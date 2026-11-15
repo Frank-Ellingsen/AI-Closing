@@ -38,6 +38,48 @@ class TestComplexReconciliations(unittest.TestCase):
         self.assertEqual(result["gross_subledger_nok"], 91550.00)
         self.assertEqual(result["fee_deduction_nok"], 2037.50)
 
+    def test_fee_must_fit_absolute_and_percentage_tolerances(self):
+        strict_matcher = ComplexReconciliationEngine(fee_tolerance_pct=0.02)
+        result = strict_matcher.solve_one_to_many_subset(
+            target_amount_nok=9700.00,
+            raw_memo="INV-200",
+            candidate_items=[{"id": "INV-200", "amount_nok": 10000.00}],
+            max_fee_deduction_nok=3500.00
+        )
+
+        self.assertIsNone(result)
+
+    def test_finalized_items_cannot_be_allocated_twice(self):
+        item = {"id": "INV-200", "amount_nok": 10000.00}
+        bank_transactions = [
+            {"tx_id": "TX-1", "amount_nok": 10000.00, "raw_memo": "INV-200"},
+            {"tx_id": "TX-2", "amount_nok": 10000.00, "raw_memo": "INV-200"}
+        ]
+        proposals = self.complex_matcher.run_pre_match(bank_transactions, [item])
+        self.assertEqual(len(proposals), 2)
+
+        self.complex_matcher.execute_final_match(proposals[0]["proposal_id"])
+        with self.assertRaisesRegex(ValueError, "already-finalized"):
+            self.complex_matcher.execute_final_match(proposals[1]["proposal_id"])
+        with self.assertRaisesRegex(ValueError, "already been finalized"):
+            self.complex_matcher.execute_final_match(proposals[0]["proposal_id"])
+
+        new_proposals = self.complex_matcher.run_pre_match(
+            [{"tx_id": "TX-3", "amount_nok": 10000.00, "raw_memo": "INV-200"}],
+            [item]
+        )
+        self.assertEqual(new_proposals, [])
+
+    def test_final_match_rejects_unbalanced_proposal(self):
+        proposal = self.complex_matcher.run_pre_match(
+            [{"tx_id": "TX-4", "amount_nok": 10000.00, "raw_memo": "INV-201"}],
+            [{"id": "INV-201", "amount_nok": 10000.00}]
+        )[0]
+        proposal["isolated_fee_nok"] = 25.00
+
+        with self.assertRaisesRegex(ValueError, "does not reconcile"):
+            self.complex_matcher.execute_final_match(proposal["proposal_id"])
+
     def test_regex_agent_token_extraction(self):
         agent = RegexAgent()
         memo = "WIRE PO-8809 INV-4412 BATCH-88491 FEE: 2037.50 PRJ-2026-001.03.FAB"

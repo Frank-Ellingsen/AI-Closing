@@ -38,9 +38,25 @@ class ComplexReconciliationEngine:
         Does NOT alter primary ledger records; stages clusters for controller approval.
         """
         proposals = []
+        finalized_item_ids = {
+            invoice_id
+            for record in self.final_matched_records
+            for invoice_id in record["matched_invoice_ids"]
+        }
+        available_items = [
+            item for item in subledger_items
+            if item.get("id") not in finalized_item_ids
+        ]
+        existing_proposal_ids = {
+            proposal["proposal_id"] for proposal in self.pre_match_proposals
+        }
 
         for b_tx in bank_transactions:
             if b_tx.get("status") == "FINAL_MATCHED":
+                continue
+
+            proposal_id = f"PROP-REC-{b_tx.get('tx_id', 'TX')}"
+            if proposal_id in existing_proposal_ids:
                 continue
 
             target_amount = float(b_tx["amount_nok"])
@@ -49,13 +65,13 @@ class ComplexReconciliationEngine:
             match = self.solve_one_to_many_subset(
                 target_amount_nok=target_amount,
                 raw_memo=raw_memo,
-                candidate_items=subledger_items,
+                candidate_items=available_items,
                 max_fee_deduction_nok=max_fee_deduction_nok
             )
 
             if match:
                 proposal = {
-                    "proposal_id": f"PROP-REC-{b_tx.get('tx_id', 'TX')}",
+                    "proposal_id": proposal_id,
                     "stage": "PRE_MATCH_SUGGESTED",
                     "bank_transaction": b_tx,
                     "matched_subledger_lines": match["matched_lines"],
@@ -69,6 +85,7 @@ class ComplexReconciliationEngine:
                 }
                 proposals.append(proposal)
                 self.pre_match_proposals.append(proposal)
+                existing_proposal_ids.add(proposal_id)
 
         return proposals
 
@@ -85,13 +102,39 @@ class ComplexReconciliationEngine:
         prop = next((p for p in self.pre_match_proposals if p["proposal_id"] == proposal_id), None)
         if not prop:
             raise ValueError(f"Proposal '{proposal_id}' not found in Pre-Match staging pool.")
+        if prop["stage"] == "FINAL_MATCHED":
+            raise ValueError(f"Proposal '{proposal_id}' has already been finalized.")
+
+        matched_items = prop["matched_subledger_lines"]
+        matched_ids = [item["id"] for item in matched_items]
+        if len(matched_ids) != len(set(matched_ids)):
+            raise ValueError(f"Proposal '{proposal_id}' contains duplicate subledger items.")
+
+        finalized_item_ids = {
+            invoice_id
+            for record in self.final_matched_records
+            for invoice_id in record["matched_invoice_ids"]
+        }
+        if finalized_item_ids.intersection(matched_ids):
+            raise ValueError(f"Proposal '{proposal_id}' includes an already-finalized subledger item.")
+
+        gross_amount = round(float(prop["gross_subledger_nok"]), 2)
+        settlement_amount = round(float(prop["bank_settlement_nok"]), 2)
+        fee_amount = round(float(prop["isolated_fee_nok"]), 2)
+        line_total = round(sum(float(item["amount_nok"]) for item in matched_items), 2)
+        if (
+            gross_amount != line_total
+            or fee_amount < 0
+            or round(gross_amount - settlement_amount - fee_amount, 2) != 0
+        ):
+            raise ValueError(f"Proposal '{proposal_id}' does not reconcile to zero.")
 
         final_record = {
             "match_id": f"FINAL-MATCH-{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}-{proposal_id}",
             "stage": "FINAL_MATCHED",
             "proposal_id": proposal_id,
             "bank_tx_id": prop["bank_transaction"]["tx_id"],
-            "matched_invoice_ids": [item["id"] for item in prop["matched_subledger_lines"]],
+            "matched_invoice_ids": matched_ids,
             "settlement_amount_nok": prop["bank_settlement_nok"],
             "allocated_fees_nok": prop["isolated_fee_nok"],
             "approved_by": approved_by,
@@ -162,7 +205,11 @@ class ComplexReconciliationEngine:
                 gross_sum = sum(float(item["amount_nok"]) for item in combo)
                 variance = round(gross_sum - target_amount_nok, 2)
 
-                if 0 <= variance <= max_fee_deduction_nok:
+                fee_pct = variance / gross_sum if gross_sum > 0 else float("inf")
+                if (
+                    0 <= variance <= max_fee_deduction_nok
+                    and fee_pct <= self.fee_tolerance_pct
+                ):
                     if variance < min_residual:
                         min_residual = variance
                         confidence = 0.99 if variance == 0 else 0.94
