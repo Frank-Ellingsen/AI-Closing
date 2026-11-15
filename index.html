@@ -1,0 +1,2909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="artifact-type" content="dashboard">
+  <meta name="design-style" content="aurora">
+  <title>CLOSE-AI · Financial Close Control Room — Nordic Engineering Projects AS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@1.43.0/dist/umd/lucide.min.js"></script>
+  <style>
+    :root {
+      color-scheme: dark;
+
+      /* Page and surfaces: deep oceanic slate steps */
+      --background: #0c1214;
+      --surface-container-low: #111a1e;
+      --surface-container: #152024;
+      --surface-container-high: #1c2a30;
+
+      /* Text */
+      --on-surface: #edf3f5;
+      --on-surface-variant: #94a8b0;
+
+      /* Borders */
+      --outline: #38515c;
+      --outline-variant: #213138;
+
+      /* Accents */
+      --primary: #63c7d6;
+      --on-primary: #081214;
+      --primary-container: #163840;
+      --on-primary-container: #c7f0f7;
+      --secondary: #5d7882;
+      --tertiary: #87d69b;
+      --error: #f27474;
+      --on-error: #1a0606;
+
+      /* Data series */
+      --data-1: #63c7d6;
+      --data-2: #87d69b;
+      --data-3: #e8b954;
+      --data-4: #f08c70;
+      --data-context: #415861;
+
+      /* Fonts */
+      --font-headline: 'Instrument Sans', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+      --font-label: 'Geist Mono', monospace;
+
+      /* Shape */
+      --rounded: 0.5rem;
+      --rounded-lg: 0.75rem;
+      --rounded-full: 9999px;
+
+      /* Style effects */
+      --hairline: 1px solid var(--outline-variant);
+      --hairline-strong: 1px solid var(--outline);
+      --panel-gradient: linear-gradient(180deg, #162226 0%, #111a1e 100%);
+      --heading-tracking: -0.025em;
+      --label-tracking: 0.06em;
+      --sage-tint: color-mix(in srgb, var(--tertiary) 13%, transparent);
+      --cyan-tint: color-mix(in srgb, var(--primary) 13%, transparent);
+      --amber-tint: color-mix(in srgb, var(--data-3) 14%, transparent);
+      --error-tint: color-mix(in srgb, var(--error) 14%, transparent);
+      --sage-border: color-mix(in srgb, var(--tertiary) 36%, transparent);
+      --cyan-border: color-mix(in srgb, var(--primary) 38%, transparent);
+      --amber-border: color-mix(in srgb, var(--data-3) 40%, transparent);
+      --error-border: color-mix(in srgb, var(--error) 42%, transparent);
+
+      /* Shared semantic & focus tokens */
+      --positive: #87d69b;
+      --warning: #e8b954;
+      --focus: #63c7d6;
+
+      /* Type scale (Dashboard / Data Explorer) */
+      --display-size: clamp(1.625rem, 1.35rem + 1vw, 2.125rem);
+      --headline-size: clamp(1.1875rem, 1.05rem + 0.45vw, 1.4375rem);
+      --subhead-size: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);
+      --body-size: clamp(0.9375rem, 0.9rem + 0.12vw, 0.975rem);
+      --label-size: 0.75rem;
+
+      /* Spacing scale (4pt base) */
+      --space-2xs: 0.125rem;
+      --space-xs: 0.25rem;
+      --space-sm: 0.5rem;
+      --space-md: 1rem;
+      --space-lg: 1.5rem;
+      --space-xl: 2.5rem;
+      --space-2xl: 4rem;
+
+      /* Motion */
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+      --dur-micro: 120ms;
+      --dur-short: 220ms;
+      --dur-long: 420ms;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+      overflow-x: clip;
+      margin: 0;
+      padding: 0;
+      background-color: var(--background);
+      color: var(--on-surface);
+      font-family: var(--font-body);
+      font-size: var(--body-size);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    header { position: static !important; }
+
+    button, input, select, textarea {
+      font-family: inherit;
+      color: inherit;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: 2px;
+    }
+
+    .app-shell {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: var(--space-lg);
+      display: grid;
+      gap: var(--space-lg);
+    }
+    .app-shell * { min-width: 0; }
+
+    /* Header */
+    .exec-header {
+      background: var(--panel-gradient);
+      border: var(--hairline);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-lg);
+      display: grid;
+      gap: var(--space-lg);
+    }
+
+    .header-top {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: var(--space-md);
+      border-bottom: var(--hairline);
+      padding-bottom: var(--space-md);
+    }
+
+    .title-block h1 {
+      margin: 0;
+      font-family: var(--font-headline);
+      font-size: var(--display-size);
+      font-weight: 600;
+      letter-spacing: var(--heading-tracking);
+      line-height: 1.1;
+      color: var(--on-surface);
+    }
+
+    .entity-meta {
+      margin-top: var(--space-xs);
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm) var(--space-md);
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      letter-spacing: var(--label-tracking);
+      text-transform: uppercase;
+      color: var(--on-surface-variant);
+    }
+    .entity-meta strong {
+      color: var(--on-surface);
+      font-weight: 500;
+    }
+
+    .header-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    /* Status Banners */
+    .close-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--rounded);
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      font-weight: 600;
+      letter-spacing: var(--label-tracking);
+      text-transform: uppercase;
+      transition: background-color var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out);
+    }
+    .close-status-pill.blocked {
+      background: var(--error-tint);
+      color: var(--error);
+      border: 1px solid var(--error-border);
+    }
+    .close-status-pill.ready {
+      background: var(--cyan-tint);
+      color: var(--primary);
+      border: 1px solid var(--cyan-border);
+    }
+    .close-status-pill.signed {
+      background: var(--sage-tint);
+      color: var(--tertiary);
+      border: 1px solid var(--sage-border);
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+      min-height: 44px;
+      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--rounded);
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      font-weight: 500;
+      letter-spacing: 0.03em;
+      cursor: pointer;
+      border: var(--hairline-strong);
+      background: transparent;
+      color: var(--on-surface);
+      transition: background-color var(--dur-micro) var(--ease-out), box-shadow var(--dur-micro) var(--ease-out), opacity var(--dur-micro) var(--ease-out);
+    }
+    .btn:hover:not(:disabled) {
+      background: var(--surface-container-high);
+    }
+    .btn:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: var(--on-primary);
+      border-color: var(--primary);
+      font-weight: 600;
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: var(--on-primary-container);
+    }
+    .btn-positive {
+      background: var(--tertiary);
+      color: var(--on-primary);
+      border-color: var(--tertiary);
+      font-weight: 600;
+    }
+    .btn-positive:hover:not(:disabled) {
+      opacity: 0.9;
+      background: var(--tertiary);
+    }
+    .btn-warning {
+      background: var(--amber-tint);
+      color: var(--warning);
+      border-color: var(--amber-border);
+    }
+    .btn-warning:hover:not(:disabled) {
+      background: var(--surface-container-high);
+    }
+    .btn-danger {
+      background: var(--error-tint);
+      color: var(--error);
+      border-color: var(--error-border);
+    }
+    .btn-danger:hover:not(:disabled) {
+      background: var(--surface-container-high);
+    }
+    .btn-compact {
+      min-height: 36px;
+      padding: var(--space-xs) var(--space-sm);
+    }
+
+    /* Readiness + KPI Grid */
+    .hero-kpi-grid {
+      display: grid;
+      grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+      gap: var(--space-lg);
+      align-items: stretch;
+    }
+
+    .readiness-card {
+      background: var(--background);
+      border: var(--hairline);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-md);
+      display: grid;
+      grid-template-columns: 120px minmax(0, 1fr);
+      gap: var(--space-md);
+      align-items: center;
+    }
+
+    .gauge-wrap {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .gauge-svg {
+      width: 120px;
+      height: 120px;
+      transform: rotate(-90deg);
+    }
+    .gauge-track {
+      fill: none;
+      stroke: var(--outline-variant);
+      stroke-width: 10;
+    }
+    .gauge-arc {
+      fill: none;
+      stroke: var(--primary);
+      stroke-width: 10;
+      stroke-linecap: round;
+      transition: stroke-dashoffset var(--dur-long) var(--ease-out), stroke var(--dur-short) var(--ease-out);
+    }
+    .gauge-center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .gauge-pct {
+      font-family: var(--font-headline);
+      font-size: 1.5rem;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+      color: var(--on-surface);
+    }
+    .gauge-sub {
+      font-family: var(--font-label);
+      font-size: 0.65rem;
+      letter-spacing: var(--label-tracking);
+      text-transform: uppercase;
+      color: var(--on-surface-variant);
+      margin-top: var(--space-xs);
+    }
+
+    .readiness-details {
+      display: grid;
+      gap: var(--space-xs);
+    }
+    .data-label {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      letter-spacing: var(--label-tracking);
+      text-transform: uppercase;
+      color: var(--on-surface-variant);
+    }
+    .readiness-summary {
+      font-size: 0.875rem;
+      color: var(--on-surface);
+    }
+    .readiness-breakdown {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      color: var(--on-surface-variant);
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: var(--space-md);
+    }
+
+    .kpi-tile {
+      background: var(--background);
+      border: var(--hairline);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: var(--space-sm);
+    }
+    .kpi-value {
+      font-family: var(--font-headline);
+      font-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.625rem);
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: var(--heading-tracking);
+      color: var(--on-surface);
+      line-height: 1.15;
+    }
+    .kpi-delta {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      color: var(--on-surface-variant);
+    }
+    .kpi-delta.positive { color: var(--tertiary); }
+    .kpi-delta.warning { color: var(--warning); }
+    .kpi-delta.error { color: var(--error); }
+
+    /* Navigation Tabs */
+    .nav-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+      border-bottom: var(--hairline);
+      padding-bottom: var(--space-sm);
+    }
+    .tab-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+      min-height: 44px;
+      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--rounded);
+      border: var(--hairline);
+      background: var(--surface-container-low);
+      color: var(--on-surface-variant);
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+    }
+    .tab-btn:hover {
+      background: var(--surface-container-high);
+      color: var(--on-surface);
+    }
+    .tab-btn.active {
+      background: var(--primary-container);
+      color: var(--on-primary-container);
+      border-color: var(--cyan-border);
+      font-weight: 600;
+    }
+    .tab-badge {
+      padding: var(--space-2xs) var(--space-sm);
+      border-radius: var(--rounded-full);
+      background: var(--background);
+      color: var(--on-surface);
+      font-size: 0.7rem;
+    }
+
+    /* Views */
+    .tab-view { display: none; gap: var(--space-lg); }
+    .tab-view.active { display: grid; }
+
+    /* Panels */
+    .panel {
+      background: var(--panel-gradient);
+      border: var(--hairline);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-lg);
+      display: grid;
+      gap: var(--space-md);
+    }
+    .panel-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-md);
+    }
+    .panel-title {
+      margin: 0;
+      font-family: var(--font-headline);
+      font-size: var(--headline-size);
+      font-weight: 600;
+      letter-spacing: var(--heading-tracking);
+      color: var(--on-surface);
+    }
+
+    /* Baseline Sub-ledgers Bar */
+    .baseline-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr));
+      gap: var(--space-sm);
+    }
+    .baseline-item {
+      background: var(--background);
+      border: var(--hairline);
+      border-radius: var(--rounded);
+      padding: var(--space-sm) var(--space-md);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    .baseline-name {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      color: var(--on-surface);
+    }
+
+    /* Status chips */
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+      padding: var(--space-2xs) var(--space-sm);
+      border-radius: var(--rounded);
+      font-family: var(--font-label);
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .chip-pass {
+      background: var(--sage-tint);
+      color: var(--tertiary);
+      border: 1px solid var(--sage-border);
+    }
+    .chip-blocker, .chip-fail {
+      background: var(--error-tint);
+      color: var(--error);
+      border: 1px solid var(--error-border);
+    }
+    .chip-high, .chip-hold {
+      background: var(--amber-tint);
+      color: var(--warning);
+      border: 1px solid var(--amber-border);
+    }
+    .chip-info {
+      background: var(--cyan-tint);
+      color: var(--primary);
+      border: 1px solid var(--cyan-border);
+    }
+
+    /* Deterministic Controls Grid */
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(290px, 100%), 1fr));
+      gap: var(--space-md);
+    }
+    .control-card {
+      text-align: left;
+      background: var(--background);
+      border: var(--hairline);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-md);
+      display: grid;
+      gap: var(--space-sm);
+      cursor: pointer;
+      transition: background-color var(--dur-micro) var(--ease-out), box-shadow var(--dur-micro) var(--ease-out);
+    }
+    .control-card:hover {
+      background: var(--surface-container-high);
+    }
+    .control-card.selected {
+      box-shadow: 0 0 0 2px var(--primary);
+      background: var(--surface-container);
+    }
+    .control-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    .control-code {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      font-weight: 600;
+      color: var(--primary);
+    }
+    .control-title {
+      font-family: var(--font-headline);
+      font-size: var(--subhead-size);
+      font-weight: 600;
+      color: var(--on-surface);
+      line-height: 1.25;
+    }
+    .control-desc {
+      font-size: 0.85rem;
+      color: var(--on-surface-variant);
+      margin: 0;
+    }
+    .control-foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-sm);
+      padding-top: var(--space-xs);
+      border-top: var(--hairline);
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      color: var(--on-surface-variant);
+    }
+
+    /* Investigation Workbench Split View */
+    .workbench-split {
+      display: grid;
+      grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
+      gap: var(--space-lg);
+      align-items: start;
+    }
+
+    .queue-panel {
+      background: var(--panel-gradient);
+      border: var(--hairline);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-md);
+      display: grid;
+      gap: var(--space-md);
+    }
+
+    .filter-form {
+      display: grid;
+      gap: var(--space-sm);
+    }
+    .filter-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: var(--space-sm);
+      align-items: end;
+    }
+
+    .field-group {
+      display: grid;
+      gap: var(--space-xs);
+    }
+    .field-label {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      letter-spacing: var(--label-tracking);
+      text-transform: uppercase;
+      color: var(--on-surface-variant);
+    }
+    .field-input, .field-select, .field-textarea {
+      width: 100%;
+      min-height: 40px;
+      padding: var(--space-xs) var(--space-sm);
+      background: var(--background);
+      border: var(--hairline-strong);
+      border-radius: var(--rounded);
+      color: var(--on-surface);
+      font-size: 0.875rem;
+    }
+    .field-select {
+      padding-right: var(--space-lg);
+    }
+    .field-textarea {
+      min-height: 68px;
+      resize: vertical;
+      padding: var(--space-sm);
+    }
+
+    .queue-list {
+      display: grid;
+      gap: var(--space-sm);
+      max-height: 680px;
+      overflow-y: auto;
+      padding-right: var(--space-xs);
+    }
+    .queue-item {
+      width: 100%;
+      text-align: left;
+      background: var(--background);
+      border: var(--hairline);
+      border-radius: var(--rounded);
+      padding: var(--space-md);
+      display: grid;
+      gap: var(--space-xs);
+      cursor: pointer;
+      transition: background-color var(--dur-micro) var(--ease-out), box-shadow var(--dur-micro) var(--ease-out);
+    }
+    .queue-item:hover {
+      background: var(--surface-container-high);
+    }
+    .queue-item.active {
+      background: var(--surface-container);
+      box-shadow: 0 0 0 2px var(--primary);
+    }
+    .queue-item-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    .queue-item-title {
+      font-family: var(--font-headline);
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--on-surface);
+    }
+    .queue-item-meta {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: var(--space-xs);
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      color: var(--on-surface-variant);
+    }
+
+    /* Dossier Viewer */
+    .dossier-panel {
+      background: var(--panel-gradient);
+      border: var(--hairline);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-lg);
+      display: grid;
+      gap: var(--space-lg);
+    }
+    .dossier-head {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: var(--space-md);
+      border-bottom: var(--hairline);
+      padding-bottom: var(--space-md);
+    }
+    .dossier-title {
+      margin: var(--space-xs) 0 0 0;
+      font-family: var(--font-headline);
+      font-size: var(--headline-size);
+      font-weight: 600;
+      letter-spacing: var(--heading-tracking);
+    }
+    .dossier-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+      align-items: center;
+    }
+
+    .risk-meter-box {
+      background: var(--background);
+      border: var(--hairline);
+      border-radius: var(--rounded);
+      padding: var(--space-sm) var(--space-md);
+      min-width: 190px;
+      display: grid;
+      gap: var(--space-xs);
+    }
+    .risk-bar-track {
+      height: 6px;
+      border-radius: var(--rounded-full);
+      background: var(--surface-container-high);
+      overflow: hidden;
+    }
+    .risk-bar-fill {
+      height: 100%;
+      border-radius: var(--rounded-full);
+      background: var(--error);
+    }
+
+    .dossier-section {
+      display: grid;
+      gap: var(--space-sm);
+    }
+    .dossier-section-title {
+      margin: 0;
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      letter-spacing: var(--label-tracking);
+      text-transform: uppercase;
+      color: var(--primary);
+    }
+
+    .well {
+      background: var(--background);
+      border: var(--hairline);
+      border-radius: var(--rounded);
+      padding: var(--space-md);
+    }
+
+    /* Evidence Graph Chain */
+    .evidence-chain {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr));
+      gap: var(--space-sm);
+    }
+    .evidence-node {
+      background: var(--background);
+      border: var(--hairline);
+      border-radius: var(--rounded);
+      padding: var(--space-sm) var(--space-md);
+      display: grid;
+      gap: var(--space-2xs);
+      position: relative;
+    }
+    .evidence-node-type {
+      font-family: var(--font-label);
+      font-size: 0.68rem;
+      letter-spacing: var(--label-tracking);
+      text-transform: uppercase;
+      color: var(--primary);
+    }
+    .evidence-node-id {
+      font-family: var(--font-label);
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--on-surface);
+      word-break: break-word;
+    }
+    .evidence-node-detail {
+      font-size: 0.8rem;
+      color: var(--on-surface-variant);
+    }
+
+    .two-col-dossier {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+      gap: var(--space-md);
+    }
+
+    /* Accounting Tables */
+    .table-wrap {
+      overflow-x: auto;
+      border: var(--hairline);
+      border-radius: var(--rounded);
+      background: var(--background);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    th, td {
+      padding: var(--space-sm) var(--space-md);
+      text-align: left;
+      border-bottom: var(--hairline);
+    }
+    th {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      font-weight: 500;
+      letter-spacing: var(--label-tracking);
+      text-transform: uppercase;
+      color: var(--on-surface-variant);
+      background: var(--surface-container-low);
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    .num {
+      text-align: right;
+      font-family: var(--font-label);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    .mono {
+      font-family: var(--font-label);
+      font-size: 0.82rem;
+    }
+
+    .action-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+      align-items: center;
+      padding-top: var(--space-sm);
+      border-top: var(--hairline);
+    }
+
+    .inline-drawer {
+      background: var(--surface-container);
+      border: var(--hairline-strong);
+      border-radius: var(--rounded);
+      padding: var(--space-md);
+      display: grid;
+      gap: var(--space-md);
+    }
+
+    .inline-feedback {
+      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--rounded);
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    .inline-feedback.info {
+      background: var(--cyan-tint);
+      color: var(--on-primary-container);
+      border: 1px solid var(--cyan-border);
+    }
+    .inline-feedback.success {
+      background: var(--sage-tint);
+      color: var(--tertiary);
+      border: 1px solid var(--sage-border);
+    }
+    .inline-feedback.error {
+      background: var(--error-tint);
+      color: var(--error);
+      border: 1px solid var(--error-border);
+    }
+
+    /* Audit Chain */
+    .hash-cell {
+      font-family: var(--font-label);
+      font-size: 0.75rem;
+      color: var(--primary);
+      word-break: break-all;
+    }
+
+    /* Management Report Chart */
+    .bridge-chart-wrap {
+      min-height: 240px;
+      background: var(--background);
+      border: var(--hairline);
+      border-radius: var(--rounded);
+      padding: var(--space-md);
+      display: grid;
+      gap: var(--space-sm);
+    }
+
+    .empty-state {
+      background: var(--background);
+      border: var(--hairline);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-xl);
+      text-align: center;
+      display: grid;
+      gap: var(--space-md);
+      justify-items: center;
+    }
+
+    @media (max-width: 1080px) {
+      .hero-kpi-grid { grid-template-columns: 1fr; }
+      .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .workbench-split { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 640px) {
+      .app-shell { padding: var(--space-sm); }
+      .kpi-grid { grid-template-columns: 1fr; }
+      .readiness-card { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+      .filter-row { grid-template-columns: 1fr; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Executive Status Header -->
+    <header class="exec-header">
+      <div class="header-top">
+        <div class="title-block">
+          <h1>CLOSE-AI · Financial Close Control Room</h1>
+          <div class="entity-meta">
+            <span>Entity: <strong>Nordic Engineering Projects AS</strong></span>
+            <span>Period: <strong>2026-10 (Workday +2)</strong></span>
+            <span>Currency: <strong>NOK</strong></span>
+            <span>Lead Controller: <strong>Frank Ellingsen</strong></span>
+          </div>
+        </div>
+        <div class="header-actions">
+          <div id="close-status-pill" class="close-status-pill blocked" role="status" aria-live="polite">
+            <i data-lucide="shield-alert" aria-hidden="true"></i>
+            <span id="close-status-text">CLOSE BLOCKED · 1 BLOCKER ACTIVE</span>
+          </div>
+          <button type="button" class="btn btn-compact" onclick="exportAuditPackJSON()">
+            <i data-lucide="file-json" aria-hidden="true"></i>
+            <span>Export Audit Pack (JSON)</span>
+          </button>
+          <button type="button" class="btn btn-compact" onclick="exportLedgerCSV()">
+            <i data-lucide="download" aria-hidden="true"></i>
+            <span>Export Ledger (CSV)</span>
+          </button>
+          <button type="button" id="reset-demo-btn" class="btn btn-compact" onclick="handleResetDemo(this)">
+            <i data-lucide="rotate-ccw" aria-hidden="true"></i>
+            <span>Reset Close</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Close Readiness Gauge & KPI Metrics -->
+      <div class="hero-kpi-grid">
+        <div class="readiness-card">
+          <div class="gauge-wrap">
+            <svg class="gauge-svg" viewBox="0 0 120 120" aria-hidden="true">
+              <circle class="gauge-track" cx="60" cy="60" r="48"></circle>
+              <circle id="readiness-arc" class="gauge-arc" cx="60" cy="60" r="48" stroke-dasharray="301.59" stroke-dashoffset="180.95"></circle>
+            </svg>
+            <div class="gauge-center">
+              <span id="readiness-pct" class="gauge-pct">40%</span>
+              <span class="gauge-sub">Readiness</span>
+            </div>
+          </div>
+          <div class="readiness-details">
+            <span class="data-label">Close Readiness Index</span>
+            <div id="readiness-summary" class="readiness-summary">Blocked by Trial Balance imbalance (CTRL-GL-01). Baseline sub-ledgers verified.</div>
+            <div id="readiness-breakdown" class="readiness-breakdown">Baseline 40% + Controls 0% / 60%</div>
+          </div>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi-tile">
+            <span class="data-label">Total Discrepancies</span>
+            <div id="kpi-discrepancy" class="kpi-value">1,204,000 NOK</div>
+            <div id="kpi-discrepancy-sub" class="kpi-delta error">Across 6 open findings</div>
+          </div>
+          <div class="kpi-tile">
+            <span class="data-label">Open Exceptions</span>
+            <div id="kpi-exceptions" class="kpi-value">6 Open</div>
+            <div id="kpi-exceptions-sub" class="kpi-delta warning">1 Blocker · 5 High Risk</div>
+          </div>
+          <div class="kpi-tile">
+            <span class="data-label">Staged / Posted JVs</span>
+            <div id="kpi-staged" class="kpi-value">0 Entries</div>
+            <div id="kpi-staged-sub" class="kpi-delta">0 NOK committed</div>
+          </div>
+          <div class="kpi-tile">
+            <span class="data-label">EBITDA vs Forecast</span>
+            <div id="kpi-ebitda" class="kpi-value">-1.44m NOK</div>
+            <div id="kpi-ebitda-sub" class="kpi-delta warning">Projected -1.80m post-accruals</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="global-toast" class="inline-feedback info" style="display: none;" role="status" aria-live="polite"></div>
+    </header>
+
+    <!-- Tab Navigation -->
+    <nav class="nav-tabs" aria-label="Control Room Sections">
+      <button type="button" id="tab-btn-workbench" class="tab-btn active" onclick="switchTab('workbench')">
+        <i data-lucide="layout-dashboard" aria-hidden="true"></i>
+        <span>Close Control Room</span>
+        <span id="badge-open-count" class="tab-badge">6</span>
+      </button>
+      <button type="button" id="tab-btn-ledger" class="tab-btn" onclick="switchTab('ledger')">
+        <i data-lucide="book-open-check" aria-hidden="true"></i>
+        <span>Adjustments Ledger</span>
+        <span id="badge-ledger-count" class="tab-badge">0</span>
+      </button>
+      <button type="button" id="tab-btn-audit" class="tab-btn" onclick="switchTab('audit')">
+        <i data-lucide="shield-check" aria-hidden="true"></i>
+        <span>Audit Trail (SHA-256)</span>
+        <span id="badge-audit-count" class="tab-badge">5</span>
+      </button>
+      <button type="button" id="tab-btn-report" class="tab-btn" onclick="switchTab('report')">
+        <i data-lucide="file-bar-chart-2" aria-hidden="true"></i>
+        <span>Management Pack &amp; Sign-Off</span>
+        <span id="badge-signoff-state" class="tab-badge">Locked</span>
+      </button>
+    </nav>
+
+    <!-- TAB 1: Control Room & Workbench -->
+    <main id="view-workbench" class="tab-view active">
+      <!-- Baseline Sub-ledgers + Deterministic Controls -->
+      <section class="panel" aria-labelledby="controls-heading">
+        <div class="panel-header">
+          <div>
+            <h2 id="controls-heading" class="panel-title">Deterministic Accounting Controls · Gold/Silver Engine</h2>
+            <span class="data-label">Click any failing rule card to filter the investigation queue below</span>
+          </div>
+          <button type="button" id="clear-rule-filter-btn" class="btn btn-compact" onclick="filterByRule('ALL')" style="display: none;">
+            <i data-lucide="x" aria-hidden="true"></i>
+            <span>Show All 6 Controls</span>
+          </button>
+        </div>
+
+        <div class="baseline-strip" aria-label="Verified Baseline Reconciliations">
+          <div class="baseline-item">
+            <span class="baseline-name">Bank Reconciliation (DNB/Nordea)</span>
+            <span class="status-chip chip-pass">PASS · 10%</span>
+          </div>
+          <div class="baseline-item">
+            <span class="baseline-name">AR Subledger Reconciliation</span>
+            <span class="status-chip chip-pass">PASS · 10%</span>
+          </div>
+          <div class="baseline-item">
+            <span class="baseline-name">Payroll Gross-to-Net Tie-Out</span>
+            <span class="status-chip chip-pass">PASS · 10%</span>
+          </div>
+          <div class="baseline-item">
+            <span class="baseline-name">Intercompany Elimination</span>
+            <span class="status-chip chip-pass">PASS · 10%</span>
+          </div>
+        </div>
+
+        <div id="controls-grid" class="controls-grid"></div>
+      </section>
+
+      <!-- Autonomous Investigation Workbench & Dossier Viewer -->
+      <section class="workbench-split" aria-label="Investigation Queue and AI Investigator Dossier">
+        <aside class="queue-panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Investigation Queue</h2>
+            <span id="queue-counter" class="data-label">6 of 6 shown</span>
+          </div>
+
+          <div class="filter-form">
+            <div class="field-group">
+              <label for="filter-search" class="field-label">Search Vendor, Project, or ID</label>
+              <input type="text" id="filter-search" class="field-input" oninput="applyQueueFilters()" placeholder="e.g. PO-8809, PRJ-104, Subsea">
+            </div>
+            <div class="filter-row">
+              <div class="field-group">
+                <label for="filter-rule" class="field-label">Control Rule</label>
+                <select id="filter-rule" class="field-select" onchange="applyQueueFilters()">
+                  <option value="ALL">All Rules (6)</option>
+                  <option value="CTRL-GL-01">CTRL-GL-01 (TB Delta)</option>
+                  <option value="CTRL-GL-02">CTRL-GL-02 (Off-Hours)</option>
+                  <option value="CTRL-AP-01">CTRL-AP-01 (Duplicate)</option>
+                  <option value="CTRL-AP-02">CTRL-AP-02 (GR/IR)</option>
+                  <option value="CTRL-AP-03">CTRL-AP-03 (PO Overrun)</option>
+                  <option value="CTRL-PRJ-03">CTRL-PRJ-03 (Untagged)</option>
+                </select>
+              </div>
+              <div class="field-group">
+                <label for="filter-status" class="field-label">Queue Status</label>
+                <select id="filter-status" class="field-select" onchange="applyQueueFilters()">
+                  <option value="ALL">All Statuses</option>
+                  <option value="OPEN">Open Only</option>
+                  <option value="HOLD">Disputed / Hold</option>
+                  <option value="RESOLVED">Approved / Rejected</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div id="queue-list" class="queue-list" role="listbox" aria-label="Exception items"></div>
+        </aside>
+
+        <article id="dossier-panel" class="dossier-panel" aria-live="polite">
+          <!-- Populated dynamically by renderDossier() -->
+        </article>
+      </section>
+    </main>
+
+    <!-- TAB 2: Adjustments Ledger -->
+    <section id="view-ledger" class="tab-view" aria-labelledby="ledger-heading">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 id="ledger-heading" class="panel-title">Staged &amp; Posted Close Adjustments Ledger</h2>
+            <span class="data-label">Every adjustment requires explicit controller authorization and balanced Debit = Credit parity</span>
+          </div>
+          <div id="ledger-summary-pills" class="dossier-tags"></div>
+        </div>
+        <div id="ledger-content"></div>
+      </div>
+    </section>
+
+    <!-- TAB 3: Cryptographic Audit Trail -->
+    <section id="view-audit" class="tab-view" aria-labelledby="audit-heading">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 id="audit-heading" class="panel-title">Cryptographically Chained Audit Trail (SHA-256)</h2>
+            <span class="data-label">Immutable hash-linked governance log from ERP ingestion through controller authorization</span>
+          </div>
+          <div class="header-actions">
+            <div id="chain-verify-badge" class="status-chip chip-pass">
+              <i data-lucide="lock" aria-hidden="true"></i>
+              <span>CHAIN VERIFIED · 5/5 BLOCKS INTACT</span>
+            </div>
+            <button type="button" class="btn btn-compact" onclick="verifyAuditChain()">
+              <i data-lucide="refresh-cw" aria-hidden="true"></i>
+              <span>Re-Verify SHA-256 Chain</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="filter-row" style="max-width: 520px;">
+          <div class="field-group">
+            <label for="audit-filter-type" class="field-label">Filter Audit Event Type</label>
+            <select id="audit-filter-type" class="field-select" onchange="renderAuditTrail()">
+              <option value="ALL">All Governance Events</option>
+              <option value="SYSTEM">Pipeline &amp; Deterministic Engine</option>
+              <option value="APPROVE">Controller Approvals &amp; Postings</option>
+              <option value="HOLD_REJECT">Disputes, Holds &amp; Rejections</option>
+              <option value="SIGN_OFF">Period Sign-Off</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Block</th>
+                <th>Timestamp (CET)</th>
+                <th>Controller / Actor</th>
+                <th>Action &amp; Rule</th>
+                <th>Financial Lines / Payload</th>
+                <th>Prev Hash</th>
+                <th>SHA-256 Record Hash</th>
+              </tr>
+            </thead>
+            <tbody id="audit-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: Management Pack & Sign-Off -->
+    <section id="view-report" class="tab-view" aria-labelledby="report-heading">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 id="report-heading" class="panel-title">Automated Management Commentary &amp; Period Sign-Off</h2>
+            <span class="data-label">Generated strictly from deterministic Gold Layer balances and approved controller adjustments</span>
+          </div>
+          <div id="signoff-gate-chip" class="status-chip chip-blocker">SIGN-OFF LOCKED · BLOCKER ACTIVE</div>
+        </div>
+
+        <div id="management-narrative-box" class="well"></div>
+
+        <div class="bridge-chart-wrap">
+          <div class="panel-header">
+            <span class="data-label">Period 2026-10 EBITDA Forecast-to-Actual Bridge (NOK Millions)</span>
+            <span id="bridge-status-note" class="data-label">Live Gold Layer Projection</span>
+          </div>
+          <div id="ebitda-bridge-svg-wrap" style="min-height: 200px;"></div>
+        </div>
+
+        <div class="dossier-section">
+          <h3 class="dossier-section-title">Project Portfolio Variance Summary (Gold Layer)</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Project / WBS</th>
+                  <th>Scope &amp; Customer</th>
+                  <th class="num">Budget Cost</th>
+                  <th class="num">Forecast Cost</th>
+                  <th class="num">Actual + Adj.</th>
+                  <th class="num">Variance</th>
+                  <th>Controller Commentary</th>
+                </tr>
+              </thead>
+              <tbody id="project-variance-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="inline-drawer">
+          <div class="panel-header">
+            <div>
+              <h3 class="panel-title" style="font-size: var(--subhead-size);">Controller Final Period Sign-Off Gate</h3>
+              <span class="data-label">Nordic Engineering Projects AS · Period 2026-10 Statutory &amp; Management Close</span>
+            </div>
+          </div>
+          <div id="signoff-checklist" class="baseline-strip"></div>
+          <div class="field-group">
+            <label for="signoff-note" class="field-label">Controller Attestation Memo (Frank Ellingsen)</label>
+            <input type="text" id="signoff-note" class="field-input" value="Period 2026-10 controls reviewed; material accruals and PO variances verified against evidence graph.">
+          </div>
+          <div class="action-bar">
+            <button type="button" id="execute-signoff-btn" class="btn btn-positive" onclick="executeFinalSignOff()" disabled>
+              <i data-lucide="badge-check" aria-hidden="true"></i>
+              <span>Execute Period 2026-10 Sign-Off</span>
+            </button>
+            <span id="signoff-lock-reason" class="data-label">Resolve Blocker CTRL-GL-01 to unlock period sign-off.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <api-shim></api-shim>
+  <script>
+    // =========================================================================
+    // INITIAL SEED DATA (Nordic Engineering Projects AS · Period 2026-10)
+    // =========================================================================
+    const INITIAL_CONTROLS = [
+      {
+        id: `CTRL-GL-01`,
+        title: `Zero Trial Balance Imbalance`,
+        severity: `BLOCKER`,
+        weight: 20,
+        description: `Verifies total General Ledger debits equal total credits across all cost centers and suspense accounts.`
+      },
+      {
+        id: `CTRL-GL-02`,
+        title: `Off-Hours & Weekend Manual Postings`,
+        severity: `HIGH`,
+        weight: 8,
+        description: `Flags manual journal entries posted outside business hours (20:00–06:00 or Sat/Sun) lacking workflow pre-approval.`
+      },
+      {
+        id: `CTRL-AP-01`,
+        title: `Duplicate Vendor Invoices`,
+        severity: `HIGH`,
+        weight: 8,
+        description: `Cross-checks vendor ID, invoice number pattern, PO reference, and exact NOK amount against historical AP ledger.`
+      },
+      {
+        id: `CTRL-AP-02`,
+        title: `Uninvoiced Goods Received (GR/IR)`,
+        severity: `HIGH`,
+        weight: 8,
+        description: `Identifies confirmed warehouse/site Goods Receipts logged before period cut-off without matching AP invoice accrual.`
+      },
+      {
+        id: `CTRL-AP-03`,
+        title: `PO Tolerance Overrun (>10%)`,
+        severity: `HIGH`,
+        weight: 8,
+        description: `Detects vendor invoices exceeding approved Purchase Order commitment by more than 10% tolerance threshold.`
+      },
+      {
+        id: `CTRL-PRJ-03`,
+        title: `Untagged Project Direct Costs`,
+        severity: `HIGH`,
+        weight: 8,
+        description: `Enforces mandatory Project ID and WBS assignment on all direct fabrication, material, and subcontractor GL accounts.`
+      }
+    ];
+
+    const INITIAL_EXCEPTIONS = [
+      {
+        id: `EX-2026-10-001`,
+        ruleId: `CTRL-GL-01`,
+        severity: `BLOCKER`,
+        status: `OPEN`,
+        riskScore: 98,
+        title: `Trial Balance 15,000 NOK Delta on JV-2026-10-1028`,
+        vendor: `Internal Payroll Interface`,
+        project: `PRJ-101 · Johan Sverdrup Modification`,
+        wbs: `WBS-101-01`,
+        costCenter: `CC-100`,
+        exposureNok: 15000,
+        ebitdaImpactNok: 0,
+        observation: `Deterministic Trial Balance tie-out detected a 15,000 NOK debit/credit imbalance in batch JV-2026-10-1028. ERP batch validator auto-parked -15,000 NOK in account 9999 (Technical TB Suspense) after payroll clearing line truncation.`,
+        rootCause: `Source interface file payroll_oct_2026.csv dropped one overtime supplement credit line for engineering team CC-100 during Silver-to-Gold transformation, leaving Debit 5010 (145,000 NOK) against Credit 2930 (130,000 NOK).`,
+        exposureText: `15,000 NOK statutory Trial Balance imbalance. Hard close blocker under Norwegian Accounting Act (Bokføringsloven) until suspense account 9999 reaches 0.00 NOK.`,
+        evidenceChain: [
+          { type: `Source Batch`, id: `JV-2026-10-1028`, detail: `Posted Oct 31 · 145k Dr / 130k Cr` },
+          { type: `Payroll Export`, id: `PAY-2026-10-B4`, detail: `Verified gross 145,000 NOK` },
+          { type: `Suspense GL`, id: `ACC 9999`, detail: `Residual -15,000 NOK imbalance` },
+          { type: `Project / WBS`, id: `PRJ-101 / WBS-101-01`, detail: `CC-100 Engineering Labor` },
+          { type: `Control Policy`, id: `POL-GL-001`, detail: `Zero TB Imbalance Mandate` }
+        ],
+        proposedJv: {
+          jvId: `JV-ADJ-1001`,
+          description: `Clear 9999 Technical TB Suspense against Accrued Payroll Clearing (JV-2026-10-1028)`,
+          lines: [
+            { account: `9999`, name: `Technical TB Interface Suspense`, wbs: `CC-100 / GEN`, debit: 15000, credit: 0 },
+            { account: `2930`, name: `Accrued Payroll & Clearing`, wbs: `CC-100 / PRJ-101`, debit: 0, credit: 15000 }
+          ]
+        },
+        controllerNote: ``
+      },
+      {
+        id: `EX-2026-10-002`,
+        ruleId: `CTRL-AP-03`,
+        severity: `HIGH`,
+        status: `OPEN`,
+        riskScore: 91,
+        title: `PO-8809 Tolerance Overrun (+16.5%) — Nordic Subsea Fabrication AS`,
+        vendor: `Nordic Subsea Fabrication AS (V-1018)`,
+        project: `PRJ-104 · Troll Phase III Manifold`,
+        wbs: `WBS-104-03`,
+        costCenter: `CC-410`,
+        exposureNok: 198000,
+        ebitdaImpactNok: -198000,
+        observation: `Vendor invoice INV-NSF-4412 (1,398,000 NOK) against PO-8809 (1,200,000 NOK) breached the 10% tolerance threshold by +198,000 NOK (+16.5%). Isolation Forest scored 91% anomaly risk vs vendor baseline.`,
+        rootCause: `Supplier billed an unapproved Duplex steel alloy surcharge (142,000 NOK) and 38 weekend welding overtime hours (56,000 NOK) without an executed Change Order (CO-8809-B) in Procurement.`,
+        exposureText: `198,000 NOK direct cost overrun on PRJ-104. Reduces PRJ-104 gross margin by 1.4 percentage points and reduces Period 2026-10 EBITDA by 198,000 NOK.`,
+        evidenceChain: [
+          { type: `Vendor`, id: `V-1018`, detail: `Nordic Subsea Fabrication AS` },
+          { type: `Purchase Order`, id: `PO-8809`, detail: `Approved limit 1,200,000 NOK` },
+          { type: `Invoice`, id: `INV-NSF-4412`, detail: `Billed 1,398,000 NOK (+16.5%)` },
+          { type: `Project / WBS`, id: `PRJ-104 / WBS-104-03`, detail: `Subsea Fabrication Package` },
+          { type: `Control Policy`, id: `POL-AP-010`, detail: `Max +10% PO Tolerance Cap` }
+        ],
+        proposedJv: {
+          jvId: `JV-ADJ-1002`,
+          description: `Accrue verified PO-8809 subsea fabrication overrun to PRJ-104 pending Change Order CO-8809-B`,
+          lines: [
+            { account: `4310`, name: `Subcontractor Fabrication Cost`, wbs: `PRJ-104 / WBS-104-03`, debit: 198000, credit: 0 },
+            { account: `2410`, name: `AP Tolerance Accrued Liability`, wbs: `V-1018 / CC-410`, debit: 0, credit: 198000 }
+          ]
+        },
+        controllerNote: ``
+      },
+      {
+        id: `EX-2026-10-003`,
+        ruleId: `CTRL-AP-01`,
+        severity: `HIGH`,
+        status: `OPEN`,
+        riskScore: 96,
+        title: `Duplicate Invoice INV-VEND-99991-DUP (284,000 NOK)`,
+        vendor: `Vestland Elektro & Automasjon AS (V-1042)`,
+        project: `PRJ-103 · Mongstad Control Upgrade`,
+        wbs: `WBS-103-02`,
+        costCenter: `CC-320`,
+        exposureNok: 284000,
+        ebitdaImpactNok: 284000,
+        observation: `Invoice INV-VEND-99991-DUP (284,000 NOK) posted Oct 29 matches existing posted invoice INV-VEND-99991 (Oct 25) on Vendor V-1042, PO-8744, and exact NOK amount. OCR fingerprint overlap is 99.4%.`,
+        rootCause: `Vendor re-submitted the same EHF XML invoice with a "-DUP" suffix after an automated AP portal timeout; both vouchers entered AP subledger and expensed WBS-103-02 twice.`,
+        exposureText: `284,000 NOK overstated AP liability and overstated project cost on PRJ-103. Reversing the duplicate restores +284,000 NOK EBITDA and prevents double cash disbursement.`,
+        evidenceChain: [
+          { type: `Vendor`, id: `V-1042`, detail: `Vestland Elektro & Automasjon` },
+          { type: `Original Inv`, id: `INV-VEND-99991`, detail: `284,000 NOK · Paid/Cleared` },
+          { type: `Duplicate Inv`, id: `INV-VEND-99991-DUP`, detail: `284,000 NOK · Risk 96%` },
+          { type: `Purchase Order`, id: `PO-8744`, detail: `100% invoiced prior to Oct 29` },
+          { type: `Project / WBS`, id: `PRJ-103 / WBS-103-02`, detail: `Control Cabinet Commissioning` }
+        ],
+        proposedJv: {
+          jvId: `JV-ADJ-1003`,
+          description: `Reverse duplicate AP invoice INV-VEND-99991-DUP for Vestland Elektro & Automasjon AS`,
+          lines: [
+            { account: `2400`, name: `Accounts Payable Control`, wbs: `V-1042 / CC-320`, debit: 284000, credit: 0 },
+            { account: `4320`, name: `Electrical Subcontract Cost`, wbs: `PRJ-103 / WBS-103-02`, debit: 0, credit: 284000 }
+          ]
+        },
+        controllerNote: ``
+      },
+      {
+        id: `EX-2026-10-004`,
+        ruleId: `CTRL-AP-02`,
+        severity: `HIGH`,
+        status: `OPEN`,
+        riskScore: 87,
+        title: `Uninvoiced Goods Receipt GR-2026-7714 (450,000 NOK Accrual)`,
+        vendor: `Bergen Marine Hydraulics AS (V-1009)`,
+        project: `PRJ-102 · North Sea Riser Package`,
+        wbs: `WBS-102-04`,
+        costCenter: `CC-210`,
+        exposureNok: 450000,
+        ebitdaImpactNok: -450000,
+        observation: `Goods Receipt GR-2026-7714 was confirmed at Bergen Yard on Oct 28, 2026 against PO-8791 (450,000 NOK), but no vendor invoice has arrived in AP by Workday +2.`,
+        rootCause: `Hydraulic actuator manifold passed QA inspection prior to Oct 31 cut-off; supplier invoice batch is scheduled for Nov 4 billing cycle, creating an unrecorded period-end liability.`,
+        exposureText: `450,000 NOK understated project cost and understated accrued liabilities. Posting the GR/IR accrual reduces Period 2026-10 EBITDA by 450,000 NOK for accurate cut-off.`,
+        evidenceChain: [
+          { type: `Vendor`, id: `V-1009`, detail: `Bergen Marine Hydraulics AS` },
+          { type: `Purchase Order`, id: `PO-8791`, detail: `450,000 NOK · Open Commitment` },
+          { type: `Goods Receipt`, id: `GR-2026-7714`, detail: `Signed Oct 28 · Bergen Yard` },
+          { type: `Project / WBS`, id: `PRJ-102 / WBS-102-04`, detail: `Hydraulic Actuators` },
+          { type: `Control Policy`, id: `POL-CLS-004`, detail: `IFRS Cut-Off Accrual Rule` }
+        ],
+        proposedJv: {
+          jvId: `JV-ADJ-1004`,
+          description: `Period-end GR/IR accrual for uninvoiced delivery GR-2026-7714 on PRJ-102`,
+          lines: [
+            { account: `4110`, name: `Project Material & Equipment Cost`, wbs: `PRJ-102 / WBS-102-04`, debit: 450000, credit: 0 },
+            { account: `2960`, name: `GR/IR Uninvoiced Goods Clearing`, wbs: `V-1009 / CC-210`, debit: 0, credit: 450000 }
+          ]
+        },
+        controllerNote: ``
+      },
+      {
+        id: `EX-2026-10-005`,
+        ruleId: `CTRL-GL-02`,
+        severity: `HIGH`,
+        status: `OPEN`,
+        riskScore: 89,
+        title: `Sunday 23:14 Manual Reclassification JV-2026-10-1041`,
+        vendor: `Manual Journal · User SYS-FIN-04`,
+        project: `PRJ-105 · Statfjord Topside Piping`,
+        wbs: `WBS-105-01`,
+        costCenter: `CC-900`,
+        exposureNok: 165000,
+        ebitdaImpactNok: 0,
+        observation: `Manual journal JV-2026-10-1041 (165,000 NOK) was booked on Sunday Oct 25 at 23:14 CET without workflow attachment, transferring advisory fees from Admin CC-900 into PRJ-105 direct cost.`,
+        rootCause: `Off-hours manual override shifted general corporate advisory overhead into a cost-plus customer project WBS without Project Manager authorization or timesheet support.`,
+        exposureText: `165,000 NOK project cost distortion and contractual billing risk on PRJ-105. Reversing back to CC-900 preserves auditability; net consolidated EBITDA impact is 0 NOK.`,
+        evidenceChain: [
+          { type: `GL Journal`, id: `JV-2026-10-1041`, detail: `Sun Oct 25 23:14 CET · 165k NOK` },
+          { type: `Origin CC`, id: `CC-900 (Admin)`, detail: `6700 External Advisory` },
+          { type: `Target WBS`, id: `PRJ-105 / WBS-105-01`, detail: `4310 Subcontractor Cost` },
+          { type: `ML Anomaly`, id: `ISO-FOREST 89%`, detail: `Off-hours + non-PO manual leg` },
+          { type: `Control Policy`, id: `POL-GL-008`, detail: `Manual Reclass Approval Gate` }
+        ],
+        proposedJv: {
+          jvId: `JV-ADJ-1005`,
+          description: `Reverse unauthorized Sunday manual reclassification JV-2026-10-1041 back to CC-900`,
+          lines: [
+            { account: `6700`, name: `External Advisory Services`, wbs: `CC-900 / ADMIN`, debit: 165000, credit: 0 },
+            { account: `4310`, name: `Subcontractor Cost`, wbs: `PRJ-105 / WBS-105-01`, debit: 0, credit: 165000 }
+          ]
+        },
+        controllerNote: ``
+      },
+      {
+        id: `EX-2026-10-006`,
+        ruleId: `CTRL-PRJ-03`,
+        severity: `HIGH`,
+        status: `OPEN`,
+        riskScore: 84,
+        title: `Untagged Workshop Consumables (92,000 NOK) Missing WBS`,
+        vendor: `Stavanger Industrial Supply AS (V-1031)`,
+        project: `PRJ-104 · Troll Phase III Manifold`,
+        wbs: `WBS-104-02`,
+        costCenter: `CC-200`,
+        exposureNok: 92000,
+        ebitdaImpactNok: 0,
+        observation: `GL posting GL-2026-88412 (92,000 NOK on 4150 Direct Fabrication Consumables) landed on Workshop Cost Center CC-200 with NULL Project ID and NULL WBS.`,
+        rootCause: `Workshop clerk omitted the WBS code during goods issue; cross-referencing PO-8815 and yard shipping manifest SM-4091 confirms 100% consumption on PRJ-104 / WBS-104-02.`,
+        exposureText: `92,000 NOK unallocated direct project cost, understating PRJ-104 cost-to-date and skewing IFRS 15 Percentage-of-Completion (POC) margin recognition.`,
+        evidenceChain: [
+          { type: `GL Posting`, id: `GL-2026-88412`, detail: `4150 · CC-200 · NULL WBS` },
+          { type: `Purchase Order`, id: `PO-8815`, detail: `Ref: Troll Phase III Welding` },
+          { type: `Manifest`, id: `SM-4091`, detail: `100% issued to Bay 4 (PRJ-104)` },
+          { type: `Target WBS`, id: `PRJ-104 / WBS-104-02`, detail: `Manifold Frame Welding` },
+          { type: `Control Policy`, id: `POL-PRJ-003`, detail: `Mandatory WBS Tagging Rule` }
+        ],
+        proposedJv: {
+          jvId: `JV-ADJ-1006`,
+          description: `Re-tag workshop consumables GL-2026-88412 from CC-200 generic to PRJ-104 / WBS-104-02`,
+          lines: [
+            { account: `4150`, name: `Direct Fabrication Consumables`, wbs: `PRJ-104 / WBS-104-02`, debit: 92000, credit: 0 },
+            { account: `4150`, name: `Direct Fabrication Consumables`, wbs: `CC-200 / UNTAGGED`, debit: 0, credit: 92000 }
+          ]
+        },
+        controllerNote: ``
+      }
+    ];
+
+    const PROJECT_BASELINE = [
+      { code: `PRJ-101`, wbs: `Johan Sverdrup Modification`, customer: `Equinor Energy AS`, budget: 18400000, forecast: 18600000, actualBase: 18520000, linkedEx: `EX-2026-10-001`, driver: `Engineering hours on plan; payroll clearing delta isolated.` },
+      { code: `PRJ-102`, wbs: `North Sea Riser Package`, customer: `Aker BP ASA`, budget: 12500000, forecast: 12900000, actualBase: 12510000, linkedEx: `EX-2026-10-004`, driver: `Actuator GR-2026-7714 accrual (+450k) aligns actuals with forecast.` },
+      { code: `PRJ-103`, wbs: `Mongstad Control Upgrade`, customer: `Equinor Refining`, budget: 8200000, forecast: 8100000, actualBase: 8360000, linkedEx: `EX-2026-10-003`, driver: `Duplicate invoice reversal (-284k) restores under-budget margin.` },
+      { code: `PRJ-104`, wbs: `Troll Phase III Manifold`, customer: `Vår Energi ASA`, budget: 14200000, forecast: 15400000, actualBase: 15190000, linkedEx: `EX-2026-10-002`, driver: `Subsea fabrication PO-8809 overrun (+198k) & welding consumables (+92k).` },
+      { code: `PRJ-105`, wbs: `Statfjord Topside Piping`, customer: `ConocoPhillips Skandinavia`, budget: 9600000, forecast: 9950000, actualBase: 10115000, linkedEx: `EX-2026-10-005`, driver: `Reversing unauthorized Sunday reclass (-165k) restores true cost.` }
+    ];
+
+    const INITIAL_AUDIT_SEED = [
+      {
+        block: 1,
+        timestamp: `2026-11-02 06:00:12 CET`,
+        actor: `CLOSE-AI Lakehouse (Bronze→Gold)`,
+        category: `SYSTEM`,
+        action: `ERP_SNAPSHOT_INGEST`,
+        ruleId: `PIPELINE-01`,
+        exceptionId: `—`,
+        financialLines: `Ingested 14,820 GL rows, 1,142 AP invoices, 384 POs, 18 active projects (Period 2026-10).`
+      },
+      {
+        block: 2,
+        timestamp: `2026-11-02 06:01:04 CET`,
+        actor: `Deterministic Control Engine`,
+        category: `SYSTEM`,
+        action: `BASELINE_SUBLEDGER_PASS`,
+        ruleId: `BASE-40`,
+        exceptionId: `—`,
+        financialLines: `Bank, AR, Payroll Gross-to-Net, and Intercompany Eliminations passed (40% Readiness Weight).`
+      },
+      {
+        block: 3,
+        timestamp: `2026-11-02 06:01:48 CET`,
+        actor: `Deterministic Control Engine`,
+        category: `SYSTEM`,
+        action: `CONTROL_EXCEPTIONS_RAISED`,
+        ruleId: `CTRL-ALL`,
+        exceptionId: `EX-001..006`,
+        financialLines: `Flagged 1 Blocker (15,000 NOK TB delta) and 5 High-Risk findings (1,189,000 NOK). Status: CLOSE BLOCKED.`
+      },
+      {
+        block: 4,
+        timestamp: `2026-11-02 06:02:19 CET`,
+        actor: `ML Anomaly Engine (Isolation Forest)`,
+        category: `SYSTEM`,
+        action: `ANOMALY_RISK_SCORING`,
+        ruleId: `ML-ISO-V2`,
+        exceptionId: `EX-001..006`,
+        financialLines: `Scored EX-003 (96%), EX-002 (91%), EX-005 (89%), EX-004 (87%), EX-006 (84%).`
+      },
+      {
+        block: 5,
+        timestamp: `2026-11-02 06:02:45 CET`,
+        actor: `AI Accounting Investigator`,
+        category: `SYSTEM`,
+        action: `EVIDENCE_DOSSIERS_BUILT`,
+        ruleId: `GRAPH-RAG`,
+        exceptionId: `EX-001..006`,
+        financialLines: `Compiled multi-source Evidence Graph chains & balanced JV proposals awaiting Human-in-the-Loop review.`
+      }
+    ];
+
+    // =========================================================================
+    // APPLICATION STATE
+    // =========================================================================
+    let appState = null;
+    let activeTab = `workbench`;
+    let selectedExceptionId = `EX-2026-10-001`;
+    let activeRuleFilter = `ALL`;
+    let editMode = false;
+    let holdDrawerOpen = false;
+    let rejectDrawerOpen = false;
+    let chainVerifiedResult = { valid: true, count: 0 };
+
+    // =========================================================================
+    // CRYPTOGRAPHIC SHA-256 HELPERS
+    // =========================================================================
+    async function computeSha256(message) {
+      if (window.crypto && window.crypto.subtle) {
+        const msgBuffer = new TextEncoder().encode(message);
+        const hashBuffer = await window.crypto.subtle.digest(`SHA-256`, msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, `0`)).join(``);
+      }
+      // Deterministic fallback only if WebCrypto unavailable
+      let h1 = 0x811c9dc5;
+      let h2 = 0x01000193;
+      for (let i = 0; i < message.length; i++) {
+        h1 ^= message.charCodeAt(i);
+        h1 = Math.imul(h1, 0x01000193);
+        h2 ^= message.charCodeAt(i) + i;
+        h2 = Math.imul(h2, 0x85ebca6b);
+      }
+      const hex = ((h1 >>> 0).toString(16).padStart(8, `0`) + (h2 >>> 0).toString(16).padStart(8, `0`)).repeat(4);
+      return hex.slice(0, 64);
+    }
+
+    function canonicalBlockPayload(entry) {
+      return `${entry.block}|${entry.timestamp}|${entry.actor}|${entry.action}|${entry.ruleId}|${entry.exceptionId}|${entry.financialLines}|${entry.prevHash}`;
+    }
+
+    async function buildInitialState() {
+      const exceptions = JSON.parse(JSON.stringify(INITIAL_EXCEPTIONS));
+      const auditLog = [];
+      let prevHash = `0000000000000000000000000000000000000000000000000000000000000000`;
+      for (const item of INITIAL_AUDIT_SEED) {
+        const blockObj = Object.assign({}, item, { prevHash: prevHash });
+        const hash = await computeSha256(canonicalBlockPayload(blockObj));
+        blockObj.hash = hash;
+        prevHash = hash;
+        auditLog.push(blockObj);
+      }
+      return {
+        version: 1,
+        period: `2026-10`,
+        signedOff: false,
+        signOffTimestamp: ``,
+        signOffNote: ``,
+        exceptions: exceptions,
+        postedJvs: [],
+        auditLog: auditLog
+      };
+    }
+
+    async function appendAuditEntry(category, action, ruleId, exceptionId, financialLines, actorName) {
+      const log = appState.auditLog;
+      const last = log[log.length - 1];
+      const prevHash = last ? last.hash : `0000000000000000000000000000000000000000000000000000000000000000`;
+      const now = new Date();
+      const pad = n => String(n).padStart(2, `0`);
+      const ts = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())} CET`;
+      const blockObj = {
+        block: log.length + 1,
+        timestamp: ts,
+        actor: actorName || `Frank Ellingsen (Lead Controller)`,
+        category: category,
+        action: action,
+        ruleId: ruleId,
+        exceptionId: exceptionId,
+        financialLines: financialLines,
+        prevHash: prevHash
+      };
+      blockObj.hash = await computeSha256(canonicalBlockPayload(blockObj));
+      log.push(blockObj);
+      await persistState();
+      await verifyAuditChain(true);
+    }
+
+    async function verifyAuditChain(silent) {
+      if (!appState || !appState.auditLog) return;
+      let expectedPrev = `0000000000000000000000000000000000000000000000000000000000000000`;
+      let valid = true;
+      for (const entry of appState.auditLog) {
+        if (entry.prevHash !== expectedPrev) {
+          valid = false;
+          break;
+        }
+        const recomputed = await computeSha256(canonicalBlockPayload(entry));
+        if (recomputed !== entry.hash) {
+          valid = false;
+          break;
+        }
+        expectedPrev = entry.hash;
+      }
+      chainVerifiedResult = { valid: valid, count: appState.auditLog.length };
+      renderAuditChainBadge();
+      if (!silent) {
+        showToast(valid ? `SHA-256 verification passed across all ${appState.auditLog.length} blocks.` : `Chain integrity mismatch detected!`, valid ? `success` : `error`);
+      }
+    }
+
+    // =========================================================================
+    // PERSISTENCE SHIM
+    // =========================================================================
+    async function persistState() {
+      if (window.notebookAppApi && typeof window.notebookAppApi.setAppState === `function`) {
+        await window.notebookAppApi.setAppState(appState);
+      }
+    }
+
+    // =========================================================================
+    // COMPUTATIONS (DETERMINISTIC METRICS)
+    // =========================================================================
+    function formatNok(num) {
+      const sign = num < 0 ? `-` : ``;
+      const abs = Math.abs(Math.round(num));
+      return `${sign}${abs.toLocaleString(`en-US`).replace(/,/g, ` `)} NOK`;
+    }
+
+    function formatMillions(num) {
+      const m = num / 1000000;
+      return `${m >= 0 ? `+` : ``}${m.toFixed(2)}m NOK`;
+    }
+
+    function isResolvedStatus(status) {
+      return status === `APPROVED` || status === `REJECTED`;
+    }
+
+    function computeMetrics() {
+      if (!ensureReadyState()) {
+        return {
+          controlStatuses: [],
+          readinessPct: 40,
+          controlsEarned: 0,
+          blockerFailing: true,
+          openExceptions: [],
+          openBlockers: 1,
+          openHigh: 5,
+          totalDiscrepancy: 0,
+          postedTotal: 0,
+          postedEbitdaDelta: 0,
+          currentEbitda: 4964000,
+          forecastEbitda: 6400000,
+          varianceVsForecast: -1436000
+        };
+      }
+      const exList = appState.exceptions;
+      const controlStatuses = INITIAL_CONTROLS.map(ctrl => {
+        const items = exList.filter(e => e.ruleId === ctrl.id);
+        const openItems = items.filter(e => !isResolvedStatus(e.status));
+        const holdItems = items.filter(e => e.status === `HOLD`);
+        const passed = openItems.length === 0;
+        const exposure = openItems.reduce((sum, e) => sum + e.exposureNok, 0);
+        return {
+          ctrl: ctrl,
+          items: items,
+          openCount: openItems.length,
+          holdCount: holdItems.length,
+          passed: passed,
+          exposure: exposure
+        };
+      });
+
+      const baselineWeight = 40;
+      const controlsEarned = controlStatuses.reduce((sum, cs) => sum + (cs.passed ? cs.ctrl.weight : 0), 0);
+      const readinessPct = baselineWeight + controlsEarned;
+
+      const blockerFailing = controlStatuses.some(cs => cs.ctrl.severity === `BLOCKER` && !cs.passed);
+      const openExceptions = exList.filter(e => !isResolvedStatus(e.status));
+      const openBlockers = openExceptions.filter(e => e.severity === `BLOCKER`).length;
+      const openHigh = openExceptions.filter(e => e.severity === `HIGH`).length;
+      const totalDiscrepancy = openExceptions.reduce((sum, e) => sum + e.exposureNok, 0);
+
+      const postedTotal = appState.postedJvs.reduce((sum, jv) => sum + jv.totalDebit, 0);
+      const postedEbitdaDelta = appState.postedJvs.reduce((sum, jv) => sum + (jv.ebitdaImpactNok || 0), 0);
+      const draftEbitda = 4964000; // Base draft before EX-002, EX-003, EX-004 net -364k adjustment -> 4,600,000 NOK
+      const currentEbitda = draftEbitda + postedEbitdaDelta;
+      const forecastEbitda = 6400000;
+      const varianceVsForecast = currentEbitda - forecastEbitda;
+
+      return {
+        controlStatuses: controlStatuses,
+        readinessPct: readinessPct,
+        controlsEarned: controlsEarned,
+        blockerFailing: blockerFailing,
+        openExceptions: openExceptions,
+        openBlockers: openBlockers,
+        openHigh: openHigh,
+        totalDiscrepancy: totalDiscrepancy,
+        postedTotal: postedTotal,
+        postedEbitdaDelta: postedEbitdaDelta,
+        currentEbitda: currentEbitda,
+        forecastEbitda: forecastEbitda,
+        varianceVsForecast: varianceVsForecast
+      };
+    }
+
+    // =========================================================================
+    // RENDERING FUNCTIONS
+    // =========================================================================
+    function renderAll() {
+      if (!ensureReadyState()) return;
+      const m = computeMetrics();
+      renderHeaderAndKpis(m);
+      renderControlsGrid(m);
+      renderQueue();
+      renderDossier();
+      renderLedgerTab();
+      renderAuditTrail();
+      renderAuditChainBadge();
+      renderManagementPack(m);
+      if (window.lucide && typeof window.lucide.createIcons === `function`) {
+        window.lucide.createIcons();
+      }
+    }
+
+    function renderHeaderAndKpis(m) {
+      const pill = document.getElementById(`close-status-pill`);
+      const pillText = document.getElementById(`close-status-text`);
+      if (pill && pillText) {
+        pill.className = `close-status-pill`;
+        if (appState.signedOff) {
+          pill.classList.add(`signed`);
+          pillText.textContent = `PERIOD 2026-10 CLOSED & SIGNED OFF`;
+        } else if (m.blockerFailing) {
+          pill.classList.add(`blocked`);
+          pillText.textContent = `CLOSE BLOCKED · ${m.openBlockers} BLOCKER ACTIVE`;
+        } else {
+          pill.classList.add(`ready`);
+          pillText.textContent = m.openHigh > 0 ? `READY FOR SIGN-OFF · ${m.openHigh} HIGH ADVISORY` : `READY FOR SIGN-OFF · 100% PASSED`;
+        }
+      }
+
+      const arc = document.getElementById(`readiness-arc`);
+      const pctEl = document.getElementById(`readiness-pct`);
+      const sumEl = document.getElementById(`readiness-summary`);
+      const brkEl = document.getElementById(`readiness-breakdown`);
+      const circumference = 301.59;
+      if (arc) {
+        const offset = circumference * (1 - m.readinessPct / 100);
+        arc.style.strokeDashoffset = String(offset);
+        arc.style.stroke = m.blockerFailing ? `var(--error)` : (m.readinessPct === 100 ? `var(--tertiary)` : `var(--primary)`);
+      }
+      if (pctEl) pctEl.textContent = `${m.readinessPct}%`;
+      if (sumEl) {
+        if (appState.signedOff) {
+          sumEl.textContent = `Period 2026-10 signed off by Frank Ellingsen. Gold Layer locked.`;
+        } else if (m.blockerFailing) {
+          sumEl.textContent = `Blocked by Trial Balance imbalance (CTRL-GL-01). Baseline sub-ledgers verified.`;
+        } else if (m.openExceptions.length > 0) {
+          sumEl.textContent = `Blocker cleared — READY FOR SIGN-OFF. ${m.openExceptions.length} high-severity item(s) still open.`;
+        } else {
+          sumEl.textContent = `All 6 deterministic controls and baseline sub-ledgers passed. Ready for Period Sign-Off.`;
+        }
+      }
+      if (brkEl) {
+        brkEl.textContent = `Baseline 40% + Controls ${m.controlsEarned}% / 60%`;
+      }
+
+      const discEl = document.getElementById(`kpi-discrepancy`);
+      const discSub = document.getElementById(`kpi-discrepancy-sub`);
+      if (discEl) discEl.textContent = formatNok(m.totalDiscrepancy);
+      if (discSub) {
+        discSub.textContent = m.openExceptions.length === 0 ? `All discrepancies cleared` : `Across ${m.openExceptions.length} open finding(s)`;
+        discSub.className = `kpi-delta ${m.totalDiscrepancy === 0 ? `positive` : `error`}`;
+      }
+
+      const exEl = document.getElementById(`kpi-exceptions`);
+      const exSub = document.getElementById(`kpi-exceptions-sub`);
+      if (exEl) exEl.textContent = `${m.openExceptions.length} Open`;
+      if (exSub) {
+        exSub.textContent = `${m.openBlockers} Blocker · ${m.openHigh} High Risk`;
+        exSub.className = `kpi-delta ${m.openExceptions.length === 0 ? `positive` : (m.openBlockers > 0 ? `error` : `warning`)}`;
+      }
+
+      const stEl = document.getElementById(`kpi-staged`);
+      const stSub = document.getElementById(`kpi-staged-sub`);
+      if (stEl) stEl.textContent = `${appState.postedJvs.length} ${appState.postedJvs.length === 1 ? `Entry` : `Entries`}`;
+      if (stSub) {
+        stSub.textContent = `${formatNok(m.postedTotal)} posted`;
+        stSub.className = `kpi-delta ${appState.postedJvs.length > 0 ? `positive` : ``}`;
+      }
+
+      const ebEl = document.getElementById(`kpi-ebitda`);
+      const ebSub = document.getElementById(`kpi-ebitda-sub`);
+      if (ebEl) ebEl.textContent = formatMillions(m.varianceVsForecast);
+      if (ebSub) ebSub.textContent = `Current ${formatMillions(m.currentEbitda).replace(`+`, ``)} vs 6.40m fcst`;
+
+      const bOpen = document.getElementById(`badge-open-count`);
+      const bLed = document.getElementById(`badge-ledger-count`);
+      const bAud = document.getElementById(`badge-audit-count`);
+      const bSig = document.getElementById(`badge-signoff-state`);
+      if (bOpen) bOpen.textContent = String(m.openExceptions.length);
+      if (bLed) bLed.textContent = String(appState.postedJvs.length);
+      if (bAud) bAud.textContent = String(appState.auditLog.length);
+      if (bSig) bSig.textContent = appState.signedOff ? `Signed` : (m.blockerFailing ? `Locked` : `Ready`);
+    }
+
+    function renderControlsGrid(m) {
+      const container = document.getElementById(`controls-grid`);
+      const clearBtn = document.getElementById(`clear-rule-filter-btn`);
+      if (!container) return;
+      if (clearBtn) {
+        clearBtn.style.display = activeRuleFilter !== `ALL` ? `inline-flex` : `none`;
+      }
+
+      container.innerHTML = m.controlStatuses.map(cs => {
+        const c = cs.ctrl;
+        const isSelected = activeRuleFilter === c.id;
+        let chipClass = `chip-pass`;
+        let chipText = `PASS`;
+        if (!cs.passed) {
+          if (c.severity === `BLOCKER`) {
+            chipClass = `chip-blocker`;
+            chipText = `BLOCKER · FAIL`;
+          } else if (cs.holdCount > 0 && cs.holdCount === cs.openCount) {
+            chipClass = `chip-hold`;
+            chipText = `ON HOLD`;
+          } else {
+            chipClass = `chip-high`;
+            chipText = `HIGH · FAIL`;
+          }
+        }
+        return `
+          <button type="button" class="control-card ${isSelected ? `selected` : ``}" onclick="filterByRule('${c.id}')" aria-pressed="${isSelected}">
+            <div class="control-card-top">
+              <span class="control-code">${c.id} · ${c.weight}% WT</span>
+              <span class="status-chip ${chipClass}">${chipText}</span>
+            </div>
+            <div class="control-title">${c.title}</div>
+            <p class="control-desc">${c.description}</p>
+            <div class="control-foot">
+              <span>${cs.passed ? `0 open findings` : `${cs.openCount} open finding`}</span>
+              <span>${cs.passed ? `0 NOK` : formatNok(cs.exposure)}</span>
+            </div>
+          </button>
+        `;
+      }).join(``);
+    }
+
+    function getFilteredExceptions() {
+      const searchInput = document.getElementById(`filter-search`);
+      const ruleSelect = document.getElementById(`filter-rule`);
+      const statusSelect = document.getElementById(`filter-status`);
+      const q = searchInput ? searchInput.value.trim().toLowerCase() : ``;
+      const ruleVal = ruleSelect ? ruleSelect.value : `ALL`;
+      const statusVal = statusSelect ? statusSelect.value : `ALL`;
+
+      return appState.exceptions.filter(ex => {
+        if (ruleVal !== `ALL` && ex.ruleId !== ruleVal) return false;
+        if (statusVal === `OPEN` && ex.status !== `OPEN`) return false;
+        if (statusVal === `HOLD` && ex.status !== `HOLD`) return false;
+        if (statusVal === `RESOLVED` && !isResolvedStatus(ex.status)) return false;
+        if (q) {
+          const hay = `${ex.id} ${ex.ruleId} ${ex.title} ${ex.vendor} ${ex.project} ${ex.wbs}`.toLowerCase();
+          if (!hay.includes(q)) return false;
+        }
+        return true;
+      });
+    }
+
+    function renderQueue() {
+      const listEl = document.getElementById(`queue-list`);
+      const counterEl = document.getElementById(`queue-counter`);
+      if (!listEl) return;
+
+      const filtered = getFilteredExceptions();
+      if (counterEl) {
+        counterEl.textContent = `${filtered.length} of ${appState.exceptions.length} shown`;
+      }
+
+      if (filtered.length === 0) {
+        listEl.innerHTML = `
+          <div class="well" style="text-align: center;">
+            <div class="data-label">No matching exceptions</div>
+            <p style="margin: var(--space-xs) 0 var(--space-sm) 0; font-size: 0.85rem; color: var(--on-surface-variant);">Clear active filters to inspect all Period 2026-10 items.</p>
+            <button type="button" class="btn btn-compact" onclick="resetQueueFilters()">Reset Filters</button>
+          </div>
+        `;
+        return;
+      }
+
+      if (!filtered.some(e => e.id === selectedExceptionId)) {
+        selectedExceptionId = filtered[0].id;
+      }
+
+      listEl.innerHTML = filtered.map(ex => {
+        const isSel = ex.id === selectedExceptionId;
+        const badge = statusBadgeForException(ex);
+        return `
+          <button type="button" class="queue-item ${isSel ? `active` : ``}" onclick="selectException('${ex.id}')" role="option" aria-selected="${isSel}">
+            <div class="queue-item-head">
+              <span class="control-code">${ex.ruleId} · ${ex.id}</span>
+              <span class="status-chip ${badge.cls}">${badge.text}</span>
+            </div>
+            <div class="queue-item-title">${ex.title}</div>
+            <div class="queue-item-meta">
+              <span>ML Risk: ${ex.riskScore}%</span>
+              <span>${formatNok(ex.exposureNok)}</span>
+            </div>
+          </button>
+        `;
+      }).join(``);
+    }
+
+    function statusBadgeForException(ex) {
+      if (ex.status === `APPROVED`) return { cls: `chip-pass`, text: `APPROVED & POSTED` };
+      if (ex.status === `REJECTED`) return { cls: `chip-info`, text: `REJECTED / OVERRIDE` };
+      if (ex.status === `HOLD`) return { cls: `chip-hold`, text: `DISPUTED / HOLD` };
+      if (ex.severity === `BLOCKER`) return { cls: `chip-blocker`, text: `BLOCKER · OPEN` };
+      return { cls: `chip-high`, text: `HIGH · OPEN` };
+    }
+
+    function renderDossier() {
+      const panel = document.getElementById(`dossier-panel`);
+      if (!panel) return;
+      const ex = appState.exceptions.find(e => e.id === selectedExceptionId) || appState.exceptions[0];
+      if (!ex) return;
+
+      const badge = statusBadgeForException(ex);
+      const jv = ex.proposedJv;
+      const totDr = jv.lines.reduce((s, l) => s + Number(l.debit || 0), 0);
+      const totCr = jv.lines.reduce((s, l) => s + Number(l.credit || 0), 0);
+      const isBalanced = totDr === totCr && totDr > 0;
+      const resolved = isResolvedStatus(ex.status);
+      const disabledActions = resolved || appState.signedOff;
+
+      let editBlockHtml = ``;
+      if (editMode && !disabledActions) {
+        editBlockHtml = `
+          <div class="inline-drawer" aria-label="Edit Proposed Journal Voucher">
+            <div class="panel-header">
+              <span class="dossier-section-title">Edit Journal Adjustment (${jv.jvId})</span>
+              <span id="edit-balance-status" class="status-chip ${isBalanced ? `chip-pass` : `chip-blocker`}">
+                ${isBalanced ? `BALANCED · Δ = 0 NOK` : `UNBALANCED · Δ = ${formatNok(totDr - totCr)}`}
+              </span>
+            </div>
+            <div class="field-group">
+              <label for="edit-jv-desc" class="field-label">Journal Narration</label>
+              <input type="text" id="edit-jv-desc" class="field-input" value="${escapeHtml(jv.description)}">
+            </div>
+            ${jv.lines.map((line, idx) => `
+              <div class="filter-row" style="grid-template-columns: 90px minmax(140px,1fr) 130px 115px 115px;">
+                <div class="field-group">
+                  <label for="edit-acc-${idx}" class="field-label">Acct</label>
+                  <input type="text" id="edit-acc-${idx}" class="field-input mono" value="${escapeHtml(line.account)}">
+                </div>
+                <div class="field-group">
+                  <label for="edit-name-${idx}" class="field-label">Account Name</label>
+                  <input type="text" id="edit-name-${idx}" class="field-input" value="${escapeHtml(line.name)}">
+                </div>
+                <div class="field-group">
+                  <label for="edit-wbs-${idx}" class="field-label">WBS / CC</label>
+                  <input type="text" id="edit-wbs-${idx}" class="field-input mono" value="${escapeHtml(line.wbs)}">
+                </div>
+                <div class="field-group">
+                  <label for="edit-dr-${idx}" class="field-label">Debit NOK</label>
+                  <input type="number" id="edit-dr-${idx}" class="field-input mono" value="${line.debit}" oninput="updateEditBalancePreview(${jv.lines.length})">
+                </div>
+                <div class="field-group">
+                  <label for="edit-cr-${idx}" class="field-label">Credit NOK</label>
+                  <input type="number" id="edit-cr-${idx}" class="field-input mono" value="${line.credit}" oninput="updateEditBalancePreview(${jv.lines.length})">
+                </div>
+              </div>
+            `).join(``)}
+            <div class="field-group">
+              <label for="edit-rationale" class="field-label">Controller Adjustment Rationale</label>
+              <input type="text" id="edit-rationale" class="field-input" value="${escapeHtml(ex.controllerNote || `Adjusted by Lead Controller during Period 2026-10 review.`)}" placeholder="State reason for modifying JV lines">
+            </div>
+            <div class="action-bar">
+              <button type="button" class="btn btn-primary btn-compact" onclick="saveEditedJv('${ex.id}')">Save Edited JV</button>
+              <button type="button" class="btn btn-compact" onclick="toggleEditMode(false)">Cancel</button>
+            </div>
+          </div>
+        `;
+      }
+
+      let holdBlockHtml = ``;
+      if (holdDrawerOpen && !disabledActions) {
+        holdBlockHtml = `
+          <div class="inline-drawer" aria-label="Dispute or Hold Exception">
+            <span class="dossier-section-title">Place Exception on Dispute / Hold</span>
+            <div class="field-group">
+              <label for="hold-reason-input" class="field-label">Dispute / Escalation Note (Logged to SHA-256 Audit Trail)</label>
+              <textarea id="hold-reason-input" class="field-textarea" placeholder="e.g. Escalated to Nordic Subsea Fabrication AS for Credit Note or PM Change Order verification.">${escapeHtml(ex.controllerNote)}</textarea>
+            </div>
+            <div class="action-bar">
+              <button type="button" class="btn btn-warning btn-compact" onclick="confirmHold('${ex.id}')">Confirm Dispute / Hold</button>
+              <button type="button" class="btn btn-compact" onclick="toggleHoldDrawer(false)">Cancel</button>
+            </div>
+          </div>
+        `;
+      }
+
+      let rejectBlockHtml = ``;
+      if (rejectDrawerOpen && !disabledActions) {
+        rejectBlockHtml = `
+          <div class="inline-drawer" aria-label="Reject AI Proposal">
+            <span class="dossier-section-title">Reject Proposed Adjustment (Controller Override)</span>
+            ${ex.severity === `BLOCKER` ? `<div class="inline-feedback error">Governance Gate: CTRL-GL-01 is a statutory Trial Balance blocker. Rejecting this proposal will log the rejection, but the close remains BLOCKED until a balanced clearing JV is posted.</div>` : ``}
+            <div class="field-group">
+              <label for="reject-reason-input" class="field-label">Override Rationale (Mandatory for Audit Evidence Pack)</label>
+              <textarea id="reject-reason-input" class="field-textarea" placeholder="Document why this finding is overridden or immaterial for Period 2026-10."></textarea>
+            </div>
+            <div class="action-bar">
+              <button type="button" class="btn btn-danger btn-compact" onclick="confirmReject('${ex.id}')">Confirm Rejection</button>
+              <button type="button" class="btn btn-compact" onclick="toggleRejectDrawer(false)">Cancel</button>
+            </div>
+          </div>
+        `;
+      }
+
+      panel.innerHTML = `
+        <div class="dossier-head">
+          <div>
+            <div class="dossier-tags">
+              <span class="control-code">${ex.id}</span>
+              <span class="status-chip ${badge.cls}">${badge.text}</span>
+              <span class="status-chip chip-info">${ex.ruleId}</span>
+            </div>
+            <h2 class="dossier-title">${ex.title}</h2>
+            <div class="entity-meta" style="margin-top: var(--space-xs);">
+              <span>Vendor/Source: <strong>${ex.vendor}</strong></span>
+              <span>Project: <strong>${ex.project}</strong></span>
+              <span>WBS / CC: <strong>${ex.wbs} · ${ex.costCenter}</strong></span>
+            </div>
+          </div>
+          <div class="risk-meter-box">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span class="data-label">Isolation Forest Risk</span>
+              <span class="mono" style="color: var(--error); font-weight: 600;">${ex.riskScore}%</span>
+            </div>
+            <div class="risk-bar-track">
+              <div class="risk-bar-fill" style="width: ${ex.riskScore}%;"></div>
+            </div>
+            <span class="data-label">Exposure: ${formatNok(ex.exposureNok)}</span>
+          </div>
+        </div>
+
+        <div class="dossier-section">
+          <h3 class="dossier-section-title">01 · AI Investigator Observation</h3>
+          <div class="well">${ex.observation}</div>
+        </div>
+
+        <div class="dossier-section">
+          <h3 class="dossier-section-title">02 · Controller Evidence Graph (Multi-Source Lineage)</h3>
+          <div class="evidence-chain">
+            ${ex.evidenceChain.map(node => `
+              <div class="evidence-node">
+                <span class="evidence-node-type">${node.type}</span>
+                <span class="evidence-node-id">${node.id}</span>
+                <span class="evidence-node-detail">${node.detail}</span>
+              </div>
+            `).join(``)}
+          </div>
+        </div>
+
+        <div class="two-col-dossier">
+          <div class="dossier-section">
+            <h3 class="dossier-section-title">03 · Root Cause Analysis</h3>
+            <div class="well">${ex.rootCause}</div>
+          </div>
+          <div class="dossier-section">
+            <h3 class="dossier-section-title">04 · Financial &amp; Margin Exposure</h3>
+            <div class="well">${ex.exposureText}</div>
+          </div>
+        </div>
+
+        <div class="dossier-section">
+          <div class="panel-header">
+            <h3 class="dossier-section-title">05 · Proposed Journal Voucher · ${jv.jvId}</h3>
+            <span class="status-chip ${isBalanced ? `chip-pass` : `chip-blocker`}">
+              ${isBalanced ? `BALANCED · Δ = 0 NOK` : `UNBALANCED`}
+            </span>
+          </div>
+          <div class="well" style="padding: var(--space-sm) var(--space-md); font-size: 0.875rem; color: var(--on-surface-variant);">
+            <strong style="color: var(--on-surface);">Narration:</strong> ${jv.description}
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Acct</th>
+                  <th>Account Name</th>
+                  <th>Project / WBS / CC</th>
+                  <th class="num">Debit (NOK)</th>
+                  <th class="num">Credit (NOK)</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${jv.lines.map(l => `
+                  <tr>
+                    <td class="mono">${l.account}</td>
+                    <td>${l.name}</td>
+                    <td class="mono">${l.wbs}</td>
+                    <td class="num">${l.debit ? formatNok(l.debit) : `—`}</td>
+                    <td class="num">${l.credit ? formatNok(l.credit) : `—`}</td>
+                  </tr>
+                `).join(``)}
+                <tr>
+                  <td colspan="3" class="mono" style="font-weight: 600;">TOTAL BALANCING CHECK</td>
+                  <td class="num" style="font-weight: 600; color: var(--on-surface);">${formatNok(totDr)}</td>
+                  <td class="num" style="font-weight: 600; color: var(--on-surface);">${formatNok(totCr)}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        ${ex.controllerNote ? `
+          <div class="inline-feedback info">
+            <i data-lucide="message-square-text" aria-hidden="true"></i>
+            <span><strong>Controller Note:</strong> ${escapeHtml(ex.controllerNote)}</span>
+          </div>
+        ` : ``}
+
+        ${editBlockHtml}
+        ${holdBlockHtml}
+        ${rejectBlockHtml}
+
+        <div class="action-bar" aria-label="Human in the Loop Governance Actions">
+          <button type="button" class="btn btn-primary" onclick="approveAndPost('${ex.id}')" ${disabledActions ? `disabled` : ``}>
+            <i data-lucide="check-circle-2" aria-hidden="true"></i>
+            <span>Approve &amp; Post</span>
+          </button>
+          <button type="button" class="btn" onclick="toggleEditMode(!editMode)" ${disabledActions ? `disabled` : ``}>
+            <i data-lucide="pencil" aria-hidden="true"></i>
+            <span>Edit Adjustment</span>
+          </button>
+          <button type="button" class="btn btn-warning" onclick="toggleHoldDrawer(!holdDrawerOpen)" ${disabledActions ? `disabled` : ``}>
+            <i data-lucide="pause-circle" aria-hidden="true"></i>
+            <span>Dispute / Hold</span>
+          </button>
+          <button type="button" class="btn btn-danger" onclick="toggleRejectDrawer(!rejectDrawerOpen)" ${disabledActions ? `disabled` : ``}>
+            <i data-lucide="x-circle" aria-hidden="true"></i>
+            <span>Reject</span>
+          </button>
+        </div>
+      `;
+    }
+
+    function renderLedgerTab() {
+      const container = document.getElementById(`ledger-content`);
+      const pills = document.getElementById(`ledger-summary-pills`);
+      if (!container) return;
+
+      const jvs = appState.postedJvs;
+      const totalAmt = jvs.reduce((s, j) => s + j.totalDebit, 0);
+      if (pills) {
+        pills.innerHTML = `
+          <span class="status-chip chip-info">${jvs.length} Posted JVs</span>
+          <span class="status-chip chip-pass">Total Posted: ${formatNok(totalAmt)}</span>
+        `;
+      }
+
+      if (jvs.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <span class="data-label">No Journal Vouchers Posted Yet</span>
+            <p style="max-width: 54ch; margin: 0; color: var(--on-surface-variant);">
+              Per CLOSE-AI Human-in-the-Loop governance, the AI Investigator stages proposals without altering accounting records. Review an exception in the Control Room and click Approve &amp; Post to commit it here.
+            </p>
+            <button type="button" class="btn btn-primary" onclick="switchTab('workbench')">Go to Investigation Workbench</button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>JV ID</th>
+                <th>Rule &amp; Exception</th>
+                <th>Narration &amp; Account Legs</th>
+                <th>Approved By</th>
+                <th>Timestamp</th>
+                <th class="num">Total Debit</th>
+                <th class="num">Total Credit</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${jvs.map(jv => `
+                <tr>
+                  <td class="mono" style="color: var(--primary); font-weight: 600;">${jv.jvId}</td>
+                  <td class="mono">${jv.ruleId}<br><span style="color: var(--on-surface-variant);">${jv.exceptionId}</span></td>
+                  <td>
+                    <div style="font-weight: 500; margin-bottom: var(--space-xs);">${jv.description}</div>
+                    ${jv.lines.map(l => `
+                      <div class="mono" style="color: var(--on-surface-variant); font-size: 0.78rem;">
+                        ${l.debit ? `DR` : `CR`} ${l.account} ${l.name} (${l.wbs}) · ${formatNok(l.debit || l.credit)}
+                      </div>
+                    `).join(``)}
+                  </td>
+                  <td class="mono">${jv.approvedBy}</td>
+                  <td class="mono">${jv.timestamp}</td>
+                  <td class="num">${formatNok(jv.totalDebit)}</td>
+                  <td class="num">${formatNok(jv.totalCredit)}</td>
+                </tr>
+              `).join(``)}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderAuditTrail() {
+      const tbody = document.getElementById(`audit-table-body`);
+      const filterEl = document.getElementById(`audit-filter-type`);
+      if (!tbody || !ensureReadyState()) return;
+      const filterVal = filterEl ? filterEl.value : `ALL`;
+
+      const rows = appState.auditLog.slice().reverse().filter(entry => {
+        if (filterVal === `ALL`) return true;
+        return entry.category === filterVal;
+      });
+
+      tbody.innerHTML = rows.map(entry => `
+        <tr>
+          <td class="mono" style="font-weight: 600;">#${String(entry.block).padStart(3, `0`)}</td>
+          <td class="mono" style="white-space: nowrap;">${entry.timestamp}</td>
+          <td>${entry.actor}</td>
+          <td>
+            <span class="status-chip ${entry.category === `APPROVE` || entry.category === `SIGN_OFF` ? `chip-pass` : (entry.category === `HOLD_REJECT` ? `chip-high` : `chip-info`)}">${entry.action}</span>
+            <div class="mono" style="color: var(--on-surface-variant); margin-top: var(--space-2xs);">${entry.ruleId} · ${entry.exceptionId}</div>
+          </td>
+          <td style="max-width: 340px;">${entry.financialLines}</td>
+          <td class="hash-cell" title="${entry.prevHash}">${entry.prevHash.slice(0, 14)}…</td>
+          <td class="hash-cell" title="${entry.hash}">${entry.hash.slice(0, 22)}…</td>
+        </tr>
+      `).join(``);
+    }
+
+    function renderAuditChainBadge() {
+      const badge = document.getElementById(`chain-verify-badge`);
+      if (!badge) return;
+      const count = appState && appState.auditLog ? appState.auditLog.length : 0;
+      badge.className = `status-chip ${chainVerifiedResult.valid ? `chip-pass` : `chip-blocker`}`;
+      badge.innerHTML = `
+        <i data-lucide="${chainVerifiedResult.valid ? `lock` : `alert-triangle`}" aria-hidden="true"></i>
+        <span>${chainVerifiedResult.valid ? `CHAIN VERIFIED · ${count}/${count} BLOCKS INTACT` : `CHAIN TAMPER ALERT`}</span>
+      `;
+    }
+
+    function renderManagementPack(m) {
+      const narrativeBox = document.getElementById(`management-narrative-box`);
+      const bridgeWrap = document.getElementById(`ebitda-bridge-svg-wrap`);
+      const projBody = document.getElementById(`project-variance-body`);
+      const gateChip = document.getElementById(`signoff-gate-chip`);
+      const checklistEl = document.getElementById(`signoff-checklist`);
+      const signBtn = document.getElementById(`execute-signoff-btn`);
+      const lockReason = document.getElementById(`signoff-lock-reason`);
+
+      if (narrativeBox) {
+        const postedCount = appState.postedJvs.length;
+        const projM = (m.currentEbitda / 1000000).toFixed(2);
+        const varM = Math.abs(m.varianceVsForecast / 1000000).toFixed(2);
+        narrativeBox.innerHTML = `
+          <div style="display: grid; gap: var(--space-sm);">
+            <div class="data-label">Automated Gold-Layer Management Commentary · Period 2026-10</div>
+            <p style="margin: 0; font-size: 1.05rem; font-weight: 500; color: var(--on-surface);">
+              EBITDA stands at NOK ${projM}m (${varM}m below the NOK 6.40m forecast), primarily driven by subsea fabrication subcontractor overruns on PRJ-104 (Troll Phase III Manifold), hydraulic actuator accruals on PRJ-102, and lower engineering utilization in CC-100.
+            </p>
+            <p style="margin: 0; font-size: 0.9rem; color: var(--on-surface-variant);">
+              Controller Governance Status: ${postedCount} adjustment journal(s) (${formatNok(m.postedTotal)}) have been reviewed and posted to the Gold Layer. ${m.openExceptions.length === 0 ? `All 6 deterministic controls are cleared and reconciled to source evidence.` : `${m.openExceptions.length} exception(s) remain open for controller disposition.`}
+            </p>
+          </div>
+        `;
+      }
+
+      if (bridgeWrap) {
+        const fcst = 6.40;
+        const draft = 4.964;
+        const dupAdj = appState.exceptions.find(e => e.id === `EX-2026-10-003` && e.status === `APPROVED`) ? 0.284 : 0;
+        const grirAdj = appState.exceptions.find(e => e.id === `EX-2026-10-004` && e.status === `APPROVED`) ? -0.450 : 0;
+        const poAdj = appState.exceptions.find(e => e.id === `EX-2026-10-002` && e.status === `APPROVED`) ? -0.198 : 0;
+        const finalEbitda = Number((draft + dupAdj + grirAdj + poAdj).toFixed(2));
+
+        const bars = [
+          { label: `Forecast EBITDA`, val: fcst, color: `var(--data-context)` },
+          { label: `Pre-Close Draft`, val: draft, color: `var(--data-1)` },
+          { label: `Duplicate Reversal`, val: dupAdj, color: `var(--data-2)` },
+          { label: `GR/IR & PO Overrun`, val: grirAdj + poAdj, color: `var(--data-4)` },
+          { label: `Gold Actual EBITDA`, val: finalEbitda, color: `var(--data-3)` }
+        ];
+
+        bridgeWrap.innerHTML = `
+          <svg viewBox="0 0 700 185" width="100%" height="185" role="img" aria-label="EBITDA Forecast to Actual Bridge">
+            <line x1="40" y1="145" x2="670" y2="145" stroke="var(--outline-variant)" stroke-width="1"/>
+            <line x1="40" y1="35" x2="670" y2="35" stroke="var(--outline-variant)" stroke-width="1" stroke-dasharray="4 4"/>
+            ${bars.map((b, i) => {
+              const x = 65 + i * 124;
+              const absH = Math.max(4, Math.abs(b.val) * 16.5);
+              const y = b.val >= 0 ? 145 - absH : 145;
+              return `
+                <rect x="${x}" y="${y}" width="66" height="${absH}" rx="4" fill="${b.color}"></rect>
+                <text x="${x + 33}" y="${b.val >= 0 ? y - 8 : y + absH + 14}" text-anchor="middle" fill="var(--on-surface)" font-family="Geist Mono, monospace" font-size="11" font-weight="600">${b.val >= 0 ? `` : ``}${b.val.toFixed(2)}m</text>
+                <text x="${x + 33}" y="172" text-anchor="middle" fill="var(--on-surface-variant)" font-family="Geist Mono, monospace" font-size="10">${b.label}</text>
+              `;
+            }).join(``)}
+          </svg>
+        `;
+      }
+
+      if (projBody) {
+        projBody.innerHTML = PROJECT_BASELINE.map(p => {
+          const linked = appState.exceptions.find(e => e.id === p.linkedEx);
+          let adjDelta = 0;
+          if (linked && linked.status === `APPROVED`) {
+            if (p.code === `PRJ-102`) adjDelta = 450000;
+            if (p.code === `PRJ-103`) adjDelta = -284000;
+            if (p.code === `PRJ-104`) adjDelta = 198000 + (appState.exceptions.find(e => e.id === `EX-2026-10-006` && e.status === `APPROVED`) ? 92000 : 0);
+            if (p.code === `PRJ-105`) adjDelta = -165000;
+          }
+          const actualPlusAdj = p.actualBase + adjDelta;
+          const variance = p.forecast - actualPlusAdj;
+          return `
+            <tr>
+              <td class="mono" style="color: var(--primary); font-weight: 600;">${p.code}<br><span style="color: var(--on-surface-variant);">${p.wbs}</span></td>
+              <td>${p.customer}</td>
+              <td class="num">${formatNok(p.budget)}</td>
+              <td class="num">${formatNok(p.forecast)}</td>
+              <td class="num">${formatNok(actualPlusAdj)}</td>
+              <td class="num" style="color: ${variance < 0 ? `var(--error)` : `var(--tertiary)`};">${formatNok(variance)}</td>
+              <td style="font-size: 0.82rem; color: var(--on-surface-variant);">${p.driver}</td>
+            </tr>
+          `;
+        }).join(``);
+      }
+
+      if (gateChip) {
+        if (appState.signedOff) {
+          gateChip.className = `status-chip chip-pass`;
+          gateChip.textContent = `SIGNED OFF · ${appState.signOffTimestamp}`;
+        } else if (m.blockerFailing) {
+          gateChip.className = `status-chip chip-blocker`;
+          gateChip.textContent = `SIGN-OFF LOCKED · BLOCKER ACTIVE`;
+        } else {
+          gateChip.className = `status-chip chip-info`;
+          gateChip.textContent = `UNLOCKED · READY FOR SIGN-OFF`;
+        }
+      }
+
+      if (checklistEl) {
+        checklistEl.innerHTML = `
+          <div class="baseline-item">
+            <span class="baseline-name">CTRL-GL-01 Blocker Resolved</span>
+            <span class="status-chip ${m.blockerFailing ? `chip-blocker` : `chip-pass`}">${m.blockerFailing ? `FAIL` : `PASS`}</span>
+          </div>
+          <div class="baseline-item">
+            <span class="baseline-name">Baseline Sub-Ledgers (4/4)</span>
+            <span class="status-chip chip-pass">PASS</span>
+          </div>
+          <div class="baseline-item">
+            <span class="baseline-name">SHA-256 Audit Chain</span>
+            <span class="status-chip ${chainVerifiedResult.valid ? `chip-pass` : `chip-blocker`}">${chainVerifiedResult.valid ? `INTACT` : `ALERT`}</span>
+          </div>
+          <div class="baseline-item">
+            <span class="baseline-name">Open High-Risk Items</span>
+            <span class="status-chip ${m.openHigh === 0 ? `chip-pass` : `chip-high`}">${m.openHigh} REMAINING</span>
+          </div>
+        `;
+      }
+
+      if (signBtn && lockReason) {
+        signBtn.disabled = m.blockerFailing || appState.signedOff || !chainVerifiedResult.valid;
+        if (appState.signedOff) {
+          lockReason.textContent = `Signed off by Frank Ellingsen on ${appState.signOffTimestamp}.`;
+        } else if (m.blockerFailing) {
+          lockReason.textContent = `Resolve Blocker CTRL-GL-01 (JV-2026-10-1028) to unlock Period 2026-10 sign-off.`;
+        } else {
+          lockReason.textContent = `All blockers passed. Controller authorized to execute Period 2026-10 sign-off.`;
+        }
+      }
+    }
+
+    // =========================================================================
+    // INTERACTIVE HANDLERS (HOISTED FUNCTIONS)
+    // =========================================================================
+    function switchTab(tabName) {
+      activeTab = tabName;
+      const views = [`workbench`, `ledger`, `audit`, `report`];
+      for (const v of views) {
+        const viewEl = document.getElementById(`view-${v}`);
+        const btnEl = document.getElementById(`tab-btn-${v}`);
+        if (viewEl) viewEl.classList.toggle(`active`, v === tabName);
+        if (btnEl) btnEl.classList.toggle(`active`, v === tabName);
+      }
+    }
+
+    function filterByRule(ruleId) {
+      if (!ensureReadyState()) return;
+      activeRuleFilter = activeRuleFilter === ruleId ? `ALL` : ruleId;
+      const sel = document.getElementById(`filter-rule`);
+      if (sel) sel.value = activeRuleFilter;
+      renderAll();
+    }
+
+    function applyQueueFilters() {
+      if (!ensureReadyState()) return;
+      const sel = document.getElementById(`filter-rule`);
+      activeRuleFilter = sel ? sel.value : `ALL`;
+      renderAll();
+    }
+
+    function resetQueueFilters() {
+      if (!ensureReadyState()) return;
+      const s = document.getElementById(`filter-search`);
+      const r = document.getElementById(`filter-rule`);
+      const st = document.getElementById(`filter-status`);
+      if (s) s.value = ``;
+      if (r) r.value = `ALL`;
+      if (st) st.value = `ALL`;
+      activeRuleFilter = `ALL`;
+      renderAll();
+    }
+
+    function selectException(exId) {
+      if (!ensureReadyState()) return;
+      selectedExceptionId = exId;
+      editMode = false;
+      holdDrawerOpen = false;
+      rejectDrawerOpen = false;
+      renderQueue();
+      renderDossier();
+      if (window.lucide && typeof window.lucide.createIcons === `function`) {
+        window.lucide.createIcons();
+      }
+    }
+
+    function toggleEditMode(state) {
+      if (!ensureReadyState()) return;
+      editMode = state;
+      holdDrawerOpen = false;
+      rejectDrawerOpen = false;
+      renderDossier();
+      if (window.lucide && typeof window.lucide.createIcons === `function`) {
+        window.lucide.createIcons();
+      }
+    }
+
+    function toggleHoldDrawer(state) {
+      if (!ensureReadyState()) return;
+      holdDrawerOpen = state;
+      editMode = false;
+      rejectDrawerOpen = false;
+      renderDossier();
+      if (window.lucide && typeof window.lucide.createIcons === `function`) {
+        window.lucide.createIcons();
+      }
+    }
+
+    function toggleRejectDrawer(state) {
+      if (!ensureReadyState()) return;
+      rejectDrawerOpen = state;
+      editMode = false;
+      holdDrawerOpen = false;
+      renderDossier();
+      if (window.lucide && typeof window.lucide.createIcons === `function`) {
+        window.lucide.createIcons();
+      }
+    }
+
+    function updateEditBalancePreview(lineCount) {
+      let dr = 0;
+      let cr = 0;
+      for (let i = 0; i < lineCount; i++) {
+        const dEl = document.getElementById(`edit-dr-${i}`);
+        const cEl = document.getElementById(`edit-cr-${i}`);
+        dr += Number(dEl ? dEl.value : 0);
+        cr += Number(cEl ? cEl.value : 0);
+      }
+      const badge = document.getElementById(`edit-balance-status`);
+      if (badge) {
+        const balanced = dr === cr && dr > 0;
+        badge.className = `status-chip ${balanced ? `chip-pass` : `chip-blocker`}`;
+        badge.textContent = balanced ? `BALANCED · Δ = 0 NOK` : `UNBALANCED · Δ = ${formatNok(dr - cr)}`;
+      }
+    }
+
+    async function saveEditedJv(exId) {
+      if (!ensureReadyState()) return;
+      const ex = appState.exceptions.find(e => e.id === exId);
+      if (!ex) return;
+      const lines = ex.proposedJv.lines;
+      const updatedLines = [];
+      let totDr = 0;
+      let totCr = 0;
+      for (let i = 0; i < lines.length; i++) {
+        const acc = document.getElementById(`edit-acc-${i}`);
+        const name = document.getElementById(`edit-name-${i}`);
+        const wbs = document.getElementById(`edit-wbs-${i}`);
+        const drEl = document.getElementById(`edit-dr-${i}`);
+        const crEl = document.getElementById(`edit-cr-${i}`);
+        const dr = Math.max(0, Number(drEl ? drEl.value : 0));
+        const cr = Math.max(0, Number(crEl ? crEl.value : 0));
+        totDr += dr;
+        totCr += cr;
+        updatedLines.push({
+          account: acc ? acc.value.trim() : lines[i].account,
+          name: name ? name.value.trim() : lines[i].name,
+          wbs: wbs ? wbs.value.trim() : lines[i].wbs,
+          debit: dr,
+          credit: cr
+        });
+      }
+      if (totDr !== totCr || totDr <= 0) {
+        showToast(`Cannot save unbalanced JV: Total Debit (${formatNok(totDr)}) must equal Total Credit (${formatNok(totCr)}).`, `error`);
+        return;
+      }
+      const descEl = document.getElementById(`edit-jv-desc`);
+      const ratEl = document.getElementById(`edit-rationale`);
+      ex.proposedJv.description = descEl ? descEl.value.trim() : ex.proposedJv.description;
+      ex.proposedJv.lines = updatedLines;
+      ex.exposureNok = totDr;
+      ex.controllerNote = ratEl ? ratEl.value.trim() : ex.controllerNote;
+      editMode = false;
+
+      await appendAuditEntry(
+        `APPROVE`,
+        `JV_EDITED_BY_CONTROLLER`,
+        ex.ruleId,
+        ex.id,
+        `Edited ${ex.proposedJv.jvId} (${formatNok(totDr)} balanced). Rationale: ${ex.controllerNote || `Updated lines`}`
+      );
+      renderAll();
+      showToast(`Saved edited lines on ${ex.proposedJv.jvId}. Click Approve & Post to commit to Gold Layer.`, `info`);
+    }
+
+    async function approveAndPost(exId) {
+      if (!ensureReadyState()) return;
+      const ex = appState.exceptions.find(e => e.id === exId);
+      if (!ex || isResolvedStatus(ex.status) || appState.signedOff) return;
+      const jv = ex.proposedJv;
+      const totDr = jv.lines.reduce((s, l) => s + Number(l.debit || 0), 0);
+      const totCr = jv.lines.reduce((s, l) => s + Number(l.credit || 0), 0);
+      if (totDr !== totCr || totDr <= 0) {
+        showToast(`Validation Error: JV Debit/Credit imbalance prevented posting.`, `error`);
+        return;
+      }
+
+      ex.status = `APPROVED`;
+      editMode = false;
+      holdDrawerOpen = false;
+      rejectDrawerOpen = false;
+
+      const now = new Date();
+      const pad = n => String(n).padStart(2, `0`);
+      const ts = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())} CET`;
+
+      appState.postedJvs.push({
+        jvId: jv.jvId,
+        ruleId: ex.ruleId,
+        exceptionId: ex.id,
+        description: jv.description,
+        lines: JSON.parse(JSON.stringify(jv.lines)),
+        totalDebit: totDr,
+        totalCredit: totCr,
+        ebitdaImpactNok: ex.ebitdaImpactNok,
+        approvedBy: `Frank Ellingsen`,
+        timestamp: ts
+      });
+
+      const lineSummary = jv.lines.map(l => `${l.debit ? `DR` : `CR`} ${l.account} (${formatNok(l.debit || l.credit)})`).join(` / `);
+      await appendAuditEntry(
+        `APPROVE`,
+        `JV_APPROVED_AND_POSTED`,
+        ex.ruleId,
+        ex.id,
+        `${jv.jvId}: ${lineSummary}`
+      );
+
+      // Move selection to next open item if available
+      const nextOpen = appState.exceptions.find(e => !isResolvedStatus(e.status));
+      if (nextOpen) selectedExceptionId = nextOpen.id;
+
+      renderAll();
+      const m = computeMetrics();
+      if (!m.blockerFailing && ex.severity === `BLOCKER`) {
+        showToast(`${jv.jvId} posted! Blocker CTRL-GL-01 cleared — Period 2026-10 is now READY FOR SIGN-OFF.`, `success`);
+      } else {
+        showToast(`${jv.jvId} approved & posted (${formatNok(totDr)}). Close Readiness updated to ${m.readinessPct}%.`, `success`);
+      }
+    }
+
+    async function confirmHold(exId) {
+      if (!ensureReadyState()) return;
+      const ex = appState.exceptions.find(e => e.id === exId);
+      if (!ex) return;
+      const reasonEl = document.getElementById(`hold-reason-input`);
+      const note = reasonEl ? reasonEl.value.trim() : ``;
+      if (!note) {
+        showToast(`Please enter a dispute or escalation note before placing on hold.`, `error`);
+        return;
+      }
+      ex.status = `HOLD`;
+      ex.controllerNote = note;
+      holdDrawerOpen = false;
+      await appendAuditEntry(
+        `HOLD_REJECT`,
+        `EXCEPTION_DISPUTED_HOLD`,
+        ex.ruleId,
+        ex.id,
+        `Placed on HOLD (${formatNok(ex.exposureNok)}). Note: ${note}`
+      );
+      renderAll();
+      showToast(`${ex.id} placed on Dispute / Hold and logged to SHA-256 chain.`, `info`);
+    }
+
+    async function confirmReject(exId) {
+      if (!ensureReadyState()) return;
+      const ex = appState.exceptions.find(e => e.id === exId);
+      if (!ex) return;
+      const reasonEl = document.getElementById(`reject-reason-input`);
+      const note = reasonEl ? reasonEl.value.trim() : ``;
+      if (!note) {
+        showToast(`Controller override requires a documented rationale before rejecting.`, `error`);
+        return;
+      }
+      if (ex.severity === `BLOCKER`) {
+        ex.controllerNote = `Proposal rejected (${note}) — Blocker remains OPEN until balanced JV clears 9999 Suspense.`;
+        rejectDrawerOpen = false;
+        await appendAuditEntry(
+          `HOLD_REJECT`,
+          `BLOCKER_PROPOSAL_REJECTED`,
+          ex.ruleId,
+          ex.id,
+          `Proposal rejected; CTRL-GL-01 remains BLOCKED. Rationale: ${note}`
+        );
+        renderAll();
+        showToast(`Proposal rejected, but CTRL-GL-01 remains BLOCKED until a balanced clearing JV is posted.`, `error`);
+        return;
+      }
+
+      ex.status = `REJECTED`;
+      ex.controllerNote = `Overridden / Rejected: ${note}`;
+      rejectDrawerOpen = false;
+      await appendAuditEntry(
+        `HOLD_REJECT`,
+        `PROPOSAL_REJECTED_OVERRIDE`,
+        ex.ruleId,
+        ex.id,
+        `Controller overrode ${ex.proposedJv.jvId} (${formatNok(ex.exposureNok)}). Rationale: ${note}`
+      );
+      renderAll();
+      showToast(`${ex.id} rejected & overridden. Readiness index updated.`, `info`);
+    }
+
+    async function executeFinalSignOff() {
+      if (!ensureReadyState()) return;
+      const m = computeMetrics();
+      if (m.blockerFailing || appState.signedOff) return;
+      const noteEl = document.getElementById(`signoff-note`);
+      const memo = noteEl ? noteEl.value.trim() : `Period 2026-10 close approved.`;
+      const now = new Date();
+      const pad = n => String(n).padStart(2, `0`);
+      const ts = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())} CET`;
+
+      appState.signedOff = true;
+      appState.signOffTimestamp = ts;
+      appState.signOffNote = memo;
+
+      await appendAuditEntry(
+        `SIGN_OFF`,
+        `PERIOD_2026_10_SIGNED_OFF`,
+        `CLOSE-GATE`,
+        `ALL`,
+        `Controller Sign-Off executed. Readiness: ${m.readinessPct}%, Posted JVs: ${appState.postedJvs.length} (${formatNok(m.postedTotal)}). Memo: ${memo}`
+      );
+      renderAll();
+      showToast(`Period 2026-10 formally closed & signed off by Frank Ellingsen.`, `success`);
+    }
+
+    async function handleResetDemo(btn) {
+      if (btn.dataset.armed !== `true`) {
+        btn.dataset.armed = `true`;
+        const span = btn.querySelector(`span`);
+        if (span) span.textContent = `Confirm Reset?`;
+        setTimeout(() => {
+          if (btn.dataset.armed === `true`) {
+            btn.dataset.armed = `false`;
+            if (span) span.textContent = `Reset Close`;
+          }
+        }, 4000);
+        return;
+      }
+      btn.dataset.armed = `false`;
+      const span = btn.querySelector(`span`);
+      if (span) span.textContent = `Reset Close`;
+      appState = await buildInitialState();
+      selectedExceptionId = `EX-2026-10-001`;
+      activeRuleFilter = `ALL`;
+      editMode = false;
+      holdDrawerOpen = false;
+      rejectDrawerOpen = false;
+      await persistState();
+      await verifyAuditChain(true);
+      resetQueueFilters();
+      showToast(`Period 2026-10 Control Room reset to Workday +2 initial snapshot.`, `info`);
+    }
+
+    // =========================================================================
+    // EXPORTS (via notebookAppApi.triggerFileDownload)
+    // =========================================================================
+    function exportAuditPackJSON() {
+      if (!ensureReadyState()) return;
+      const m = computeMetrics();
+      const pack = {
+        entity: `Nordic Engineering Projects AS`,
+        period: appState.period,
+        workday: `+2`,
+        currency: `NOK`,
+        controller: `Frank Ellingsen`,
+        closeStatus: appState.signedOff ? `SIGNED_OFF` : (m.blockerFailing ? `CLOSE_BLOCKED` : `READY_FOR_SIGN_OFF`),
+        readinessIndexPct: m.readinessPct,
+        chainIntegrityVerified: chainVerifiedResult.valid,
+        controls: m.controlStatuses.map(c => ({ id: c.ctrl.id, title: c.ctrl.title, severity: c.ctrl.severity, passed: c.passed })),
+        postedAdjustments: appState.postedJvs,
+        sha256AuditTrail: appState.auditLog
+      };
+      const jsonStr = JSON.stringify(pack, null, 2);
+      if (window.notebookAppApi && typeof window.notebookAppApi.triggerFileDownload === `function`) {
+        window.notebookAppApi.triggerFileDownload({
+          content: jsonStr,
+          contentType: `text/plain`,
+          encoding: `UTF-8`,
+          filename: `close-ai-audit-pack-2026-10.json`
+        });
+      }
+      showToast(`Exported Audit Evidence Pack (close-ai-audit-pack-2026-10.json).`, `success`);
+    }
+
+    function exportLedgerCSV() {
+      if (!ensureReadyState()) return;
+      const headers = [`Section`, `ID`, `Rule`, `Status`, `Account_Or_Project`, `Debit_NOK`, `Credit_NOK`, `Hash_Or_Note`];
+      const lines = [headers.join(`,`)];
+      for (const ex of appState.exceptions) {
+        lines.push([`EXCEPTION`, ex.id, ex.ruleId, ex.status, `"${ex.project}"`, ex.exposureNok, 0, `"${ex.title}"`].join(`,`));
+      }
+      for (const jv of appState.postedJvs) {
+        for (const l of jv.lines) {
+          lines.push([`POSTED_JV`, jv.jvId, jv.ruleId, `POSTED`, `"${l.account} ${l.name} (${l.wbs})"`, l.debit, l.credit, `"${jv.approvedBy} ${jv.timestamp}"`].join(`,`));
+        }
+      }
+      for (const b of appState.auditLog) {
+        lines.push([`AUDIT_BLOCK`, `#${b.block}`, b.ruleId, b.action, `"${b.actor}"`, 0, 0, b.hash].join(`,`));
+      }
+      const csvStr = lines.join(`\n`);
+      if (window.notebookAppApi && typeof window.notebookAppApi.triggerFileDownload === `function`) {
+        window.notebookAppApi.triggerFileDownload({
+          content: csvStr,
+          contentType: `text/csv`,
+          encoding: `UTF-8`,
+          filename: `close-ai-ledger-controls-2026-10.csv`
+        });
+      }
+      showToast(`Exported Controls & Posted Ledger CSV (close-ai-ledger-controls-2026-10.csv).`, `success`);
+    }
+
+    // =========================================================================
+    // UTILITIES
+    // =========================================================================
+    function escapeHtml(str) {
+      if (!str) return ``;
+      return String(str)
+        .replace(/&/g, `&amp;`)
+        .replace(/</g, `&lt;`)
+        .replace(/>/g, `&gt;`)
+        .replace(/"/g, `&quot;`);
+    }
+
+    let toastTimer = null;
+    function showToast(msg, type) {
+      const el = document.getElementById(`global-toast`);
+      if (!el) return;
+      el.className = `inline-feedback ${type || `info`}`;
+      el.textContent = msg;
+      el.style.display = `flex`;
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        el.style.display = `none`;
+      }, 5000);
+    }
+
+    // =========================================================================
+    // INITIALIZATION
+    // =========================================================================
+    async function initApp() {
+      let saved = null;
+      if (window.notebookAppApi && typeof window.notebookAppApi.getAppState === `function`) {
+        try {
+          saved = await window.notebookAppApi.getAppState();
+        } catch (err) {
+          saved = null;
+        }
+      }
+      if (saved && Array.isArray(saved.exceptions) && Array.isArray(saved.auditLog)) {
+        appState = saved;
+      } else {
+        appState = await buildInitialState();
+        await persistState();
+      }
+      await verifyAuditChain(true);
+      renderAll();
+      if (window.notebookAppApi && typeof window.notebookAppApi.notifyAppReady === `function`) {
+        window.notebookAppApi.notifyAppReady();
+      }
+    }
+
+    function ensureReadyState() {
+      return Boolean(appState && Array.isArray(appState.exceptions) && Array.isArray(appState.auditLog));
+    }
+
+    window.addEventListener(`DOMContentLoaded`, initApp);
+  </script>
+</body>
+</html>
