@@ -850,46 +850,6 @@
         scroll-behavior: auto !important;
       }
     }
-
-    /* Modal Backdrop & Dialog (Adra Rule Inspector) */
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(12, 18, 20, 0.78);
-      backdrop-filter: blur(4px);
-      z-index: 100;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: var(--space-md);
-    }
-    .modal-backdrop.open { display: flex; }
-    .modal-dialog {
-      background: var(--surface-container);
-      border: var(--rule);
-      border-radius: var(--rounded-md);
-      box-shadow: var(--shadow-2);
-      max-width: 960px;
-      width: 100%;
-      max-height: 88vh;
-      overflow-y: auto;
-      padding: var(--space-lg);
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-md);
-    }
-    .modal-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      border-bottom: var(--rule);
-      padding-bottom: var(--space-md);
-    }
-    .selected-row {
-      background: color-mix(in srgb, var(--primary) 12%, transparent);
-      outline: 1px solid var(--primary);
-    }
-
   </style>
 </head>
 <body>
@@ -2233,18 +2193,12 @@
               <h2 class="section-title">Avstemte Poster (${p.clusters.length} klynger) — ${escapeHtml(p.label)}</h2>
               <p class="text-muted" style="margin:0;">Full sporbarhet per Match ID. Bruk «Opphev avstemming» for å frigi transaksjoner tilbake til Åpne Poster med automatisk SHA-256 revisjonslogg.</p>
             </div>
-            <div style="display:flex; gap:var(--space-sm); align-items:center; flex-wrap:wrap;">
-              <div class="filter-pills">
-                ${rules.map((r) => `
-                  <button type="button" class="filter-pill ${appState.reconciledRuleFilter === r ? `is-active` : ``}" onclick="setReconciledRuleFilter('${r}')">
-                    ${r === `all` ? `Alle regler (${p.clusters.length})` : escapeHtml(r)}
-                  </button>
-                `).join(``)}
-              </div>
-              <button type="button" class="btn btn-secondary btn-sm" onclick="openRulesModal()" title="Åpne full regel- og toleransematrise">
-                <i data-lucide="sliders-horizontal" width="14" height="14" aria-hidden="true"></i>
-                <span>Regelmotor</span>
-              </button>
+            <div class="filter-pills">
+              ${rules.map((r) => `
+                <button type="button" class="filter-pill ${appState.reconciledRuleFilter === r ? `is-active` : ``}" onclick="setReconciledRuleFilter('${r}')">
+                  ${r === `all` ? `Alle regler (${p.clusters.length})` : escapeHtml(r)}
+                </button>
+              `).join(``)}
             </div>
           </div>
 
@@ -2283,7 +2237,7 @@
                             <i data-lucide="${isExpanded ? `chevron-up` : `chevron-down`}" width="14" height="14" aria-hidden="true"></i>
                           </button>
                         </td>
-                        <td><span class="status-chip ${chipCls}" onclick="openRulesModal('${c.rule}')" style="cursor:pointer;" title="Klikk for regel-inspeksjon">${escapeHtml(c.rule)} <i data-lucide="info" width="12" height="12" style="display:inline; vertical-align:middle; margin-left:3px;" aria-hidden="true"></i></span></td>
+                        <td><span class="status-chip ${chipCls}">${escapeHtml(c.rule)}</span></td>
                         <td>
                           <strong>${escapeHtml(c.desc)}</strong>
                           <div class="text-muted" style="font-size:0.78rem;">${c.bankIds.length} bank : ${c.erpIds.length} ERP${c.variance !== 0 ? ` · Avvik ${formatNOK(c.variance)}` : ``}</div>
@@ -3167,161 +3121,7 @@ ${voucherXml || `    <!-- Ingen bilag i utkast/bokført ennå -->`}
       showToast(`Lastet ned ${payload.filename}.`, `positive`);
     }
 
-    async 
-    // =========================================================================
-    // ADRA MATCHER RULES CATALOG & RULE INSPECTOR MODAL
-    // =========================================================================
-    const RULES_CATALOG = [
-      {
-        code: `R-01`,
-        name: `Eksakt KID & Beløp (1:1)`,
-        mode: `Deterministisk`,
-        dateTolerance: `0 dager`,
-        amountTolerance: `0,00 kr`,
-        criteria: `Eksakt samsvar på 14-sifret KID-referanse og nettobeløp mellom DNB Bankfeed og Kundereskontro.`,
-        baselineCount: 842,
-        baselineVolume: 18450000
-      },
-      {
-        code: `R-02`,
-        name: `Referanse & Bank-Float (±3d)`,
-        mode: `Heuristisk toleranse`,
-        dateTolerance: `±3 dager`,
-        amountTolerance: `±1,00 kr`,
-        criteria: `Matcher faktura-/bilagsnummer mot banktransaksjon med clearingforsinkelse inntil 3 virkedager.`,
-        baselineCount: 245,
-        baselineVolume: 6120000
-      },
-      {
-        code: `R-03`,
-        name: `1:Mange Gateway Batch (Regex)`,
-        mode: `Multi-way Regex`,
-        dateTolerance: `±2 dager`,
-        amountTolerance: `±2,5% gebyrbånd`,
-        criteria: `Parser Nets/Adyen batch-ID via regex og aggregerer underliggende ordrer/fakturaer med automatisk gebyrkontroll.`,
-        baselineCount: 112,
-        baselineVolume: 4890000
-      },
-      {
-        code: `R-04`,
-        name: `M:M Konsernavregning Valuta (Agio)`,
-        mode: `Multi-valuta netting`,
-        dateTolerance: `±5 dager`,
-        amountTolerance: `Valutasvingning`,
-        criteria: `Aggregerer konsernmellomregning i GBP/EUR mot oppgjør i NOK, automatisk agio/disagio-bilag (8060/8160).`,
-        baselineCount: 38,
-        baselineVolume: 8940000
-      },
-      {
-        code: `R-05`,
-        name: `Fuzzy Leverandør & Beløp`,
-        mode: `Heuristisk tekstlikhet`,
-        dateTolerance: `±2 dager`,
-        amountTolerance: `0,00 kr`,
-        criteria: `Levenshtein-distanse > 85% på leverandørnavn kombinert med eksakt beløpssamsvar.`,
-        baselineCount: 19,
-        baselineVolume: 430000
-      },
-      {
-        code: `R-MAN`,
-        name: `Manuell Controller-avstemming`,
-        mode: `Human-in-the-Loop`,
-        dateTolerance: `Valgfri`,
-        amountTolerance: `Null-delta (0,00 kr)`,
-        criteria: `Manuell sammenslåing av bank- og reskontrolinjer utført av autorisert regnskapsfører med begrunnelse.`,
-        baselineCount: 12,
-        baselineVolume: 210000
-      },
-      {
-        code: `R-AI-AGENT`,
-        name: `AI-Agent Foreslått Avstemming`,
-        mode: `Autonom Agent + HITL`,
-        dateTolerance: `Dynamisk`,
-        amountTolerance: `Avviksforklaring`,
-        criteria: `Agentisk resonnering på fritekst/notater, delbetalinger, rabatter og uautorisert overtid med foreslått korreksjonsbilag.`,
-        baselineCount: 8,
-        baselineVolume: 512000
-      }
-    ];
-
-    function openRulesModal(highlightRuleCode) {
-      const backdrop = document.getElementById(`modal-backdrop`);
-      const kicker = document.getElementById(`modal-kicker`);
-      const title = document.getElementById(`modal-title`);
-      const body = document.getElementById(`modal-body`);
-      if (!backdrop || !body) return;
-
-      if (kicker) kicker.textContent = `Adra Matcher v4.2 — Regelhierarki & Toleransematrise`;
-      if (title) title.textContent = highlightRuleCode ? `Regel-inspeksjon: ${highlightRuleCode}` : `Regel-inspeksjon & Automatiseringsstatistikk`;
-
-      const p = getPeriod();
-      const rec = p ? p.clusters : [];
-      const totalBaseline = RULES_CATALOG.reduce((a, r) => a + r.baselineCount, 0) + rec.length;
-
-      const rowsHtml = RULES_CATALOG.map((r) => {
-        const sessionMatched = rec.filter((c) => c.rule === r.code);
-        const count = r.baselineCount + sessionMatched.length;
-        const vol = r.baselineVolume + sessionMatched.reduce((a, c) => a + Math.abs(c.bankTotal), 0);
-        const pct = ((count / Math.max(1, totalBaseline)) * 100).toFixed(1).replace(`.`, `,`);
-        const isHl = highlightRuleCode && (r.code === highlightRuleCode || highlightRuleCode.startsWith(r.code));
-
-        return `
-          <tr class="${isHl ? `selected-row` : ``}">
-            <td><span class="status-chip chip-cyan" style="font-weight:600;">${r.code}</span></td>
-            <td><strong>${r.name}</strong><div style="font-size: 0.8rem; color: var(--text-muted); margin-top:2px;">${r.criteria}</div></td>
-            <td class="tabular">${r.mode}</td>
-            <td class="tabular">${r.dateTolerance}</td>
-            <td class="tabular">${r.amountTolerance}</td>
-            <td class="num tabular"><strong>${count}</strong></td>
-            <td class="num tabular">${formatNOK(vol)}</td>
-            <td class="num tabular" style="font-weight:600;">${pct} %</td>
-          </tr>
-        `;
-      }).join(``);
-
-      body.innerHTML = `
-        <div class="stack-md">
-          <p class="text-muted" style="margin:0;">
-            Hierarkisk regelstige for avstemmingsmotoren (R-01 til R-AI). Transaksjoner behandles sekvensielt fra strengeste deterministiske kriterium (1:1 eksakt KID) til agentiske forslag.
-          </p>
-          <div class="table-scroll" style="max-height: 480px;">
-            <table>
-              <thead>
-                <tr>
-                  <th>Regel</th>
-                  <th>Beskrivelse &amp; Kriterium</th>
-                  <th>Metode</th>
-                  <th>Dato-tol.</th>
-                  <th>Beløps-tol.</th>
-                  <th class="num">Antall</th>
-                  <th class="num">Volum (NOK)</th>
-                  <th class="num">Andel</th>
-                </tr>
-              </thead>
-              <tbody>${rowsHtml}</tbody>
-            </table>
-          </div>
-          <div class="well" style="font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; gap: var(--space-md); flex-wrap: wrap;">
-            <span>Aktiv motor: <strong>Adra Multi-Way Combinatorial Matcher v4.2</strong> (Subset-Sum + NLP Tokenizer)</span>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="closeModal()">Lukk inspeksjon</button>
-          </div>
-        </div>
-      `;
-
-      backdrop.classList.add(`open`);
-      if (window.lucide) window.lucide.createIcons();
-    }
-
-    function closeModal() {
-      const backdrop = document.getElementById(`modal-backdrop`);
-      if (backdrop) backdrop.classList.remove(`open`);
-    }
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeModal();
-    });
-
-    function verifyAuditChain() {
+    async function verifyAuditChain() {
       let valid = true;
       let prev = `0000000000000000000000000000000000000000000000000000000000000000`;
       for (const entry of appState.auditLog) {
@@ -3347,20 +3147,5 @@ ${voucherXml || `    <!-- Ingen bilag i utkast/bokført ennå -->`}
     // Boot
     document.addEventListener(`DOMContentLoaded`, initApp);
   </script>
-
-  <!-- ADRA RULE INSPECTOR MODAL -->
-  <div class="modal-backdrop" id="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-title" onclick="if(event.target===this)closeModal()">
-    <div class="modal-dialog">
-      <div class="modal-head">
-        <div>
-          <span class="data-label" id="modal-kicker">Adra Matcher v4.2 · Regelhierarki</span>
-          <h3 class="panel-title" id="modal-title" style="margin:0;">Regel-inspeksjon &amp; Automatiseringsstatistikk</h3>
-        </div>
-        <button type="button" class="btn btn-secondary btn-sm" onclick="closeModal()">Lukk</button>
-      </div>
-      <div id="modal-body"></div>
-    </div>
-  </div>
-
 </body>
 </html>
