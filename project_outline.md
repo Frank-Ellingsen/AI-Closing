@@ -3729,3 +3729,161 @@ $$\text{Debet } (16\ 127\ 100 + 13\ 500 + 59\ 400) = \text{Kredit } (16\ 200\ 00
 1. 1:Mange Merchant & Bankoppgjør med Skjulte Gebyrer (1:M m/ Gebyrsplitt)Casen: En samlet innbetaling fra en oppgjørssentral (f.eks. Nets, Adyen eller en konsernbank-pool) på 89 512,50 NOK.Hvorfor det er vanskelig:Beskrivelsen i bank er støyete: "CR-SETTL-ADYEN-88491-OCT26 INCL 2% DEDUCT".Den dekker 4 ulike prosjektfakturaer på til sammen 91 550,00 NOK.Differansen på 2 037,50 NOK er et variabelt transaksjonsgebyr som aldri var forhåndsbokført i kundereskontro.AI-løsningen:RegexAgent trekker ut batch-ID 88491 og dirigerer søket.Kombinatorisk subset-sum identifiserer de 4 fakturaene.Systemet genererer et 3-linjers bilag: lukker reskontro mot kundene, fører gebyret på Konto 7770, og oppnår $\Delta = 0,00$ mot bankinnskuddet.2. Multi-Way 4-Parts Avstemming i Verftsprosjekt (PO vs. Varemottak vs. Faktura vs. Endringsordre)Casen: Subsea-manifoldpakke (PRJ-2026-001.03.FAB).Hvorfor det er vanskelig:Innkjøpsordre (PO-8809): Autorisert til 670 000 NOK for manifold + 80 000 NOK for overflatebehandling.Varemottak (GRN): Manifold fysisk godkjent ved verftet, men overflatebehandling ble avvist i porten pga. kvalitetsfeil.Leverandørfaktura: Lyder på 895 000 NOK (inkludert 145 000 NOK i overtid/ekstra sveising som verftsformannen avtalte muntlig uten godkjent endringsordre/CCO).AI-løsningen:Systemet splitter posten deterministisk: godkjenner og avstemmer de fysisk leverte 670 000 NOK.Etterforskningsagenten identifiserer at 145 000 NOK mangler formell CCO, genererer et påløpt kostnadsbilag for den godkjente delen, og oppretter automatisk et avviksnotat til prosjektlederen.3. Mange:Mange Valuta- og Konsernavregning med Bank Float (M:M Intercompany Netting)Casen: Oslo HQ fakturerer det britiske datterselskapet i Aberdeen løpende gjennom måneden i GBP for ingeniørtimer.Hvorfor det er vanskelig:12 separate fakturaer i GBP er bokført i Oslo til ulike dagskurser (totalt 1 750 420 NOK).Aberdeen betaler ett samlet nettingoppgjør på £125 000.Pengene ankommer den norske valutakontoen 4 virkedager senere med en faktisk kurs som gir 1 724 110 NOK.AI-løsningen:Systemet gjenkjenner at transaksjonsvalutaen GBP stemmer nøyaktig (£125 000 = £125 000) på tvers av en 5-dagers tidsforsinkelse (float window).Det lukker konsernfordringen i reskontro og genererer automatisk agio/disagio-posteringen på 26 310 NOK mot Konto 8160 (Valutatap).4. Noisy OCR / Scannet Remisse med Kontantrabatt (M:M med Ufullstendig Fradrag)Casen: En underleverandør sender en ustrukturert PDF/scannet avregning der to innbetalinger dekker tre fakturaer minus en kreditnota for defekte flenser, fratrukket en 2 % kontantrabatt.Hvorfor det er vanskelig:Delvise innbetalinger på ulike datoer.OCR-støy gjør at referanser kuttes eller skrives som "INV90412/13 LESS CR".AI-løsningen:Multimodal OCR + regex tokeniserer fakturanumrene og kreditnotaer.Bipartitt matching beregner kontantrabatten nøyaktig mot Konto 8150, og isolerer eventuelle uberettigede leverandørtrekk som et uavklart restbeløp.Hva dette betyr for prosjektet dittDette gjør at prosjektet ditt demonstrerer nøyaktig hva moderne AI kan utrette utover det du oppnådde i 2006:Ikke bare 1:1 faste regler, men kombinatorisk oppløsning av komplekse samleposter.Ustrukturerte data: Leser støyete banktekster og remisser direkte uten manuell vask.Selvbalanserende regnskapslogikk: Finner gebyrene, valutatapene og overskridelsene, og genererer ferdig balanserte bilag og autoreverseringer.
 
 1. Hva er Pre-Match vs. Final Match?FaseHva som skjerToleranser & ReglerHåndtering i systemetPre-Match (Staging / Kandidat-identifisering)Systemet kjører brede søk for å finne mulige kandidat-par eller klynger. Her brukes Regex-agenter, dato-vinduer (± 3–5 dager for bank-float), KID-stripping, og delmengdesummer for 1:M/M:M.Fleksible / probabilistiske: Tillater mindre differanser (gebyrer, agio), fuzzy navnematching på leverandør og åpne tidsvinduer.Postene bindes ikke permanent. De markeres som «Suggested Match» med en tillitsscore (f.eks. 94 %), og legges i arbeidsbenken for controlleren eller klargjøres for endelig deterministisk verifisering.Final Match (Hard Clearing / Ledger Freeze)Den ugjenkallelige avstemmingen og lukkingen av postene. Enten helautomatisk (for 100 % sikre treff) eller etter kontrollørens godkjenning (HITL).Strenge / deterministiske: Nøyaktig $\Delta = 0,00$ (eller formelt godkjent og postert gebyr/valutabilag).Postene fjernes fra åpne poster, tildeles en felles Match ID, og stemples inn i den uforanderlige SHA-256 revisjonsloggen.2. Hvordan dette løser de vanskelige casene våreNår du har komplekse 1:mange eller valutaavstemminger (som i subsea/EPC-caset vårt), fungerer to-trinns-prosessen slik:Eksempel: 1:Mange Merchant-oppgjør med gebyrPre-Match (AI & Regex):Bankposten på 89 512,50 NOK analyseres av RegexAgent som finner batch-ID 88491.Motoren finner 4 åpne fakturaer på totalt 91 550,00 NOK.Pre-match status: Klyngen flagges som SUGGESTED MATCH (1:4) med beregnet gebyr på 2 037,50 NOK (Konto 7770).Final Match (HITL & Bokføring):Controlleren ser forslaget i Adra-arbeidsbenken (Side A vs. Side B).Controlleren klikker «Godkjenn & Bokfør Bilag».Korrigeringsbilaget postes, reskontro lukkes, og transaksjonen går til Final Match med 0,00 i restdifferanse.Eksempel: Multi-valuta Konsernavregning (GBP vs. NOK)Pre-Match:Innbetalingen på 1 724 110 NOK holdes mot de 12 åpne fakturaene på 1 750 420 NOK.Pre-match-regelen identifiserer at transaksjonsvalutaen GBP er identisk (£125 000 = £125 000) innenfor 5 dagers bank-float.Klyngen pares foreløpig som en foreslått match med valutatap (agio) på 26 310 NOK.Final Match:Agio-bilaget genereres mot Konto 8160.Når bilaget er validert, fryses postene i Final Match.3. Fordelen for revisjon og internkontrollVed å skille disse to fasene oppnår du det beste fra to verdener:Høy hastighet: 90–95 % av rene 1:1-poster går direkte gjennom Pre-Match og rett til Final Match automatisk i nattkjøringen.Ingen feilavstemminger: Komplekse poster med gebyrer, valuta eller avvik tvinges gjennom Pre-Match staging, slik at ingen poster lukkes i hovedboken før en controller har signert eller reglene for gebyrisolasjon er matematisk oppfylt.
+
+
+. Regelhierarkiet i motoren (Prioritert rekkefølge)
+Transaksjonene kjøres gjennom en definert regelstige fra de strengeste til de mer fleksible reglene:
+Regel-ID
+Regelnavn
+Logikk & Kriterier
+Type
+Toleranse
+R-01
+1:1 Eksakt KID/OCR & Beløp
+Matcher bankkonto mot kundereskontro på eksakt KID og ørebeløp.
+Auto
+0 dager / 0,00 kr
+R-02
+1:1 Referanse & Beløp m/ Float
+Matcher fakturanummer/PO i fritekst mot reskontro innenfor dato-vindu.
+Auto
+±3 dager / 0,00 kr
+R-03
+1:M Samleoppgjør m/ Gebyrsplitt
+Regex trekker ut batch-ID; delmengdesum finner fakturaene og isolerer gebyr (Konto 7770).
+Auto / Pre-match
+±5 dager / Gebyr < 3 500 kr
+R-04
+M:M Konsernavregning GBP/NOK
+Matcher på tvers av transaksjonsvaluta GBP; isolerer agio/disagio (Konto 8160).
+Pre-match
+±5 dager / Agio beregnes
+R-05
+Fuzzy Leverandør & Beløp
+Levenshtein-avstand > 85 % på leverandørnavn + eksakt beløp.
+Staged
+0 dager / 0,00 kr
+R-MAN
+Manuell Brukeravstemming
+Bruker merker poster manuelt i Åpne poster og klikker «Avstem».
+Manuell
+Brukerskjønn (krever signatur)
+2. Hvordan dette synliggjøres i brukergrensesnittet (UI)
+A. Direkte i listen over «Avstemte Poster» (Reconciled)
+Tabellen har en egen kolonne «Anvendt Regel» med fargekodede badges:
+[R-01: Auto KID] (Grønn)
+[R-02: Auto Ref ±3d] (Grønn)
+[R-03: 1:M Regex Batch] (Blå)
+[R-04: M:M Valuta Agio] (Lilla)
+[R-MAN: Frank Ellingsen] (Oransje)
+Du kan sortere og filtrere direkte på denne kolonnen for å se f.eks. kun manuelle avstemminger eller kun de som ble tatt av 1:M-motoren.
+B. Regel-inspeksjon i transaksjonsdetaljene (Inspector Modal)
+Når du klikker på en avstemt linje eller dens Match ID (f.eks. MID-2026-10-88491), åpnes en detaljfane som viser:
+Hvilken regel som slo til: Navn, versjon og beskrivelse.
+Hvilke parametere som matchet:
+Referansetoken funnet: 88491
+Datodifferanse: +1 virkedag (innenfor terskel på 5 dager).
+Beregnet gebyr/differanse: 2 037,50 NOK ført mot Konto 7770.
+Tidsstempel & Agent/Bruker: F.eks. «Utført av RegexAgent v2.0 under nattkjøring kl. 06:02:14» eller «Manuelt godkjent av Frank Ellingsen kl. 08:15».
+C. Egen dashboard-visning for «Regelstatistikk» (Rule Performance)
+Et eget kort eller diagram som viser automatiseringsgrad per regel:
+R-01 (KID): 62 % av volumet
+R-02 (Ref m/ float): 21 % av volumet
+R-03 (1:M Batch): 11 % av volumet
+R-04 (Valuta Agio): 4 % av volumet
+R-MAN (Manuell): 2 % av volumet (avvikshåndtering)
+3. I datamodellen og revisjonssporet
+I kildekoden (models.py) og i audit_trail.jsonl lagres dette direkte på hver avstemt klynge:
+{
+  "match_id": "MID-2026-10-88491",
+  "rule_id": "R-03",
+  "rule_name": "1:M Merchant Batch med Gebyrsplitt",
+  "rule_criteria": {
+    "extracted_token": "88491",
+    "fee_account": "7770",
+    "fee_amount_nok": 2037.50,
+    "confidence_score": 0.94
+  },
+  "matched_by": "CLOSE-AI RegexAgent",
+  "approved_by": "Frank Ellingsen",
+  "timestamp": "2026-10-31T08:15:22Z",
+  "sha256_hash": "a4f89b...3c1"
+}
+. Regelhierarkiet i motoren (Prioritert rekkefølge)
+Transaksjonene kjøres gjennom en definert regelstige fra de strengeste til de mer fleksible reglene:
+Regel-ID
+Regelnavn
+Logikk & Kriterier
+Type
+Toleranse
+R-01
+1:1 Eksakt KID/OCR & Beløp
+Matcher bankkonto mot kundereskontro på eksakt KID og ørebeløp.
+Auto
+0 dager / 0,00 kr
+R-02
+1:1 Referanse & Beløp m/ Float
+Matcher fakturanummer/PO i fritekst mot reskontro innenfor dato-vindu.
+Auto
+±3 dager / 0,00 kr
+R-03
+1:M Samleoppgjør m/ Gebyrsplitt
+Regex trekker ut batch-ID; delmengdesum finner fakturaene og isolerer gebyr (Konto 7770).
+Auto / Pre-match
+±5 dager / Gebyr < 3 500 kr
+R-04
+M:M Konsernavregning GBP/NOK
+Matcher på tvers av transaksjonsvaluta GBP; isolerer agio/disagio (Konto 8160).
+Pre-match
+±5 dager / Agio beregnes
+R-05
+Fuzzy Leverandør & Beløp
+Levenshtein-avstand > 85 % på leverandørnavn + eksakt beløp.
+Staged
+0 dager / 0,00 kr
+R-MAN
+Manuell Brukeravstemming
+Bruker merker poster manuelt i Åpne poster og klikker «Avstem».
+Manuell
+Brukerskjønn (krever signatur)
+2. Hvordan dette synliggjøres i brukergrensesnittet (UI)
+A. Direkte i listen over «Avstemte Poster» (Reconciled)
+Tabellen har en egen kolonne «Anvendt Regel» med fargekodede badges:
+[R-01: Auto KID] (Grønn)
+[R-02: Auto Ref ±3d] (Grønn)
+[R-03: 1:M Regex Batch] (Blå)
+[R-04: M:M Valuta Agio] (Lilla)
+[R-MAN: Frank Ellingsen] (Oransje)
+Du kan sortere og filtrere direkte på denne kolonnen for å se f.eks. kun manuelle avstemminger eller kun de som ble tatt av 1:M-motoren.
+B. Regel-inspeksjon i transaksjonsdetaljene (Inspector Modal)
+Når du klikker på en avstemt linje eller dens Match ID (f.eks. MID-2026-10-88491), åpnes en detaljfane som viser:
+Hvilken regel som slo til: Navn, versjon og beskrivelse.
+Hvilke parametere som matchet:
+Referansetoken funnet: 88491
+Datodifferanse: +1 virkedag (innenfor terskel på 5 dager).
+Beregnet gebyr/differanse: 2 037,50 NOK ført mot Konto 7770.
+Tidsstempel & Agent/Bruker: F.eks. «Utført av RegexAgent v2.0 under nattkjøring kl. 06:02:14» eller «Manuelt godkjent av Frank Ellingsen kl. 08:15».
+C. Egen dashboard-visning for «Regelstatistikk» (Rule Performance)
+Et eget kort eller diagram som viser automatiseringsgrad per regel:
+R-01 (KID): 62 % av volumet
+R-02 (Ref m/ float): 21 % av volumet
+R-03 (1:M Batch): 11 % av volumet
+R-04 (Valuta Agio): 4 % av volumet
+R-MAN (Manuell): 2 % av volumet (avvikshåndtering)
+3. I datamodellen og revisjonssporet
+I kildekoden (models.py) og i audit_trail.jsonl lagres dette direkte på hver avstemt klynge:
+{
+  "match_id": "MID-2026-10-88491",
+  "rule_id": "R-03",
+  "rule_name": "1:M Merchant Batch med Gebyrsplitt",
+  "rule_criteria": {
+    "extracted_token": "88491",
+    "fee_account": "7770",
+    "fee_amount_nok": 2037.50,
+    "confidence_score": 0.94
+  },
+  "matched_by": "CLOSE-AI RegexAgent",
+  "approved_by": "Frank Ellingsen",
+  "timestamp": "2026-10-31T08:15:22Z",
+  "sha256_hash": "a4f89b...3c1"
+}
