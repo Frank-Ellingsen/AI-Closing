@@ -1,0 +1,8 @@
+duckdb
+numpy
+pandas
+pyarrow
+PyYAML
+requests
+scikit-learn
+streamlit
