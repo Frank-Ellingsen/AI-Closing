@@ -1,0 +1,82 @@
+# ==============================================================================
+# CLOSE-AI .gitignore
+# ==============================================================================
+
+# 1. Environment Variables & Secrets (CRITICAL)
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# 2. Python Bytecode, Caches & Virtual Environments
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+env/
+.venv/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# 3. Financial Data & Lakehouse Storage
+# (Never commit actual ERP transaction dumps or DuckDB database files)
+data/raw/*
+data/lakehouse/*
+*.parquet
+*.duckdb
+*.db
+*.sqlite3
+
+# Keep the folder structure tracked while ignoring contents
+!data/raw/.gitkeep
+!data/lakehouse/.gitkeep
+
+# 4. Audit Logs
+# In production, audit logs are written to an immutable append-only volume or S3/GCS.
+# Ignore local development audit runs:
+data/audit_logs/*.jsonl
+!data/audit_logs/.gitkeep
+audit_log_*.json
+erp_data_2026_10/
+
+# 5. Testing & Code Quality Caches
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+.mypy_cache/
+.ruff_cache/
+
+# 6. Streamlit & Web App Local State
+.streamlit/secrets.toml
+ui/static/downloads/*
+
+# 7. IDE, Editor & OS Artifacts
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 8. Docker & Ollama Local Bind Mounts
+ollama_models/

@@ -1,0 +1,68 @@
+{
+  "system": "CLOSE-AI Deterministic Rules Engine",
+  "version": "2.1.0",
+  "entity": "Nordic Engineering Projects AS",
+  "period": "2026-10",
+  "rules": [
+    {
+      "rule_id": "CTRL-GL-01",
+      "rule_name": "Zero Trial Balance Imbalance",
+      "domain": "GENERAL_LEDGER",
+      "severity": "BLOCKER",
+      "weight": 25,
+      "description": "Ensure total general ledger debits equal credits exactly (Delta = 0.00 NOK). Any imbalance halts period close.",
+      "parameterized_sql": "WITH tb AS (SELECT ROUND(ABS(SUM(debit_nok) - SUM(credit_nok)), 2) AS imbalance, ROUND(SUM(debit_nok), 2) AS total_debit, ROUND(SUM(credit_nok), 2) AS total_credit FROM gl_journal_lines) SELECT 'CTRL-GL-01' AS rule_id, 'Zero Trial Balance Imbalance' AS rule_name, CASE WHEN imbalance = 0.00 THEN 'PASS' ELSE 'FAIL' END AS status, 'BLOCKER' AS severity, imbalance AS discrepancy_amount_nok, CASE WHEN imbalance = 0.00 THEN 0 ELSE 1 END AS affected_count, json_object('total_debit', total_debit, 'total_credit', total_credit, 'imbalance', imbalance) AS details_json FROM tb;",
+      "remediation_action": "Identify unbalanced journal entries and post offsetting adjusting leg."
+    },
+    {
+      "rule_id": "CTRL-GL-02",
+      "rule_name": "Off-Hours & Weekend Manual Postings",
+      "domain": "GENERAL_LEDGER",
+      "severity": "HIGH",
+      "weight": 15,
+      "description": "Flags high-risk manual journal vouchers posted on weekends or outside normal working hours without controller pre-approval.",
+      "parameterized_sql": "WITH flagged_manual AS (SELECT e.entry_id, e.posting_date, e.created_by, ROUND(SUM(l.debit_nok), 2) AS entry_total_nok FROM gl_journal_entries e JOIN gl_journal_lines l ON e.entry_id = l.entry_id WHERE e.source_module = 'MANUAL_GL' AND (EXTRACT(DOW FROM e.posting_date) IN (0, 6)) GROUP BY e.entry_id, e.posting_date, e.created_by) SELECT 'CTRL-GL-02' AS rule_id, 'Off-Hours & Weekend Manual Postings' AS rule_name, CASE WHEN COUNT(*) = 0 THEN 'PASS' WHEN MAX(entry_total_nok) > 100000 THEN 'FAIL' ELSE 'WARNING' END AS status, 'HIGH' AS severity, COALESCE(SUM(entry_total_nok), 0.0) AS discrepancy_amount_nok, COUNT(*) AS affected_count, json_group_array(json_object('entry_id', entry_id, 'date', posting_date, 'user', created_by, 'amount_nok', entry_total_nok)) AS details_json FROM flagged_manual;",
+      "remediation_action": "Audit authorization record, substantiate business purpose, and obtain Lead Controller sign-off."
+    },
+    {
+      "rule_id": "CTRL-AP-01",
+      "rule_name": "Potential Duplicate Vendor Invoices",
+      "domain": "ACCOUNTS_PAYABLE",
+      "severity": "HIGH",
+      "weight": 15,
+      "description": "Detects potential duplicate payments to trade creditors matching on vendor, exact amount, and 14-day date proximity.",
+      "parameterized_sql": "WITH duplicate_invoices AS (SELECT a.invoice_id AS invoice_a, b.invoice_id AS invoice_b, a.vendor_id, a.vendor_name, a.amount_nok, a.invoice_date AS date_a, b.invoice_date AS date_b, ABS(DATEDIFF('day', a.invoice_date, b.invoice_date)) AS day_difference FROM vendor_invoices a JOIN vendor_invoices b ON a.vendor_id = b.vendor_id AND a.invoice_id < b.invoice_id AND ABS(a.amount_nok - b.amount_nok) <= 0.01 AND ABS(DATEDIFF('day', a.invoice_date, b.invoice_date)) <= 14) SELECT 'CTRL-AP-01' AS rule_id, 'Potential Duplicate Vendor Invoices' AS rule_name, CASE WHEN COUNT(*) = 0 THEN 'PASS' ELSE 'FAIL' END AS status, 'HIGH' AS severity, COALESCE(SUM(amount_nok), 0.0) AS discrepancy_amount_nok, COUNT(*) AS affected_count, json_group_array(json_object('invoice_pair', invoice_a || ' / ' || invoice_b, 'vendor', vendor_name, 'amount_nok', amount_nok, 'day_gap', day_difference)) AS details_json FROM duplicate_invoices;",
+      "remediation_action": "Place payment block on secondary invoice and initiate vendor statement reconciliation."
+    },
+    {
+      "rule_id": "CTRL-AP-02",
+      "rule_name": "Uninvoiced Goods Received (GR/IR Accruals)",
+      "domain": "PROCUREMENT_AP",
+      "severity": "HIGH",
+      "weight": 15,
+      "description": "Verifies that yard goods receipts with confirmed delivery have corresponding vendor invoices or close accruals.",
+      "parameterized_sql": "WITH uninvoiced_deliveries AS (SELECT l.po_line_id, l.po_number, l.wbs_code, l.total_amount_nok, h.vendor_id, h.order_date FROM po_lines l JOIN purchase_orders h ON l.po_number = h.po_number LEFT JOIN vendor_invoices i ON l.po_number = i.po_number WHERE l.delivery_status = 'DELIVERED' AND l.received_qty > 0 AND i.invoice_id IS NULL) SELECT 'CTRL-AP-02' AS rule_id, 'Uninvoiced Goods Received' AS rule_name, CASE WHEN COALESCE(SUM(total_amount_nok), 0) < 25000 THEN 'PASS' WHEN SUM(total_amount_nok) <= 250000 THEN 'WARNING' ELSE 'FAIL' END AS status, 'HIGH' AS severity, COALESCE(SUM(total_amount_nok), 0.0) AS discrepancy_amount_nok, COUNT(*) AS affected_count, json_group_array(json_object('po_line_id', po_line_id, 'po_number', po_number, 'wbs_code', wbs_code, 'unbilled_nok', total_amount_nok)) AS details_json FROM uninvoiced_deliveries;",
+      "remediation_action": "Post period-end reversing accrual (Dr 4100 / Cr 2440) for delivered milestones."
+    },
+    {
+      "rule_id": "CTRL-AP-03",
+      "rule_name": "PO Tolerance Overrun (>10%)",
+      "domain": "PROCUREMENT_AP",
+      "severity": "HIGH",
+      "weight": 15,
+      "description": "Catches vendor invoices exceeding authorized purchase commitments by more than 10.0% without an approved change order.",
+      "parameterized_sql": "WITH po_variance AS (SELECT i.invoice_id, i.po_number, i.vendor_name, i.amount_nok AS invoice_amount, l.total_amount_nok AS po_amount, ROUND((i.amount_nok - l.total_amount_nok), 2) AS variance_nok, ROUND(((i.amount_nok - l.total_amount_nok) / l.total_amount_nok) * 100, 2) AS variance_pct FROM vendor_invoices i JOIN po_lines l ON i.po_number = l.po_number WHERE i.amount_nok > l.total_amount_nok AND ((i.amount_nok - l.total_amount_nok) / l.total_amount_nok) > 0.10) SELECT 'CTRL-AP-03' AS rule_id, 'PO Price Tolerance Overrun' AS rule_name, CASE WHEN COUNT(*) = 0 THEN 'PASS' ELSE 'FAIL' END AS status, 'HIGH' AS severity, COALESCE(SUM(variance_nok), 0.0) AS discrepancy_amount_nok, COUNT(*) AS affected_count, json_group_array(json_object('invoice_id', invoice_id, 'po_number', po_number, 'vendor', vendor_name, 'variance_nok', variance_nok, 'variance_pct', variance_pct)) AS details_json FROM po_variance;",
+      "remediation_action": "Hold unbudgeted price variance, accrue authorized delivery, and route dispute ticket to Project Manager."
+    },
+    {
+      "rule_id": "CTRL-PRJ-03",
+      "rule_name": "Untagged Project Direct Costs",
+      "domain": "PROJECT_ACCOUNTING",
+      "severity": "HIGH",
+      "weight": 15,
+      "description": "Identifies direct project cost postings (Accounts 4000-4999) lacking mandatory Project ID or WBS Element codes.",
+      "parameterized_sql": "WITH untagged_costs AS (SELECT entry_id, line_id, account_number, debit_nok, cost_center, line_description FROM gl_journal_lines WHERE account_number BETWEEN '4000' AND '4999' AND (project_id IS NULL OR wbs_code IS NULL)) SELECT 'CTRL-PRJ-03' AS rule_id, 'Untagged Project Direct Costs' AS rule_name, CASE WHEN COUNT(*) = 0 THEN 'PASS' ELSE 'FAIL' END AS status, 'HIGH' AS severity, COALESCE(SUM(debit_nok), 0.0) AS discrepancy_amount_nok, COUNT(*) AS affected_count, json_group_array(json_object('line_id', line_id, 'account', account_number, 'amount_nok', debit_nok, 'description', line_description)) AS details_json FROM untagged_costs;",
+      "remediation_action": "Reclassify direct expenses to active WBS deliverables to preserve project cost-at-completion baseline."
+    }
+  ]
+}

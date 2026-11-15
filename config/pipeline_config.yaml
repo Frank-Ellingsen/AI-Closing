@@ -1,0 +1,27 @@
+# pipeline_config.yaml
+pipeline_version: "2.1.0"
+fiscal_entity: "Nordic Engineering Projects AS"
+organization_number: "NO 984 521 890 MVA"
+headquarters: "Stavanger / Oslo, Norway"
+functional_currency: "NOK"
+fiscal_period: "2026-10"
+target_close_workday: "WD+4"
+current_workday: "WD+2"
+lakehouse_root: "data/lakehouse"
+
+data_contracts:
+  gl_journal_lines:
+    required_keys: ["entry_id", "line_id", "account_number", "debit_nok", "credit_nok"]
+    numeric_precision: 4
+    allow_null_dimensions:
+      direct_cost_accounts: false
+      balance_sheet_accounts: true
+
+currency_normalization:
+  fx_rates_source: "silver/dim_fx_rates.parquet"
+  supported_currencies: ["NOK", "EUR", "USD", "GBP"]
+  fixed_october_2026_rates:
+    NOK: 1.0000
+    EUR: 11.6500
+    USD: 10.8200
+    GBP: 13.7500
