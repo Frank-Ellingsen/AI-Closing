@@ -1,0 +1,2624 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="artifact-type" content="dashboard">
+  <meta name="design-style" content="aurora">
+  <title>CLOSE-AI · Kontrollrom for Månedsavslutning &amp; Autonom Avstemmingsmotor</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@1.43.0/dist/umd/lucide.min.js"></script>
+  <style>
+    :root {
+      color-scheme: dark;
+
+      /* Aurora Scandinavian Dark Slate & Navy Palette */
+      --background: #0a1019;
+      --surface-container-low: #0f1824;
+      --surface-container: #142030;
+      --surface-container-high: #1b2a3e;
+
+      /* Text */
+      --on-surface: #eef4f8;
+      --on-surface-variant: #9fb2c4;
+
+      /* Borders */
+      --outline: #384e66;
+      --outline-variant: #223246;
+
+      /* Accents */
+      --primary: #63c7d6;
+      --on-primary: #071318;
+      --primary-container: #163848;
+      --on-primary-container: #c7f0f7;
+      --secondary: #5d7882;
+      --tertiary: #34d399;
+      --on-tertiary: #051b14;
+      --error: #f27474;
+      --on-error: #1a0606;
+
+      /* Semantic */
+      --positive: #34d399;
+      --warning: #f0b44c;
+      --on-warning: #1c1304;
+      --focus: #63c7d6;
+
+      /* Data series */
+      --data-1: #63c7d6;
+      --data-2: #34d399;
+      --data-3: #f0b44c;
+      --data-4: #f27474;
+      --data-context: #415861;
+
+      /* Fonts */
+      --font-headline: 'Instrument Sans', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+      --font-label: 'Geist Mono', monospace;
+
+      /* Shape */
+      --rounded: 0.5rem;
+      --rounded-lg: 0.75rem;
+      --rounded-full: 9999px;
+
+      /* Style effects */
+      --hairline: 1px solid var(--outline-variant);
+      --hairline-strong: 1px solid var(--outline);
+      --panel-gradient: linear-gradient(180deg, #162334 0%, #0f1824 100%);
+      --panel-elevated: linear-gradient(180deg, #1b2a3e 0%, #142030 100%);
+      --heading-tracking: -0.025em;
+      --label-tracking: 0.06em;
+      --emerald-tint: color-mix(in srgb, var(--positive) 14%, transparent);
+      --emerald-border: color-mix(in srgb, var(--positive) 38%, transparent);
+      --amber-tint: color-mix(in srgb, var(--warning) 14%, transparent);
+      --amber-border: color-mix(in srgb, var(--warning) 40%, transparent);
+      --crimson-tint: color-mix(in srgb, var(--error) 14%, transparent);
+      --crimson-border: color-mix(in srgb, var(--error) 42%, transparent);
+      --cyan-tint: color-mix(in srgb, var(--primary) 13%, transparent);
+      --cyan-border: color-mix(in srgb, var(--primary) 38%, transparent);
+      --scrim: color-mix(in srgb, var(--background) 78%, transparent);
+
+      /* Type scale (Dashboard) */
+      --display-size: clamp(1.65rem, 1.3rem + 1.1vw, 2.15rem);
+      --headline-size: clamp(1.1875rem, 1.05rem + 0.45vw, 1.4rem);
+      --subhead-size: clamp(1rem, 0.95rem + 0.2vw, 1.125rem);
+      --body-size: clamp(0.9375rem, 0.9rem + 0.12vw, 0.98rem);
+      --label-size: 0.75rem;
+
+      /* Spacing scale */
+      --space-xs: 0.25rem;
+      --space-sm: 0.5rem;
+      --space-md: 1rem;
+      --space-lg: 1.5rem;
+      --space-xl: 2.5rem;
+      --space-2xl: 4rem;
+
+      /* Motion */
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+      --dur-micro: 120ms;
+      --dur-short: 220ms;
+      --dur-long: 420ms;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+      overflow-x: clip;
+      margin: 0;
+      padding: 0;
+      background-color: var(--background);
+      color: var(--on-surface);
+      font-family: var(--font-body);
+      font-size: var(--body-size);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    header { position: static !important; }
+
+    button, input, select, textarea {
+      font-family: inherit;
+      font-size: inherit;
+      color: inherit;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: 2px;
+    }
+
+    .page-grid {
+      display: grid;
+      gap: var(--space-lg);
+      padding: var(--space-lg);
+      max-width: 1360px;
+      margin: 0 auto;
+    }
+    .page-grid * { min-width: 0; }
+
+    /* Header */
+    .control-header {
+      background: var(--panel-gradient);
+      border: var(--hairline);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-lg);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: var(--space-lg);
+    }
+
+    .header-title-group {
+      max-width: 72ch;
+    }
+
+    .eyebrow-mono {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      letter-spacing: var(--label-tracking);
+      text-transform: uppercase;
+      color: var(--primary);
+      margin-bottom: var(--space-xs);
+    }
+
+    h1.page-title {
+      font-family: var(--font-headline);
+      font-size: var(--display-size);
+      font-weight: 600;
+      letter-spacing: var(--heading-tracking);
+      line-height: 1.12;
+      margin: 0 0 var(--space-xs) 0;
+      color: var(--on-surface);
+    }
+
+    .page-subtitle {
+      margin: 0;
+      color: var(--on-surface-variant);
+      font-size: var(--body-size);
+      max-width: 68ch;
+    }
+
+    .header-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .standards-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-top: var(--space-md);
+      padding-top: var(--space-md);
+      border-top: var(--hairline);
+      width: 100%;
+    }
+
+    .standards-label {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      letter-spacing: var(--label-tracking);
+      text-transform: uppercase;
+      color: var(--on-surface-variant);
+      margin-right: var(--space-xs);
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+      min-height: 44px;
+      padding: 0 var(--space-md);
+      border-radius: var(--rounded);
+      font-family: var(--font-headline);
+      font-weight: 600;
+      font-size: 0.875rem;
+      cursor: pointer;
+      border: var(--hairline-strong);
+      background-color: var(--surface-container);
+      color: var(--on-surface);
+      transition: background-color var(--dur-micro) var(--ease-out),
+                  box-shadow var(--dur-micro) var(--ease-out),
+                  transform var(--dur-micro) var(--ease-out),
+                  opacity var(--dur-micro) var(--ease-out);
+      white-space: nowrap;
+    }
+
+    .btn:hover:not(:disabled) {
+      background-color: var(--surface-container-high);
+      box-shadow: 0 0 0 1px var(--outline);
+    }
+
+    .btn:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: var(--on-primary);
+      border-color: var(--primary);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: color-mix(in srgb, var(--primary) 88%, var(--on-surface));
+      box-shadow: 0 0 0 2px var(--cyan-tint);
+    }
+
+    .btn-emerald {
+      background-color: var(--positive);
+      color: var(--on-tertiary);
+      border-color: var(--positive);
+    }
+
+    .btn-emerald:hover:not(:disabled) {
+      background-color: color-mix(in srgb, var(--positive) 88%, var(--on-surface));
+      box-shadow: 0 0 0 2px var(--emerald-tint);
+    }
+
+    .btn-danger-outline {
+      border-color: var(--crimson-border);
+      color: var(--error);
+      background-color: var(--crimson-tint);
+    }
+
+    .btn-danger-outline:hover:not(:disabled) {
+      background-color: color-mix(in srgb, var(--error) 22%, transparent);
+    }
+
+    .btn-sm {
+      min-height: 36px;
+      padding: 0 var(--space-sm);
+      font-size: 0.8125rem;
+    }
+
+    /* Tooltips for Accounting Standards (Hover + Focus + Click) */
+    .std-tooltip-wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .std-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 32px;
+      padding: 4px 10px;
+      border-radius: var(--rounded);
+      border: 1px solid var(--cyan-border);
+      background-color: var(--cyan-tint);
+      color: var(--on-primary-container);
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color var(--dur-micro) var(--ease-out),
+                  box-shadow var(--dur-micro) var(--ease-out);
+    }
+
+    .std-badge:hover,
+    .std-badge:focus-visible,
+    .std-tooltip-wrap.open .std-badge {
+      background-color: var(--primary-container);
+      box-shadow: 0 0 0 1px var(--primary);
+    }
+
+    .std-popover {
+      position: fixed;
+      z-index: 900;
+      width: min(360px, calc(100vw - 24px));
+      background: var(--surface-container-high);
+      border: 1px solid var(--primary);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-md);
+      box-shadow: 0 16px 40px var(--scrim);
+      color: var(--on-surface);
+      display: none;
+      pointer-events: auto;
+    }
+
+    .std-popover.visible {
+      display: block;
+    }
+
+    .std-popover-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-xs);
+    }
+
+    .std-popover-code {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      letter-spacing: var(--label-tracking);
+      color: var(--primary);
+      text-transform: uppercase;
+    }
+
+    .std-popover-title {
+      font-family: var(--font-headline);
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin: 0 0 var(--space-xs) 0;
+    }
+
+    .std-popover-body {
+      margin: 0;
+      font-size: 0.84rem;
+      line-height: 1.5;
+      color: var(--on-surface-variant);
+    }
+
+    .std-popover-rule {
+      margin-top: var(--space-sm);
+      padding-top: var(--space-sm);
+      border-top: var(--hairline);
+      font-family: var(--font-label);
+      font-size: 0.72rem;
+      color: var(--tertiary);
+    }
+
+    /* KPI Strip */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+      gap: var(--space-md);
+    }
+
+    .panel {
+      background: var(--panel-gradient);
+      border: var(--hairline);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-lg);
+    }
+
+    .kpi-card {
+      background: var(--panel-gradient);
+      border: var(--hairline);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-md) var(--space-lg);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: var(--space-sm);
+    }
+
+    .data-label {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      letter-spacing: var(--label-tracking);
+      text-transform: uppercase;
+      color: var(--on-surface-variant);
+    }
+
+    .metric-value {
+      font-family: var(--font-headline);
+      font-weight: 600;
+      font-size: clamp(1.5rem, 1.25rem + 0.9vw, 2rem);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: var(--heading-tracking);
+      line-height: 1.1;
+      color: var(--on-surface);
+    }
+
+    .metric-sub {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      color: var(--on-surface-variant);
+    }
+
+    .metric-sub.emerald { color: var(--positive); }
+    .metric-sub.amber { color: var(--warning); }
+    .metric-sub.crimson { color: var(--error); }
+
+    .readiness-track {
+      width: 100%;
+      height: 8px;
+      background-color: var(--background);
+      border: var(--hairline);
+      border-radius: var(--rounded-full);
+      overflow: hidden;
+      margin-top: var(--space-xs);
+    }
+
+    .readiness-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--positive) 100%);
+      transition: width var(--dur-long) var(--ease-out);
+    }
+
+    /* Two-Stage Lifecycle Explanation Banner */
+    .lifecycle-banner {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 0.85fr) auto minmax(0, 1fr);
+      gap: var(--space-md);
+      align-items: stretch;
+      background: var(--surface-container-low);
+      border: var(--hairline);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-md);
+    }
+
+    .stage-box {
+      background: var(--surface-container);
+      border: var(--hairline);
+      border-radius: var(--rounded);
+      padding: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+
+    .stage-box.pre { border-left: 3px solid var(--warning); }
+    .stage-box.gate { border-left: 3px solid var(--primary); }
+    .stage-box.final { border-left: 3px solid var(--positive); }
+
+    .stage-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-sm);
+    }
+
+    .stage-title {
+      font-family: var(--font-headline);
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin: 0;
+    }
+
+    .stage-desc {
+      margin: 0;
+      font-size: 0.84rem;
+      color: var(--on-surface-variant);
+      line-height: 1.45;
+    }
+
+    .stage-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--secondary);
+    }
+
+    /* Status Chips */
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      border-radius: var(--rounded);
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .chip-amber {
+      background: var(--amber-tint);
+      color: var(--warning);
+      border: 1px solid var(--amber-border);
+    }
+
+    .chip-emerald {
+      background: var(--emerald-tint);
+      color: var(--positive);
+      border: 1px solid var(--emerald-border);
+    }
+
+    .chip-crimson {
+      background: var(--crimson-tint);
+      color: var(--error);
+      border: 1px solid var(--crimson-border);
+    }
+
+    .chip-cyan {
+      background: var(--cyan-tint);
+      color: var(--primary);
+      border: 1px solid var(--cyan-border);
+    }
+
+    /* Navigation Tabs */
+    .nav-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+      border-bottom: var(--hairline);
+      padding-bottom: var(--space-sm);
+    }
+
+    .tab-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+      min-height: 44px;
+      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--rounded);
+      border: var(--hairline);
+      background-color: var(--surface-container-low);
+      color: var(--on-surface-variant);
+      font-family: var(--font-headline);
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background-color var(--dur-micro) var(--ease-out),
+                  color var(--dur-micro) var(--ease-out),
+                  box-shadow var(--dur-micro) var(--ease-out);
+    }
+
+    .tab-btn:hover {
+      background-color: var(--surface-container);
+      color: var(--on-surface);
+    }
+
+    .tab-btn[aria-selected="true"] {
+      background-color: var(--primary-container);
+      color: var(--on-primary-container);
+      border-color: var(--primary);
+      box-shadow: 0 0 0 1px var(--primary);
+    }
+
+    .tab-count {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      padding: 1px 7px;
+      border-radius: var(--rounded);
+      background-color: var(--background);
+      color: var(--on-surface);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: grid; gap: var(--space-lg); }
+
+    /* Case Cards in Tab 1 & Tab 3 */
+    .case-list {
+      display: grid;
+      gap: var(--space-md);
+    }
+
+    .case-card {
+      background: var(--panel-gradient);
+      border: var(--hairline);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-lg);
+      display: grid;
+      gap: var(--space-md);
+      transition: box-shadow var(--dur-micro) var(--ease-out);
+    }
+
+    .case-card.blocker {
+      border-left: 4px solid var(--error);
+    }
+
+    .case-card.prematch {
+      border-left: 4px solid var(--warning);
+    }
+
+    .case-card.finalmatch {
+      border-left: 4px solid var(--positive);
+    }
+
+    .case-card-top {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: var(--space-md);
+    }
+
+    .case-title {
+      font-family: var(--font-headline);
+      font-size: var(--headline-size);
+      font-weight: 600;
+      letter-spacing: var(--heading-tracking);
+      margin: 0 0 var(--space-xs) 0;
+    }
+
+    .case-meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .case-metrics-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
+      gap: var(--space-sm);
+      background: var(--background);
+      border: var(--hairline);
+      border-radius: var(--rounded);
+      padding: var(--space-md);
+    }
+
+    .mini-stat-label {
+      font-family: var(--font-label);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: var(--label-tracking);
+      color: var(--on-surface-variant);
+    }
+
+    .mini-stat-val {
+      font-family: var(--font-label);
+      font-size: 0.95rem;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      margin-top: 2px;
+    }
+
+    /* Workbench Layout */
+    .workbench-selector {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+      gap: var(--space-sm);
+    }
+
+    .wb-pill {
+      text-align: left;
+      padding: var(--space-md);
+      border-radius: var(--rounded);
+      background: var(--surface-container-low);
+      border: var(--hairline);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+      min-height: 44px;
+      transition: background-color var(--dur-micro) var(--ease-out),
+                  box-shadow var(--dur-micro) var(--ease-out);
+    }
+
+    .wb-pill:hover {
+      background: var(--surface-container);
+    }
+
+    .wb-pill.selected {
+      background: var(--surface-container-high);
+      border-color: var(--primary);
+      box-shadow: 0 0 0 1px var(--primary);
+    }
+
+    .wb-pill-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-xs);
+      width: 100%;
+    }
+
+    .wb-pill-code {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      color: var(--on-surface-variant);
+    }
+
+    .wb-pill-name {
+      font-family: var(--font-headline);
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--on-surface);
+    }
+
+    /* 2-Sided Adra Comparison */
+    .two-sided-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: var(--space-md);
+    }
+
+    .side-panel {
+      background: var(--panel-gradient);
+      border: var(--hairline);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+
+    .side-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-sm);
+      padding-bottom: var(--space-sm);
+      border-bottom: var(--hairline);
+    }
+
+    .side-title {
+      font-family: var(--font-headline);
+      font-weight: 600;
+      font-size: var(--subhead-size);
+      margin: 0;
+    }
+
+    /* Data Tables */
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table.fin-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    table.fin-table th {
+      font-family: var(--font-label);
+      font-size: 0.72rem;
+      letter-spacing: var(--label-tracking);
+      text-transform: uppercase;
+      color: var(--on-surface-variant);
+      text-align: left;
+      padding: var(--space-sm) var(--space-sm);
+      border-bottom: var(--hairline-strong);
+      white-space: nowrap;
+    }
+
+    table.fin-table th.num,
+    table.fin-table td.num {
+      text-align: right;
+      font-family: var(--font-label);
+      font-variant-numeric: tabular-nums;
+    }
+
+    table.fin-table td {
+      padding: var(--space-sm) var(--space-sm);
+      border-bottom: var(--hairline);
+      vertical-align: top;
+    }
+
+    table.fin-table tr.row-iso {
+      background-color: var(--amber-tint);
+    }
+
+    table.fin-table tr.row-blocker {
+      background-color: var(--crimson-tint);
+    }
+
+    table.fin-table tr.row-total td {
+      border-top: var(--hairline-strong);
+      border-bottom: none;
+      font-weight: 600;
+      padding-top: var(--space-md);
+    }
+
+    /* Delta Verification Bar */
+    .delta-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-md);
+      background: var(--surface-container-high);
+      border: var(--hairline-strong);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-md) var(--space-lg);
+    }
+
+    .delta-equations {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--space-lg);
+    }
+
+    .delta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    /* Regex & OCR Token Inspector */
+    .workbench-lower-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.25fr);
+      gap: var(--space-md);
+    }
+
+    .well {
+      background: var(--background);
+      border: var(--hairline);
+      border-radius: var(--rounded);
+      padding: var(--space-md);
+      font-family: var(--font-label);
+      font-size: 0.8125rem;
+      line-height: 1.6;
+      overflow-x: auto;
+    }
+
+    .tok-match {
+      background-color: var(--cyan-tint);
+      border: 1px solid var(--cyan-border);
+      color: var(--on-primary-container);
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+
+    .tok-var {
+      background-color: var(--amber-tint);
+      border: 1px solid var(--amber-border);
+      color: var(--warning);
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+
+    .tok-block {
+      background-color: var(--crimson-tint);
+      border: 1px solid var(--crimson-border);
+      color: var(--error);
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+
+    .token-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+      margin-top: var(--space-sm);
+    }
+
+    .token-chip {
+      background: var(--surface-container);
+      border: var(--hairline);
+      border-radius: var(--rounded);
+      padding: 6px 10px;
+      font-family: var(--font-label);
+      font-size: 0.76rem;
+    }
+
+    .token-chip span {
+      color: var(--on-surface-variant);
+      display: block;
+      font-size: 0.68rem;
+      text-transform: uppercase;
+    }
+
+    /* Blocker Resolution Gate Box */
+    .blocker-gate-box {
+      background: var(--crimson-tint);
+      border: 1px solid var(--crimson-border);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-lg);
+      display: grid;
+      gap: var(--space-md);
+    }
+
+    .blocker-gate-box.resolved {
+      background: var(--emerald-tint);
+      border-color: var(--emerald-border);
+    }
+
+    .resolution-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+      gap: var(--space-sm);
+    }
+
+    .res-option-btn {
+      text-align: left;
+      background: var(--surface-container);
+      border: var(--hairline-strong);
+      border-radius: var(--rounded);
+      padding: var(--space-md);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+      transition: background-color var(--dur-micro) var(--ease-out),
+                  box-shadow var(--dur-micro) var(--ease-out);
+    }
+
+    .res-option-btn:hover {
+      background: var(--surface-container-high);
+    }
+
+    .res-option-btn.active {
+      background: var(--primary-container);
+      border-color: var(--primary);
+      box-shadow: 0 0 0 1px var(--primary);
+    }
+
+    /* Paired Vouchers */
+    .voucher-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: var(--space-md);
+    }
+
+    .voucher-card {
+      background: var(--surface-container-low);
+      border: var(--hairline);
+      border-radius: var(--rounded);
+      padding: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+
+    .voucher-card.bilag-a { border-top: 2px solid var(--primary); }
+    .voucher-card.bilag-b { border-top: 2px solid var(--warning); }
+
+    /* Audit Stream */
+    .audit-stream {
+      display: grid;
+      gap: var(--space-sm);
+    }
+
+    .audit-block {
+      background: var(--background);
+      border: var(--hairline);
+      border-left: 3px solid var(--positive);
+      border-radius: var(--rounded);
+      padding: var(--space-md);
+      display: grid;
+      gap: var(--space-xs);
+      font-family: var(--font-label);
+      font-size: 0.78rem;
+    }
+
+    .audit-block.genesis {
+      border-left-color: var(--primary);
+    }
+
+    .audit-hash-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-md);
+      color: var(--on-surface-variant);
+      word-break: break-all;
+    }
+
+    .hash-val {
+      color: var(--positive);
+    }
+
+    /* Modal (SAF-T & ERP Export) */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 950;
+      background-color: var(--scrim);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-md);
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-dialog {
+      width: min(880px, 100%);
+      max-height: 90vh;
+      overflow-y: auto;
+      background: var(--surface-container);
+      border: var(--hairline-strong);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-lg);
+      display: grid;
+      gap: var(--space-md);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: var(--space-md);
+      padding-bottom: var(--space-sm);
+      border-bottom: var(--hairline);
+    }
+
+    .export-preview {
+      max-height: 320px;
+      overflow: auto;
+      white-space: pre;
+      font-family: var(--font-label);
+      font-size: 0.76rem;
+      line-height: 1.5;
+    }
+
+    .inline-toast {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      color: var(--positive);
+      min-height: 1.2em;
+    }
+
+    .empty-state {
+      background: var(--surface-container-low);
+      border: var(--hairline);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-xl);
+      text-align: center;
+      display: grid;
+      gap: var(--space-sm);
+      justify-items: center;
+    }
+
+    .source-footer {
+      border-top: var(--hairline);
+      padding-top: var(--space-md);
+      color: var(--on-surface-variant);
+      font-size: 0.8rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: var(--space-sm);
+    }
+
+    /* Responsive Breakpoints */
+    @media (max-width: 960px) {
+      .lifecycle-banner {
+        grid-template-columns: 1fr;
+      }
+      .stage-arrow {
+        transform: rotate(90deg);
+        padding: var(--space-xs) 0;
+      }
+      .two-sided-grid,
+      .workbench-lower-grid,
+      .voucher-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .page-grid {
+        padding: var(--space-sm);
+        gap: var(--space-md);
+      }
+      .control-header,
+      .panel,
+      .case-card {
+        padding: var(--space-md);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-grid">
+    <!-- Top Executive Control Room Header -->
+    <header class="control-header">
+      <div class="header-title-group">
+        <div class="eyebrow-mono">CLOSE-AI · KONTROLLROM FOR MÅNEDSAVSLUTNING · OKTOBER 2026</div>
+        <h1 class="page-title">Autonom Avstemmingsmotor &amp; To-Stegs Livssyklus</h1>
+        <p class="page-subtitle">
+          Deterministisk kontrollrom for EPC- og subsea-regnskap. Isolerer gebyrer, valutadifferanser, 4-veis varemottak og OCR-rabatter i <strong>Pre-Match</strong> før kryptografisk forsegling i <strong>Final Match</strong>.
+        </p>
+      </div>
+      <div class="header-actions">
+        <button type="button" class="btn btn-primary" onclick="openExportModal()">
+          <i data-lucide="file-code-2" aria-hidden="true"></i>
+          Eksporter SAF-T / ERP
+        </button>
+        <button type="button" id="reset-demo-btn" class="btn" onclick="handleResetDemo(this)">
+          <i data-lucide="rotate-ccw" aria-hidden="true"></i>
+          Tilbakestill
+        </button>
+      </div>
+
+      <!-- Standards Reference Bar (Hover + Focus + Click Tooltips) -->
+      <div class="standards-bar" aria-label="Regnskaps- og revisjonsstandarder">
+        <span class="standards-label">Kontrollrammeverk (hold over eller klikk):</span>
+        <span class="std-tooltip-wrap">
+          <button type="button" class="std-badge" data-std="ifrs15" aria-expanded="false"
+            onmouseenter="showStdPopover(this)" onmouseleave="scheduleHideStdPopover()"
+            onfocus="showStdPopover(this)" onblur="scheduleHideStdPopover()"
+            onclick="toggleStdPopover(this)">
+            <i data-lucide="book-open" aria-hidden="true"></i> IFRS 15
+          </button>
+        </span>
+        <span class="std-tooltip-wrap">
+          <button type="button" class="std-badge" data-std="isa240" aria-expanded="false"
+            onmouseenter="showStdPopover(this)" onmouseleave="scheduleHideStdPopover()"
+            onfocus="showStdPopover(this)" onblur="scheduleHideStdPopover()"
+            onclick="toggleStdPopover(this)">
+            <i data-lucide="shield-alert" aria-hidden="true"></i> ISA 240
+          </button>
+        </span>
+        <span class="std-tooltip-wrap">
+          <button type="button" class="std-badge" data-std="isa315" aria-expanded="false"
+            onmouseenter="showStdPopover(this)" onmouseleave="scheduleHideStdPopover()"
+            onfocus="showStdPopover(this)" onblur="scheduleHideStdPopover()"
+            onclick="toggleStdPopover(this)">
+            <i data-lucide="layers" aria-hidden="true"></i> ISA 315 / 500
+          </button>
+        </span>
+        <span class="std-tooltip-wrap">
+          <button type="button" class="std-badge" data-std="bokforing" aria-expanded="false"
+            onmouseenter="showStdPopover(this)" onmouseleave="scheduleHideStdPopover()"
+            onfocus="showStdPopover(this)" onblur="scheduleHideStdPopover()"
+            onclick="toggleStdPopover(this)">
+            <i data-lucide="scale" aria-hidden="true"></i> Bokføringsloven
+          </button>
+        </span>
+      </div>
+    </header>
+
+    <!-- KPI Hierarchy Strip -->
+    <section class="kpi-grid" aria-label="Nøkkeltall for avslutningsklarhet">
+      <div class="kpi-card">
+        <div class="data-label">Avslutningsklarhet (Close Readiness)</div>
+        <div class="metric-value" id="kpi-readiness-pct">0%</div>
+        <div class="readiness-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="readiness-progressbar">
+          <div class="readiness-fill" id="readiness-fill"></div>
+        </div>
+        <div class="metric-sub" id="kpi-readiness-sub">0 av 4 komplekse saker forseglet i Final Match</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="data-label">Pre-Match Staging (Kandidater)</div>
+        <div class="metric-value" id="kpi-prematch-count">3</div>
+        <div class="metric-sub amber" id="kpi-prematch-nok">2 291 970,00 NOK brutto til gjennomgang</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="data-label">Kritiske Blokkeringer (Hard Blockers)</div>
+        <div class="metric-value" id="kpi-blocker-count">1</div>
+        <div class="metric-sub crimson" id="kpi-blocker-sub">895 000,00 NOK venter på CO / GRN-avklaring</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="data-label">Final Match &amp; SHA-256 Forseglet</div>
+        <div class="metric-value" id="kpi-final-count">0</div>
+        <div class="metric-sub emerald" id="kpi-final-nok">0,00 NOK deterministisk låst (Δ = 0,00)</div>
+      </div>
+    </section>
+
+    <!-- Two-Stage Lifecycle Explanation Strip -->
+    <section class="lifecycle-banner" aria-label="To-stegs avstemmingslivssyklus">
+      <div class="stage-box pre">
+        <div class="stage-head">
+          <h2 class="stage-title">Steg 1: Pre-Match (Staging &amp; Kandidatklynger)</h2>
+          <span class="chip chip-amber">Ikke-låsende</span>
+        </div>
+        <p class="stage-desc">
+          Probabilistisk og heuristisk gruppering med Regex-tokenisering, datovindu-toleranse (±3–5 dager bank-float) og konfidensscore (94%–98%). Isolerer bankgebyrer, kontantrabatter og agio uten å låse hovedboken.
+        </p>
+      </div>
+
+      <div class="stage-arrow" aria-hidden="true">
+        <i data-lucide="arrow-right"></i>
+      </div>
+
+      <div class="stage-box gate">
+        <div class="stage-head">
+          <h2 class="stage-title">Kontrollport (Arbeidsbenk)</h2>
+          <span class="chip chip-cyan">Human-in-the-Loop</span>
+        </div>
+        <p class="stage-desc">
+          Side-A mot Side-B verifisering, opprydning av 4-veis blokkeringer (PO/GRN/Faktura/CO) og gjennomsyn av paret bilagsføring (31.10.2026 + reversering 01.11.2026).
+        </p>
+      </div>
+
+      <div class="stage-arrow" aria-hidden="true">
+        <i data-lucide="arrow-right"></i>
+      </div>
+
+      <div class="stage-box final">
+        <div class="stage-head">
+          <h2 class="stage-title">Steg 2: Final Match (Hard Cleared)</h2>
+          <span class="chip chip-emerald">SHA-256 Forseglet</span>
+        </div>
+        <p class="stage-desc">
+          Deterministisk null-avvik verifisert (Debet = Kredit, Δ = 0,00 NOK). Genererer uforanderlig SHA-256 revisjonsblokk og låser periodens hovedbok for SAF-T eksport.
+        </p>
+      </div>
+    </section>
+
+    <!-- Primary Lifecycle Tabs -->
+    <nav class="nav-tabs" role="tablist" aria-label="Livssyklusfaner">
+      <button type="button" class="tab-btn" role="tab" id="tab-btn-prematch" aria-selected="true" aria-controls="panel-prematch" onclick="switchTab('prematch')">
+        <i data-lucide="sparkles" aria-hidden="true"></i>
+        Pre-Match (Kandidatklynger &amp; Staging)
+        <span class="tab-count" id="count-prematch">4</span>
+      </button>
+      <button type="button" class="tab-btn" role="tab" id="tab-btn-workbench" aria-selected="false" aria-controls="panel-workbench" onclick="switchTab('workbench')">
+        <i data-lucide="split" aria-hidden="true"></i>
+        Gjennomgang &amp; Korreksjonsbenk
+        <span class="tab-count" id="count-workbench">4</span>
+      </button>
+      <button type="button" class="tab-btn" role="tab" id="tab-btn-final" aria-selected="false" aria-controls="panel-final" onclick="switchTab('final')">
+        <i data-lucide="lock" aria-hidden="true"></i>
+        Final Match (Deterministisk Avstemt &amp; Forseglet)
+        <span class="tab-count" id="count-final">0</span>
+      </button>
+    </nav>
+
+    <!-- TAB 1: Pre-Match Staging -->
+    <section id="panel-prematch" class="tab-panel active" role="tabpanel" aria-labelledby="tab-btn-prematch">
+      <div class="case-list" id="prematch-list"></div>
+    </section>
+
+    <!-- TAB 2: Review & Correction Workbench -->
+    <section id="panel-workbench" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-workbench">
+      <div class="workbench-selector" id="workbench-selector"></div>
+      <div id="workbench-content"></div>
+    </section>
+
+    <!-- TAB 3: Final Match & Cryptographic Audit Trail -->
+    <section id="panel-final" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-final">
+      <div class="case-list" id="final-list"></div>
+
+      <div class="panel">
+        <div class="side-header">
+          <div>
+            <div class="eyebrow-mono">KRYPTOGRAFISK REVISJONSSPOR · ISA 500 &amp; BOKFØRINGSLOVEN § 10</div>
+            <h2 class="case-title">Live SHA-256 Revisjonskjede (Uforanderlig Bilagslogg)</h2>
+          </div>
+          <span class="chip chip-emerald" id="chain-integrity-badge">Kjede Verifisert · Intakt</span>
+        </div>
+        <div class="audit-stream" id="audit-stream-container"></div>
+      </div>
+    </section>
+
+    <!-- Footer Source Attribution -->
+    <footer class="source-footer">
+      <span>Metodikk inspirert av Trintech Adra Matcher (Multi-Way Matching, Raw Readability, Suggestive Matching), Numeric Transaction-Level ERP Sync og Bluecopa SamyxAI, tilpasset norsk regnskapspraksis (NS 4102 &amp; SAF-T v1.30).</span>
+      <span>CLOSE-AI Kontrollrom · Alle tall i NOK / GBP · Ingen ekstern nettverkstrafikk</span>
+    </footer>
+  </div>
+
+  <!-- Floating Accounting Standard Popover -->
+  <div id="std-popover" class="std-popover" role="dialog" aria-modal="false" aria-hidden="true">
+    <div class="std-popover-head">
+      <span class="std-popover-code" id="std-pop-code"></span>
+      <button type="button" class="btn btn-sm" onclick="hideStdPopover()" aria-label="Lukk standardforklaring">Lukk</button>
+    </div>
+    <h3 class="std-popover-title" id="std-pop-title"></h3>
+    <p class="std-popover-body" id="std-pop-body"></p>
+    <div class="std-popover-rule" id="std-pop-rule"></div>
+  </div>
+
+  <!-- SAF-T & ERP Export Modal -->
+  <div id="export-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="export-modal-title">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div>
+          <div class="eyebrow-mono">SKATTEETATEN SAF-T REGNSKAP v1.30 &amp; ERP-BILAG</div>
+          <h2 class="case-title" id="export-modal-title">Eksporter Forseglede Final Match-Posteringer</h2>
+        </div>
+        <button type="button" class="btn btn-sm" onclick="closeExportModal()">Lukk</button>
+      </div>
+
+      <div id="export-status-banner" class="chip chip-cyan"></div>
+
+      <div class="header-actions">
+        <button type="button" id="fmt-xml-btn" class="btn btn-sm btn-primary" onclick="setExportFormat('xml')">SAF-T XML (v1.30)</button>
+        <button type="button" id="fmt-csv-btn" class="btn btn-sm" onclick="setExportFormat('csv')">ERP Bilag (CSV)</button>
+        <button type="button" class="btn btn-sm" onclick="copyExportPayload()">
+          <i data-lucide="copy" aria-hidden="true"></i> Kopier innhold
+        </button>
+        <button type="button" class="btn btn-sm btn-emerald" onclick="downloadExportPayload()">
+          <i data-lucide="download" aria-hidden="true"></i> Last ned fil
+        </button>
+      </div>
+
+      <div class="inline-toast" id="export-feedback" aria-live="polite"></div>
+
+      <pre class="well export-preview" id="export-preview-code"></pre>
+    </div>
+  </div>
+
+  <api-shim></api-shim>
+
+  <script>
+    // Accounting Standards Reference Dictionary (IFRS 15, ISA 240, ISA 315/500, Bokføringsloven)
+    const STANDARDS_INFO = {
+      ifrs15: {
+        code: `IFRS 15 · DRIFTSINNTEKTER & LEVERANSEFORPLIKTELSER`,
+        title: `Inntektsføring, Endringsordrer (CO) og Kontraktsrabatter`,
+        body: `Krever at vederlag fra kundefordringer (Sak 1 & 4) og endringsordrer på EPC/verftskontrakter (Sak 2) kun regnskapsføres når leveranseforpliktelsen er oppfylt og skriftlig godkjent av begge parter. Kontantrabatter (skonto) reduserer transaksjonsprisen.`,
+        rule: `CLOSE-AI Kontroll: Blokkerer automatisk inntekts-/kostnadsføring av uautoriserte endringsordrer og isolerer 2% skonto på Konto 8150.`
+      },
+      isa240: {
+        code: `ISA 240 · MISLIGHOLD & LEDELSESOVERSKRIING`,
+        title: `Revisors ansvar vedrørende misligheter og uautoriserte tillegg`,
+        body: `Fakturaer som overstiger godkjent innkjøpsordre (PO) eller fysisk varemottak (GRN) med uautorisert overtid representerer høy risiko for fiktiv fakturering eller omgåelse av fullmaktsmatrise (Sak 2: 145 000 NOK overtid uten CO).`,
+        rule: `CLOSE-AI Kontroll: Hard Blocker (rød) hindrer automatisk clearing i Pre-Match og tvinger frem enten disputt-karantene eller dokumentert CO-godkjenning.`
+      },
+      isa315: {
+        code: `ISA 315 / ISA 500 · RISIKOVURDERING & REVISJONSBEVIS`,
+        title: `Tilstrekkelig og hensiktsmessig revisjonsbevis i automatisert avstemming`,
+        body: `Probabilistisk Pre-Match er kun et forslag uten beviskraft alene. ISA 500 krever etterprøvbar kobling mellom kildebilag (bank, OCR-remisse, GRN, valutakurs) og hovedbok, samt menneskelig kontrollgodkjenning før endelig låsing.`,
+        rule: `CLOSE-AI Kontroll: Hver godkjenning lagrer rådata-tokens, konfidensscore, sjekksum og brukeridentitet i en uforanderlig SHA-256-kjede.`
+      },
+      bokforing: {
+        code: `BOKFØRINGSLOVEN §§ 4, 7 & 10 · NORSK REGNSKAPSLOVGIVNING`,
+        title: `Grunnleggende bokføringsprinsipper, dokumentasjon og sporbarhet`,
+        body: `Krever fullstendig kontrollspor mellom dokumentasjon, spesifikasjoner og pliktig regnskapsrapportering (SAF-T). Periodiseringer per 31.10.2026 skal være dokumenterte og spores rent ved reversering 01.11.2026 (§ 7), og forseglede poster kan ikke slettes (§ 9/10).`,
+        rule: `CLOSE-AI Kontroll: Genererer paret Closing Bilag A (31.10) + Auto-Reversal Bilag B (01.11) og produserer gyldig SAF-T Regnskap v1.30 XML.`
+      }
+    };
+
+    // Core 4 EPC / Subsea Reconciliation Cases
+    const INITIAL_CASES = [
+      {
+        id: `case-1`,
+        code: `SAK-01 · 1:MANY`,
+        title: `1:M Merchant- & Bankoppgjør (Subsea Prosjektfakturaer)`,
+        category: `1:Many Bankoppgjør`,
+        stage: `prematch`,
+        isBlocker: false,
+        blockerResolved: true,
+        resolutionMode: `auto`,
+        confidence: 98,
+        floatTolerance: `±3 dager bank-float`,
+        ruleUsed: `1:M Aggregering + Isolert Gebyrtoleranse (≤ 2,5%)`,
+        standards: [`ifrs15`, `isa315`, `bokforing`],
+        grossNok: 91550.00,
+        sideASummary: `Bankinnbetaling 89 512,50 NOK + Gebyr 2 037,50 NOK`,
+        sideBSummary: `4 Prosjektfakturaer = 91 550,00 NOK`,
+        varianceLabel: `2 037,50 NOK · Isolert på Konto 7770 (Bankgebyr)`,
+        sideATitle: `Side A · Bankstrøm & Isolert Gebyr (DNB)`,
+        sideBTitle: `Side B · Kundefordringer (4 Prosjektfakturaer)`,
+        sideALines: [
+          { ref: `DNB-WIRE-88412`, date: `30.10.2026`, desc: `Netto oppgjør Equinor Subsea Pool (Batch #914)`, amountNok: 89512.50, type: `normal` },
+          { ref: `AUTO-ISO-7770`, date: `30.10.2026`, desc: `Isolert betalingsgebyr / clearing-trekk (2,23%) → Konto 7770`, amountNok: 2037.50, type: `isolated` }
+        ],
+        sideBLines: [
+          { ref: `FAK-2026-1041`, date: `14.10.2026`, desc: `Subsea Umbilical Inspection · Prosjekt P-402`, amountNok: 24500.00, type: `normal` },
+          { ref: `FAK-2026-1042`, date: `16.10.2026`, desc: `ROV Mobilisering Fase 2 · Prosjekt P-402`, amountNok: 31200.00, type: `normal` },
+          { ref: `FAK-2026-1043`, date: `19.10.2026`, desc: `HSEQ Dokumentasjonspakke · Prosjekt P-402`, amountNok: 18850.00, type: `normal` },
+          { ref: `FAK-2026-1044`, date: `21.10.2026`, desc: `Offshore Crew Standby · Prosjekt P-402`, amountNok: 17000.00, type: `normal` }
+        ],
+        rawPayloadHtml: `MT940 :61:2610301030C89512,50NTRFNONREF//DNB-WIRE-88412<br>:86:/ORDP/EQUINOR ASA /REMI/<span class="tok-match">FAK 1041,1042,1043,1044</span> /PROJ/<span class="tok-match">P-402</span> /GROSS/<span class="tok-match">91550.00</span> /FEE/<span class="tok-var">-2037.50 PSP</span>`,
+        tokens: [
+          { label: `Regex Faktura-klynge`, value: `FAK-2026-1041..1044` },
+          { label: `Prosjektkode`, value: `P-402 (Subsea)` },
+          { label: `Brutto Sum`, value: `91 550,00 NOK` },
+          { label: `Isolert Gebyr`, value: `2 037,50 NOK (Konto 7770)` }
+        ],
+        bilagA: {
+          id: `BIL-2026-10-901A`,
+          date: `31.10.2026`,
+          desc: `Periodisert oppgjør & isolering av betalingsgebyr (Pre-Match #1)`,
+          entries: [
+            { konto: `1920`, navn: `Bankinnskudd DNB Driftskonto`, debet: 89512.50, kredit: 0, mva: `0` },
+            { konto: `7770`, navn: `Bank- og kortgebyr (Isolert PSP-trekk)`, debet: 2037.50, kredit: 0, mva: `0` },
+            { konto: `1500`, navn: `Kundefordringer (FAK 1041–1044)`, debet: 0, kredit: 91550.00, mva: `0` }
+          ]
+        },
+        bilagB: {
+          id: `BIL-2026-11-901B`,
+          date: `01.11.2026`,
+          desc: `Auto-reversering av midlertidig gebyravsetning ved endelig bankbilag (valgfri nullstilling)`,
+          note: `Ved endelig bankbekreftelse 01.11 overføres 2 037,50 NOK fra midlertidig periodiseringskonto 2960 til endelig kostnadsbilag dersom PSP-faktura ankommer etterskuddsvis; her balansert 1:1 i oktober.`,
+          entries: [
+            { konto: `2960`, navn: `Påløpt gebyravsetning (Periodisering)`, debet: 2037.50, kredit: 0, mva: `0` },
+            { konto: `7770`, navn: `Reversering oktober-estimat ved mottak PSP-bilag`, debet: 0, kredit: 2037.50, mva: `0` }
+          ]
+        }
+      },
+      {
+        id: `case-2`,
+        code: `SAK-02 · 4-VEIS VERFT`,
+        title: `4-Veis Verftsleveranse Subsea (PO vs. GRN vs. Faktura vs. CO)`,
+        category: `Multi-Way 4-Party Blocker`,
+        stage: `prematch`,
+        isBlocker: true,
+        blockerResolved: false,
+        resolutionMode: null,
+        confidence: 41,
+        floatTolerance: `Krever 4-veis samsvar`,
+        ruleUsed: `4-Veis PO/GRN/Faktura/CO Kontrollport`,
+        standards: [`isa240`, `ifrs15`, `isa315`, `bokforing`],
+        grossNok: 895000.00,
+        sideASummary: `PO 750 000 NOK · Fysisk GRN 670 000 NOK`,
+        sideBSummary: `Faktura 895 000 NOK (+145 000 uautorisert overtid)`,
+        varianceLabel: `BLOKKERT: 145 000 NOK uten Endringsordre (CO) + 80 000 ikke-mottatt GRN`,
+        sideATitle: `Side A · Godkjent Innkjøpsordre (PO) & Fysisk Varemottak (GRN)`,
+        sideBTitle: `Side B · Leverandørfaktura & Uautorisert Overtid`,
+        sideALines: [
+          { ref: `PO-8809`, date: `02.10.2026`, desc: `Autorisert rammeordre: Subsea Manifold Skid`, amountNok: 750000.00, type: `normal` },
+          { ref: `GRN-YARD-4412`, date: `26.10.2026`, desc: `Fysisk godkjent mottak på verft (89,3% av PO)`, amountNok: 670000.00, type: `normal` },
+          { ref: `GRN-OPEN-REST`, date: `31.10.2026`, desc: `Ulevert PO-rest (ikke fysisk mottatt per 31.10)`, amountNok: 80000.00, type: `blocker` }
+        ],
+        sideBLines: [
+          { ref: `LEVF-77410-A`, date: `29.10.2026`, desc: `Verft & Subsea Fabrikasjon AS — Delarbeid iht. GRN`, amountNok: 670000.00, type: `normal` },
+          { ref: `LEVF-77410-B`, date: `29.10.2026`, desc: `Fakturert ulevert PO-del (forskudd uten levering)`, amountNok: 80000.00, type: `blocker` },
+          { ref: `LEVF-77410-C`, date: `29.10.2026`, desc: `Uautorisert helge-/nattovertid — MANGLER ENDRINGSORDRE (CO)`, amountNok: 145000.00, type: `blocker` }
+        ],
+        rawPayloadHtml: `EHF-UBL2.1 INV: LEVF-77410 | ORDER_REF: <span class="tok-match">PO-8809 (750k)</span> | GRN_VERIFIED: <span class="tok-match">670,000.00</span><br>LINE_03: "Natt- og helgeovertid verft" AMT: <span class="tok-block">145,000.00 NOK</span> | CHANGE_ORDER_ID: <span class="tok-block">NULL (MANGLER)</span>`,
+        tokens: [
+          { label: `PO-8809 Autorisert`, value: `750 000,00 NOK` },
+          { label: `Fysisk GRN Mottatt`, value: `670 000,00 NOK` },
+          { label: `Faktura Totalt`, value: `895 000,00 NOK` },
+          { label: `Kritisk Blokkering`, value: `145 000,00 NOK (Mangler CO)` }
+        ],
+        bilagA: {
+          id: `BIL-2026-10-902A`,
+          date: `31.10.2026`,
+          desc: `4-Veis kontrollføring: Godkjent GRN + Disputt/Karantene av uautorisert avvik`,
+          entries: [
+            { konto: `4000`, navn: `Varekjøp / Subsea Fabrikasjon (Godkjent GRN)`, debet: 670000.00, kredit: 0, mva: `0` },
+            { konto: `2995`, navn: `Sperret disputtkonto (145k uautorisert + 80k ulevert)`, debet: 225000.00, kredit: 0, mva: `0` },
+            { konto: `2400`, navn: `Leverandørgjeld Verft & Subsea AS (LEVF-77410)`, debet: 0, kredit: 895000.00, mva: `0` }
+          ]
+        },
+        bilagB: {
+          id: `BIL-2026-11-902B`,
+          date: `01.11.2026`,
+          desc: `Auto-reversering av disputt- og periodiseringsavsetning i november`,
+          note: `Konto 2995 (225 000 NOK) reverseres 01.11.2026 ved mottak av kreditnota fra verftet eller ettergodkjent Endringsordre (CO) og nytt varemottak.`,
+          entries: [
+            { konto: `2400`, navn: `Leverandørgjeld (Avventer kreditnota / CO-avklaring)`, debet: 225000.00, kredit: 0, mva: `0` },
+            { konto: `2995`, navn: `Reversering sperret disputtkonto`, debet: 0, kredit: 225000.00, mva: `0` }
+          ]
+        }
+      },
+      {
+        id: `case-3`,
+        code: `SAK-03 · MANY:MANY`,
+        title: `M:M Grenseoverskridende Intercompany Netting (GBP → NOK)`,
+        category: `Many:Many Intercompany & FX`,
+        stage: `prematch`,
+        isBlocker: false,
+        blockerResolved: true,
+        resolutionMode: `auto`,
+        confidence: 96,
+        floatTolerance: `±5 dager valutavindu (4d float)`,
+        ruleUsed: `M:M Intercompany Netting + Automatisk Agio/Disagio-splitt`,
+        standards: [`isa315`, `bokforing`, `ifrs15`],
+        grossNok: 1750420.00,
+        sideASummary: `1 konsolidert bankwire £125 000 = 1 724 110,00 NOK + Agio 26 310,00 NOK`,
+        sideBSummary: `12 GBP ingeniørviderefaktureringer £125 000 = 1 750 420,00 NOK`,
+        varianceLabel: `26 310,00 NOK · Valutatap (Agio/Disagio) isolert på Konto 8160`,
+        sideATitle: `Side A · Konsolidert Valutabetaling (4d Float) & Konto 8160`,
+        sideBTitle: `Side B · 12 Intercompany Ingeniørviderefaktureringer (Aberdeen → Stavanger)`,
+        sideALines: [
+          { ref: `SWIFT-IC-7701`, date: `29.10.2026`, desc: `Konsolidert IC-wire fra UK Engineering Ltd (£125 000,00 @ 13,79288)`, amountNok: 1724110.00, type: `normal` },
+          { ref: `AUTO-FX-8160`, date: `29.10.2026`, desc: `Isolert valutatap etter 4 dagers bank-float (14,00336 → 13,79288) → Konto 8160`, amountNok: 26310.00, type: `isolated` }
+        ],
+        sideBLines: [
+          { ref: `IC-UK-01`, date: `04.10.2026`, desc: `Subsea Pipeline Stress Analysis (£12 000,00)`, amountNok: 168040.00, type: `normal` },
+          { ref: `IC-UK-02`, date: `06.10.2026`, desc: `ROV Tooling Engineering (£10 500,00)`, amountNok: 147035.00, type: `normal` },
+          { ref: `IC-UK-03`, date: `08.10.2026`, desc: `Umbilical Dynamic Simulation (£15 000,00)`, amountNok: 210050.00, type: `normal` },
+          { ref: `IC-UK-04`, date: `10.10.2026`, desc: `FAT Supervision Aberdeen (£8 500,00)`, amountNok: 119029.00, type: `normal` },
+          { ref: `IC-UK-05`, date: `12.10.2026`, desc: `Cathodic Protection Design (£11 000,00)`, amountNok: 154037.00, type: `normal` },
+          { ref: `IC-UK-06`, date: `14.10.2026`, desc: `Subsea Tie-In Procedure Review (£9 000,00)`, amountNok: 126030.00, type: `normal` },
+          { ref: `IC-UK-07`, date: `16.10.2026`, desc: `Riser Fatigue Modeling (£14 000,00)`, amountNok: 196047.00, type: `normal` },
+          { ref: `IC-UK-08`, date: `18.10.2026`, desc: `Metocean Current Load Study (£7 500,00)`, amountNok: 105025.00, type: `normal` },
+          { ref: `IC-UK-09`, date: `20.10.2026`, desc: `Jumper Metrology Support (£10 000,00)`, amountNok: 140034.00, type: `normal` },
+          { ref: `IC-UK-10`, date: `22.10.2026`, desc: `Control Module Interface Check (£9 500,00)`, amountNok: 133032.00, type: `normal` },
+          { ref: `IC-UK-11`, date: `24.10.2026`, desc: `Geotechnical Seabed Re-run (£11 000,00)`, amountNok: 154037.00, type: `normal` },
+          { ref: `IC-UK-12`, date: `25.10.2026`, desc: `As-Built CAD Package (£7 000,00)`, amountNok: 98024.00, type: `normal` }
+        ],
+        rawPayloadHtml: `SWIFT MT103 :32A:261029<span class="tok-match">GBP125000,00</span> | SETTLED_NOK: <span class="tok-match">1,724,110.00</span><br>:70:/IC-NETTING/<span class="tok-match">IC-UK-01..12</span> /FLOAT_DAYS/<span class="tok-var">4D</span> /HIST_NOK/<span class="tok-match">1,750,420.00</span> /FX_DELTA/<span class="tok-var">-26,310.00</span>`,
+        tokens: [
+          { label: `Valuta & Beløp`, value: `£125 000,00 (1:1 GBP)` },
+          { label: `Bank-float Vindu`, value: `4 dager (Innen ±5d)` },
+          { label: `Bokført NOK (12 poster)`, value: `1 750 420,00 NOK` },
+          { label: `Isolert Agio/Valutatap`, value: `26 310,00 NOK (Konto 8160)` }
+        ],
+        bilagA: {
+          id: `BIL-2026-10-903A`,
+          date: `31.10.2026`,
+          desc: `Intercompany oppgjør £125 000 + realisert valutatap på Konto 8160`,
+          entries: [
+            { konto: `1925`, navn: `Valutakonto GBP (Omregnet til spotkurs 13,79288)`, debet: 1724110.00, kredit: 0, mva: `0` },
+            { konto: `8160`, navn: `Valutatap (Disagio 4-dagers oppgjørsfloat)`, debet: 26310.00, kredit: 0, mva: `0` },
+            { konto: `1560`, navn: `Kortsiktig konsernfordring UK Engineering Ltd`, debet: 0, kredit: 1750420.00, mva: `0` }
+          ]
+        },
+        bilagB: {
+          id: `BIL-2026-11-903B`,
+          date: `01.11.2026`,
+          desc: `Auto-reversering av månedsslutt-kursomregning på åpen GBP-likviditet (IAS 21)`,
+          note: `For konsolidering reverseres urealisert balansekursjustering på valutakonto 1925 første virkedag i november før løpende spot-oppdatering.`,
+          entries: [
+            { konto: `1560`, navn: `Konsernmellomværende (Reversering kursjustering)`, debet: 26310.00, kredit: 0, mva: `0` },
+            { konto: `8160`, navn: `Nullstilling midlertidig månedsslutt-agio ved ny periode`, debet: 0, kredit: 26310.00, mva: `0` }
+          ]
+        }
+      },
+      {
+        id: `case-4`,
+        code: `SAK-04 · OCR & SKONTO`,
+        title: `Støyende OCR-Remisse med 2% Kontantrabatt (Skonto)`,
+        category: `Noisy OCR + 2% Cash Discount`,
+        stage: `prematch`,
+        isBlocker: false,
+        blockerResolved: true,
+        resolutionMode: `auto`,
+        confidence: 94,
+        floatTolerance: `±3 dager remissevindu`,
+        ruleUsed: `OCR Regex-Tokenisering + 2% Skonto-ekstraksjon`,
+        standards: [`ifrs15`, `isa315`, `bokforing`],
+        grossNok: 500000.00,
+        sideASummary: `2 Bankinnbetalinger (441 000 NOK) + 2% Rabatt (9 000 NOK) + Kreditnota (50 000 NOK)`,
+        sideBSummary: `3 Fakturaer = 500 000,00 NOK`,
+        varianceLabel: `9 000,00 NOK · 2% Kontantrabatt isolert på Konto 8150`,
+        sideATitle: `Side A · 2 Bankoverføringer, Kreditnota & 2% Rabatt (450k + 50k)`,
+        sideBTitle: `Side B · 3 Prosjektfakturaer før fradrag (500 000,00 NOK)`,
+        sideALines: [
+          { ref: `WIRE-OCR-118`, date: `27.10.2026`, desc: `Delbetaling #1 fra Norsk Marine Service AS`, amountNok: 241000.00, type: `normal` },
+          { ref: `WIRE-OCR-119`, date: `28.10.2026`, desc: `Delbetaling #2 (sluttutligning etter skonto)`, amountNok: 200000.00, type: `normal` },
+          { ref: `KN-88`, date: `22.10.2026`, desc: `Kreditnota KN-88 (Returnert subsea-ventil)`, amountNok: 50000.00, type: `normal` },
+          { ref: `AUTO-DISC-8150`, date: `28.10.2026`, desc: `Isolert 2% kontantrabatt av netto 450 000 NOK → Konto 8150`, amountNok: 9000.00, type: `isolated` }
+        ],
+        sideBLines: [
+          { ref: `FAK-5501`, date: `10.10.2026`, desc: `Trykktesting & Kalibrering · Batch A`, amountNok: 200000.00, type: `normal` },
+          { ref: `FAK-5502`, date: `12.10.2026`, desc: `Hydraulikkslanger & Koblinger · Batch B`, amountNok: 150000.00, type: `normal` },
+          { ref: `FAK-5503`, date: `15.10.2026`, desc: `Subsea Ventilpakke (inkl. returdel)`, amountNok: 150000.00, type: `normal` }
+        ],
+        rawPayloadHtml: `OCR_PDF_SCAN_DPI300: "Betalingsadvice Norsk Marine — ref <span class="tok-match">5501/5502/5503</span><br>minus <span class="tok-match">KN88 (50.000)</span> = netto <span class="tok-match">450.000</span>. Trekk <span class="tok-var">2% skonto = 9.000,-</span><br>Betalt i 2 omganger: <span class="tok-match">241.000</span> + <span class="tok-match">200.000</span> = <span class="tok-match">441.000 NOK</span>"`,
+        tokens: [
+          { label: `Regex Fakturaer`, value: `FAK-5501, 5502, 5503` },
+          { label: `Kreditnota Detektert`, value: `KN-88 (-50 000,00 NOK)` },
+          { label: `Skonto Regex (2%)`, value: `9 000,00 NOK (Konto 8150)` },
+          { label: `Netto Bankinngang`, value: `441 000,00 NOK (2 wires)` }
+        ],
+        bilagA: {
+          id: `BIL-2026-10-904A`,
+          date: `31.10.2026`,
+          desc: `Utligning av 3 fakturaer, KN-88 og 2% kontantrabatt på Konto 8150`,
+          entries: [
+            { konto: `1920`, navn: `Bankinnskudd DNB (Wire #118 + #119)`, debet: 441000.00, kredit: 0, mva: `0` },
+            { konto: `8150`, navn: `Kontantrabatt (2% skonto på 450 000 NOK)`, debet: 9000.00, kredit: 0, mva: `0` },
+            { konto: `1500`, navn: `Kundefordringer (Kreditnota KN-88 utlignet)`, debet: 50000.00, kredit: 0, mva: `0` },
+            { konto: `1500`, navn: `Kundefordringer (FAK 5501, 5502, 5503)`, debet: 0, kredit: 500000.00, mva: `0` }
+          ]
+        },
+        bilagB: {
+          id: `BIL-2026-11-904B`,
+          date: `01.11.2026`,
+          desc: `Auto-reversering av midlertidig skontoavsetning dersom MVA-kreditnota etterposteres`,
+          note: `Dersom selger utsteder formell MVA-korrigert rabattnota i november, reverseres foreløpig brutto-rabattføring automatisk den 01.11.2026.`,
+          entries: [
+            { konto: `2965`, navn: `Påløpt rabattkorreksjon (Avventer MVA-bilag)`, debet: 9000.00, kredit: 0, mva: `0` },
+            { konto: `8150`, navn: `Reversering oktober-skonto ved endelig rabattnota`, debet: 0, kredit: 9000.00, mva: `0` }
+          ]
+        }
+      }
+    ];
+
+    const GENESIS_BLOCK = {
+      index: 0,
+      timestamp: `2026-10-31 08:00:00 UTC`,
+      caseId: `GENESIS`,
+      caseCode: `PERIODE-ÅPNING`,
+      title: `Åpningsbalanse Oktober 2026 · Kontrollkjede Initialisert`,
+      approver: `SYSTEM · CLOSE-AI MOTOR`,
+      voucherA: `OPN-2026-10`,
+      voucherB: `—`,
+      amountNok: 0,
+      prevHash: `0000000000000000000000000000000000000000000000000000000000000000`,
+      blockHash: `8f4e2a91c0d7b5314a6f2e88c9b0142d7e3a5f6c8b901234a5d6e7f8091a2b3c`
+    };
+
+    // Application State
+    let appState = {
+      activeTab: `prematch`,
+      selectedCaseId: `case-1`,
+      exportFormat: `xml`,
+      cases: JSON.parse(JSON.stringify(INITIAL_CASES)),
+      auditChain: [JSON.parse(JSON.stringify(GENESIS_BLOCK))]
+    };
+
+    let popoverHideTimer = null;
+    let activeStdButton = null;
+
+    // Formatting Helpers (Norwegian)
+    function formatNok(val) {
+      return new Intl.NumberFormat('nb-NO', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(val) + ` NOK`;
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // Real SHA-256 Hashing via Web Crypto API with deterministic fallback
+    async function computeSha256(message) {
+      try {
+        if (window.crypto && window.crypto.subtle) {
+          const encoder = new TextEncoder();
+          const data = encoder.encode(message);
+          const hashBuffer = await window.crypto.subtle.digest('SHA-256', data);
+          const hashArray = Array.from(new Uint8Array(hashBuffer));
+          return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+        }
+      } catch (err) {
+        // Fallback below if subtle crypto is unavailable in restricted context
+      }
+      let h1 = 0x811c9dc5;
+      let h2 = 0x9e3779b9;
+      for (let i = 0; i < message.length; i++) {
+        const ch = message.charCodeAt(i);
+        h1 = Math.imul(h1 ^ ch, 0x01000193);
+        h2 = Math.imul(h2 ^ (ch + i), 0x85ebca6b);
+      }
+      const part1 = (h1 >>> 0).toString(16).padStart(8, '0');
+      const part2 = (h2 >>> 0).toString(16).padStart(8, '0');
+      return (part1 + part2 + part1 + part2 + part1 + part2 + part1 + part2).slice(0, 64);
+    }
+
+    // Persistence via Gemini Notebook Shim API
+    async function persistState() {
+      try {
+        if (window.notebookAppApi && typeof window.notebookAppApi.setAppState === 'function') {
+          await window.notebookAppApi.setAppState(appState);
+        }
+      } catch (err) {
+        // Ignore persistence errors silently so UI stays responsive
+      }
+    }
+
+    async function loadInitialState() {
+      try {
+        if (window.notebookAppApi && typeof window.notebookAppApi.getAppState === 'function') {
+          const saved = await window.notebookAppApi.getAppState();
+          if (saved && Array.isArray(saved.cases) && saved.cases.length === 4) {
+            appState = saved;
+          }
+        }
+      } catch (err) {
+        // Keep default initial state
+      }
+      renderAll();
+      if (window.notebookAppApi && typeof window.notebookAppApi.notifyAppReady === 'function') {
+        window.notebookAppApi.notifyAppReady();
+      }
+    }
+
+    // Tab Navigation
+    function switchTab(tabName) {
+      appState.activeTab = tabName;
+      const tabs = [`prematch`, `workbench`, `final`];
+      tabs.forEach((t) => {
+        const btn = document.getElementById(`tab-btn-${t}`);
+        const panel = document.getElementById(`panel-${t}`);
+        const isSel = t === tabName;
+        if (btn) btn.setAttribute(`aria-selected`, isSel ? `true` : `false`);
+        if (panel) panel.classList.toggle(`active`, isSel);
+      });
+      persistState();
+    }
+
+    function openCaseInWorkbench(caseId) {
+      appState.selectedCaseId = caseId;
+      switchTab(`workbench`);
+      renderWorkbench();
+    }
+
+    // Standards Tooltips (Hover + Focus + Click)
+    function populateAndPositionPopover(btn) {
+      const key = btn.getAttribute(`data-std`);
+      const info = STANDARDS_INFO[key];
+      const pop = document.getElementById(`std-popover`);
+      if (!info || !pop) return;
+
+      const codeEl = document.getElementById(`std-pop-code`);
+      const titleEl = document.getElementById(`std-pop-title`);
+      const bodyEl = document.getElementById(`std-pop-body`);
+      const ruleEl = document.getElementById(`std-pop-rule`);
+      if (codeEl) codeEl.textContent = info.code;
+      if (titleEl) titleEl.textContent = info.title;
+      if (bodyEl) bodyEl.textContent = info.body;
+      if (ruleEl) ruleEl.textContent = info.rule;
+
+      pop.classList.add(`visible`);
+      pop.setAttribute(`aria-hidden`, `false`);
+
+      const rect = btn.getBoundingClientRect();
+      const popRect = pop.getBoundingClientRect();
+      let left = rect.left;
+      if (left + popRect.width > window.innerWidth - 12) {
+        left = Math.max(12, window.innerWidth - popRect.width - 12);
+      }
+      let top = rect.bottom + 8;
+      if (top + popRect.height > window.innerHeight - 12) {
+        top = Math.max(12, rect.top - popRect.height - 8);
+      }
+      pop.style.left = `${left}px`;
+      pop.style.top = `${top}px`;
+    }
+
+    function showStdPopover(btn) {
+      clearTimeout(popoverHideTimer);
+      if (activeStdButton && activeStdButton !== btn) {
+        activeStdButton.setAttribute(`aria-expanded`, `false`);
+      }
+      activeStdButton = btn;
+      btn.setAttribute(`aria-expanded`, `true`);
+      populateAndPositionPopover(btn);
+    }
+
+    function scheduleHideStdPopover() {
+      clearTimeout(popoverHideTimer);
+      popoverHideTimer = setTimeout(() => {
+        hideStdPopover();
+      }, 220);
+    }
+
+    function toggleStdPopover(btn) {
+      const pop = document.getElementById(`std-popover`);
+      if (!pop) return;
+      const isOpen = pop.classList.contains(`visible`) && activeStdButton === btn;
+      if (isOpen) {
+        hideStdPopover();
+      } else {
+        showStdPopover(btn);
+      }
+    }
+
+    function hideStdPopover() {
+      const pop = document.getElementById(`std-popover`);
+      if (pop) {
+        pop.classList.remove(`visible`);
+        pop.setAttribute(`aria-hidden`, `true`);
+      }
+      if (activeStdButton) {
+        activeStdButton.setAttribute(`aria-expanded`, `false`);
+        activeStdButton = null;
+      }
+    }
+
+    // Blocker Resolution in Case 2
+    function resolveBlockerMode(caseId, mode) {
+      const c = appState.cases.find((item) => item.id === caseId);
+      if (!c || c.stage === `final`) return;
+
+      c.resolutionMode = mode;
+      c.blockerResolved = true;
+
+      if (mode === `quarantine`) {
+        c.bilagA = {
+          id: `BIL-2026-10-902A`,
+          date: `31.10.2026`,
+          desc: `4-Veis kontroll: Godkjent GRN (670k) + Karantene av 225k avvik på Konto 2995`,
+          entries: [
+            { konto: `4000`, navn: `Varekjøp / Subsea Fabrikasjon (Fysisk GRN-4412)`, debet: 670000.00, kredit: 0, mva: `0` },
+            { konto: `2995`, navn: `Sperret disputtkonto (145k uautorisert CO + 80k ulevert)`, debet: 225000.00, kredit: 0, mva: `0` },
+            { konto: `2400`, navn: `Leverandørgjeld Verft & Subsea AS (LEVF-77410)`, debet: 0, kredit: 895000.00, mva: `0` }
+          ]
+        };
+        c.bilagB = {
+          id: `BIL-2026-11-902B`,
+          date: `01.11.2026`,
+          desc: `Auto-reversering av disputtkonto 2995 ved kreditnota eller CO`,
+          note: `Den 01.11.2026 reverseres sperret beløp (225 000 NOK) mot innkommende kreditnota fra verftet. Kun 670 000 NOK frigis til utbetaling.`,
+          entries: [
+            { konto: `2400`, navn: `Leverandørgjeld (Utlignes ved kreditnota / avklaring)`, debet: 225000.00, kredit: 0, mva: `0` },
+            { konto: `2995`, navn: `Reversering sperret disputtkonto`, debet: 0, kredit: 225000.00, mva: `0` }
+          ]
+        };
+      } else if (mode === `co_approved`) {
+        c.bilagA = {
+          id: `BIL-2026-10-902A`,
+          date: `31.10.2026`,
+          desc: `Ettergodkjent Endringsordre CO-8809-B (145k) + Forskuddsperiodisering (80k)`,
+          entries: [
+            { konto: `4000`, navn: `Varekjøp / Subsea Fabrikasjon (GRN 670k + CO-8809-B 145k)`, debet: 815000.00, kredit: 0, mva: `0` },
+            { konto: `1700`, navn: `Forskuddsbetalt / Ikke-levert PO-8809 rest`, debet: 80000.00, kredit: 0, mva: `0` },
+            { konto: `2400`, navn: `Leverandørgjeld Verft & Subsea AS (LEVF-77410)`, debet: 0, kredit: 895000.00, mva: `0` }
+          ]
+        };
+        c.bilagB = {
+          id: `BIL-2026-11-902B`,
+          date: `01.11.2026`,
+          desc: `Auto-reversering av forskudd på ulevert PO-rest (80 000 NOK) ved november-levering`,
+          note: `80 000 NOK overføres tilbake fra forskuddskonto 1700 til varekjøp 4000 idet fysisk GRN for resterende PO-leveranse kvitteres i november.`,
+          entries: [
+            { konto: `4000`, navn: `Varekjøp / Subsea Fabrikasjon (November-mottak)`, debet: 80000.00, kredit: 0, mva: `0` },
+            { konto: `1700`, navn: `Reversering forskuddsperiodisering`, debet: 0, kredit: 80000.00, mva: `0` }
+          ]
+        };
+      }
+
+      persistState();
+      renderAll();
+    }
+
+    // Promote Pre-Match -> Final Match with Cryptographic SHA-256 Block
+    async function promoteToFinalMatch(caseId) {
+      const c = appState.cases.find((item) => item.id === caseId);
+      if (!c || c.stage === `final`) return;
+      if (c.isBlocker && !c.blockerResolved) return;
+
+      const lastBlock = appState.auditChain[appState.auditChain.length - 1];
+      const nowStr = new Date().toISOString().replace('T', ' ').slice(0, 19) + ` UTC`;
+      const payloadForHash = JSON.stringify({
+        index: appState.auditChain.length,
+        prevHash: lastBlock.blockHash,
+        caseId: c.id,
+        grossNok: c.grossNok,
+        voucherA: c.bilagA.id,
+        voucherB: c.bilagB.id,
+        resolutionMode: c.resolutionMode,
+        entriesA: c.bilagA.entries,
+        timestamp: nowStr
+      });
+
+      const newHash = await computeSha256(payloadForHash);
+
+      c.stage = `final`;
+      c.sealedAt = nowStr;
+      c.blockHash = newHash;
+
+      appState.auditChain.push({
+        index: appState.auditChain.length,
+        timestamp: nowStr,
+        caseId: c.id,
+        caseCode: c.code,
+        title: c.title,
+        approver: `CONTROLLER · GODKJENT & FORSEGLET`,
+        voucherA: c.bilagA.id,
+        voucherB: c.bilagB.id,
+        amountNok: c.grossNok,
+        prevHash: lastBlock.blockHash,
+        blockHash: newHash
+      });
+
+      await persistState();
+      renderAll();
+    }
+
+    // Two-step inline Reset (no confirm/alert)
+    function handleResetDemo(btn) {
+      if (btn.dataset.armed !== `true`) {
+        btn.dataset.armed = `true`;
+        btn.classList.add(`btn-danger-outline`);
+        btn.innerHTML = `<i data-lucide="alert-triangle" aria-hidden="true"></i> Bekreft tilbakestilling`;
+        if (window.lucide) window.lucide.createIcons();
+        setTimeout(() => {
+          if (btn.dataset.armed === `true`) {
+            btn.dataset.armed = `false`;
+            btn.classList.remove(`btn-danger-outline`);
+            btn.innerHTML = `<i data-lucide="rotate-ccw" aria-hidden="true"></i> Tilbakestill`;
+            if (window.lucide) window.lucide.createIcons();
+          }
+        }, 4000);
+        return;
+      }
+
+      btn.dataset.armed = `false`;
+      btn.classList.remove(`btn-danger-outline`);
+      btn.innerHTML = `<i data-lucide="rotate-ccw" aria-hidden="true"></i> Tilbakestill`;
+
+      appState = {
+        activeTab: `prematch`,
+        selectedCaseId: `case-1`,
+        exportFormat: `xml`,
+        cases: JSON.parse(JSON.stringify(INITIAL_CASES)),
+        auditChain: [JSON.parse(JSON.stringify(GENESIS_BLOCK))]
+      };
+      persistState();
+      switchTab(`prematch`);
+      renderAll();
+    }
+
+    // Render KPIs & Tab Counts
+    function renderKpis() {
+      const total = appState.cases.length;
+      const finalCases = appState.cases.filter((c) => c.stage === `final`);
+      const prematchCases = appState.cases.filter((c) => c.stage === `prematch`);
+      const activeBlockers = prematchCases.filter((c) => c.isBlocker && !c.blockerResolved);
+      const nonBlockerPrematch = prematchCases.filter((c) => !(c.isBlocker && !c.blockerResolved));
+
+      const readinessPct = Math.round((finalCases.length / total) * 100);
+      const finalSum = finalCases.reduce((acc, c) => acc + c.grossNok, 0);
+      const prematchSum = nonBlockerPrematch.reduce((acc, c) => acc + c.grossNok, 0);
+      const blockerSum = activeBlockers.reduce((acc, c) => acc + c.grossNok, 0);
+
+      const pctEl = document.getElementById(`kpi-readiness-pct`);
+      const fillEl = document.getElementById(`readiness-fill`);
+      const barEl = document.getElementById(`readiness-progressbar`);
+      const subEl = document.getElementById(`kpi-readiness-sub`);
+
+      if (pctEl) pctEl.textContent = `${readinessPct}%`;
+      if (fillEl) fillEl.style.width = `${readinessPct}%`;
+      if (barEl) barEl.setAttribute(`aria-valuenow`, String(readinessPct));
+      if (subEl) {
+        subEl.textContent = `${finalCases.length} av ${total} komplekse saker forseglet i Final Match`;
+        subEl.className = readinessPct === 100 ? `metric-sub emerald` : `metric-sub`;
+      }
+
+      const pmCountEl = document.getElementById(`kpi-prematch-count`);
+      const pmNokEl = document.getElementById(`kpi-prematch-nok`);
+      if (pmCountEl) pmCountEl.textContent = String(nonBlockerPrematch.length);
+      if (pmNokEl) pmNokEl.textContent = `${formatNok(prematchSum)} til gjennomgang`;
+
+      const blkCountEl = document.getElementById(`kpi-blocker-count`);
+      const blkSubEl = document.getElementById(`kpi-blocker-sub`);
+      if (blkCountEl) blkCountEl.textContent = String(activeBlockers.length);
+      if (blkSubEl) {
+        if (activeBlockers.length > 0) {
+          blkSubEl.textContent = `${formatNok(blockerSum)} venter på CO / GRN-avklaring`;
+          blkSubEl.className = `metric-sub crimson`;
+        } else {
+          blkSubEl.textContent = `Ingen aktive blokkeringer · Kontrollport klar`;
+          blkSubEl.className = `metric-sub emerald`;
+        }
+      }
+
+      const fnCountEl = document.getElementById(`kpi-final-count`);
+      const fnNokEl = document.getElementById(`kpi-final-nok`);
+      if (fnCountEl) fnCountEl.textContent = String(finalCases.length);
+      if (fnNokEl) fnNokEl.textContent = `${formatNok(finalSum)} deterministisk låst (Δ = 0,00)`;
+
+      const cPm = document.getElementById(`count-prematch`);
+      const cWb = document.getElementById(`count-workbench`);
+      const cFn = document.getElementById(`count-final`);
+      if (cPm) cPm.textContent = String(prematchCases.length);
+      if (cWb) cWb.textContent = String(total);
+      if (cFn) cFn.textContent = String(finalCases.length);
+    }
+
+    function renderStdBadgesInline(stdKeys) {
+      return stdKeys.map((key) => {
+        const labelMap = {
+          ifrs15: `IFRS 15`,
+          isa240: `ISA 240`,
+          isa315: `ISA 315/500`,
+          bokforing: `Bokføringsloven`
+        };
+        return `<span class="std-tooltip-wrap">
+          <button type="button" class="std-badge" data-std="${key}" aria-expanded="false"
+            onmouseenter="showStdPopover(this)" onmouseleave="scheduleHideStdPopover()"
+            onfocus="showStdPopover(this)" onblur="scheduleHideStdPopover()"
+            onclick="toggleStdPopover(this)">${labelMap[key] || key}</button>
+        </span>`;
+      }).join('');
+    }
+
+    // Render Tab 1: Pre-Match Staging List
+    function renderPrematchList() {
+      const container = document.getElementById(`prematch-list`);
+      if (!container) return;
+
+      const items = appState.cases.filter((c) => c.stage === `prematch`);
+      if (items.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <span class="chip chip-emerald">100% Ferdigstilt · Alle kandidater forseglet</span>
+            <h2 class="case-title">Ingen gjenstående poster i Pre-Match Staging</h2>
+            <p class="page-subtitle">Samtlige 4 EPC- og subsea-avstemminger har passert deterministisk null-avvikskontroll og er forseglet i Final Match med SHA-256 revisjonsblokk.</p>
+            <button type="button" class="btn btn-primary" onclick="switchTab('final')">Gå til Final Match &amp; Revisjonskjede</button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = items.map((c) => {
+        const isHardBlocked = c.isBlocker && !c.blockerResolved;
+        const cardClass = isHardBlocked ? `blocker` : `prematch`;
+        const statusChip = isHardBlocked
+          ? `<span class="chip chip-crimson">KRITISK BLOKKERING · KONFIDENS ${c.confidence}%</span>`
+          : `<span class="chip chip-amber">PRE-MATCH KANDIDAT · KONFIDENS ${c.confidence}%</span>`;
+
+        return `
+          <article class="case-card ${cardClass}">
+            <div class="case-card-top">
+              <div>
+                <div class="case-meta-row">
+                  <span class="eyebrow-mono">${escapeHtml(c.code)}</span>
+                  ${statusChip}
+                  <span class="chip chip-cyan">${escapeHtml(c.floatTolerance)}</span>
+                </div>
+                <h2 class="case-title">${escapeHtml(c.title)}</h2>
+                <div class="case-meta-row">
+                  ${renderStdBadgesInline(c.standards)}
+                </div>
+              </div>
+              <div class="header-actions">
+                <button type="button" class="btn btn-primary" onclick="openCaseInWorkbench('${c.id}')">
+                  <i data-lucide="split" aria-hidden="true"></i>
+                  Åpne i Arbeidsbenk
+                </button>
+                ${!isHardBlocked ? `
+                  <button type="button" class="btn btn-emerald" onclick="promoteToFinalMatch('${c.id}')">
+                    <i data-lucide="shield-check" aria-hidden="true"></i>
+                    Godkjenn &amp; Forsegl
+                  </button>
+                ` : ``}
+              </div>
+            </div>
+
+            <div class="case-metrics-strip">
+              <div>
+                <div class="mini-stat-label">Side A (Ekstern / Bank / PO)</div>
+                <div class="mini-stat-val">${escapeHtml(c.sideASummary)}</div>
+              </div>
+              <div>
+                <div class="mini-stat-label">Side B (Hovedbok / Faktura)</div>
+                <div class="mini-stat-val">${escapeHtml(c.sideBSummary)}</div>
+              </div>
+              <div>
+                <div class="mini-stat-label">Isolert Avvik / Toleranse</div>
+                <div class="mini-stat-val">${escapeHtml(c.varianceLabel)}</div>
+              </div>
+              <div>
+                <div class="mini-stat-label">Heuristisk Regel</div>
+                <div class="mini-stat-val">${escapeHtml(c.ruleUsed)}</div>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    // Render Tab 2: Review & Correction Workbench
+    function renderWorkbench() {
+      const selEl = document.getElementById(`workbench-selector`);
+      const contentEl = document.getElementById(`workbench-content`);
+      if (!selEl || !contentEl) return;
+
+      selEl.innerHTML = appState.cases.map((c) => {
+        const isSelected = c.id === appState.selectedCaseId;
+        let badge = `<span class="chip chip-amber">Pre-Match ${c.confidence}%</span>`;
+        if (c.stage === `final`) {
+          badge = `<span class="chip chip-emerald">Final Match</span>`;
+        } else if (c.isBlocker && !c.blockerResolved) {
+          badge = `<span class="chip chip-crimson">Blokkert</span>`;
+        }
+        return `
+          <button type="button" class="wb-pill ${isSelected ? `selected` : ``}" onclick="selectWorkbenchCase('${c.id}')">
+            <div class="wb-pill-head">
+              <span class="wb-pill-code">${escapeHtml(c.code)}</span>
+              ${badge}
+            </div>
+            <div class="wb-pill-name">${escapeHtml(c.title)}</div>
+          </button>
+        `;
+      }).join('');
+
+      const c = appState.cases.find((item) => item.id === appState.selectedCaseId) || appState.cases[0];
+      if (!c) return;
+
+      const isFinal = c.stage === `final`;
+      const isHardBlocked = c.isBlocker && !c.blockerResolved;
+
+      const sumSideA = c.sideALines.reduce((acc, l) => acc + l.amountNok, 0);
+      const sumSideB = c.sideBLines.reduce((acc, l) => acc + l.amountNok, 0);
+
+      // Compute balanced delta for Side A vs Side B
+      let displayDelta = 0;
+      if (c.id === `case-2`) {
+        // PO 750k vs GRN 670k vs Invoice 895k
+        displayDelta = isHardBlocked ? 225000.00 : 0.00;
+      } else {
+        displayDelta = Math.abs(sumSideA - sumSideB);
+      }
+
+      const renderSideRows = (lines, isCase2SideA) => {
+        return lines.map((line) => {
+          const rowCls = line.type === `isolated` ? `row-iso` : (line.type === `blocker` ? `row-blocker` : ``);
+          return `
+            <tr class="${rowCls}">
+              <td><strong>${escapeHtml(line.ref)}</strong><br><span class="metric-sub">${escapeHtml(line.date)}</span></td>
+              <td>${escapeHtml(line.desc)}</td>
+              <td class="num">${formatNok(line.amountNok)}</td>
+            </tr>
+          `;
+        }).join('');
+      };
+
+      // Blocker Governance Gate UI for Case 2
+      let blockerGateHtml = ``;
+      if (c.isBlocker) {
+        const resolvedCls = c.blockerResolved ? `resolved` : ``;
+        blockerGateHtml = `
+          <div class="blocker-gate-box ${resolvedCls}">
+            <div class="case-card-top">
+              <div>
+                <div class="eyebrow-mono">ISA 240 &amp; IFRS 15 KONTROLLPORT · 4-VEIS AVVIKSHÅNDTERING</div>
+                <h3 class="side-title">${c.blockerResolved
+                  ? `Kontrollavvik avklart (${c.resolutionMode === `quarantine` ? `Karantene på Konto 2995` : `Ettergodkjent CO-8809-B`}) — Klar for forsegling`
+                  : `Hard Blocker: Faktura overstiger PO (750k) og Fysisk GRN (670k) med 145 000 NOK uautorisert overtid`}</h3>
+              </div>
+              <span class="chip ${c.blockerResolved ? `chip-emerald` : `chip-crimson`}">
+                ${c.blockerResolved ? `Avklart · Δ = 0,00` : `Sperret for Final Match`}
+              </span>
+            </div>
+            ${!isFinal ? `
+              <div class="resolution-options">
+                <button type="button" class="res-option-btn ${c.resolutionMode === `quarantine` ? `active` : ``}" onclick="resolveBlockerMode('${c.id}', 'quarantine')">
+                  <strong>Alternativ A · Karantene &amp; Kreditnota-krav (Anbefalt)</strong>
+                  <span class="metric-sub">Kostnadsfør kun verifisert GRN (670 000 NOK). Plasser 225 000 NOK (145k overtid + 80k ulevert) på sperret Konto 2995 med auto-reversering 01.11.</span>
+                </button>
+                <button type="button" class="res-option-btn ${c.resolutionMode === `co_approved` ? `active` : ``}" onclick="resolveBlockerMode('${c.id}', 'co_approved')">
+                  <strong>Alternativ B · Registrer godkjent Endringsordre CO-8809-B</strong>
+                  <span class="metric-sub">Overstyr sperre med dokumentert CO-8809-B (+145 000 NOK til Konto 4000) og periodiser 80 000 NOK ulevert PO som forskudd på Konto 1700.</span>
+                </button>
+              </div>
+            ` : ``}
+          </div>
+        `;
+      }
+
+      const renderVoucherTable = (voucher) => {
+        const totDeb = voucher.entries.reduce((a, e) => a + e.debet, 0);
+        const totKred = voucher.entries.reduce((a, e) => a + e.kredit, 0);
+        return `
+          <div class="table-wrap">
+            <table class="fin-table">
+              <thead>
+                <tr>
+                  <th>Konto</th>
+                  <th>Kontonavn &amp; Tekst</th>
+                  <th class="num">Debet (NOK)</th>
+                  <th class="num">Kredit (NOK)</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${voucher.entries.map((e) => `
+                  <tr>
+                    <td><strong>${escapeHtml(e.konto)}</strong></td>
+                    <td>${escapeHtml(e.navn)}</td>
+                    <td class="num">${e.debet > 0 ? formatNok(e.debet) : `—`}</td>
+                    <td class="num">${e.kredit > 0 ? formatNok(e.kredit) : `—`}</td>
+                  </tr>
+                `).join('')}
+                <tr class="row-total">
+                  <td colspan="2">Sum Balansekontroll (Debet = Kredit)</td>
+                  <td class="num">${formatNok(totDeb)}</td>
+                  <td class="num">${formatNok(totKred)}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        `;
+      };
+
+      const statusBadge = isFinal
+        ? `<span class="chip chip-emerald">FINAL MATCH · FORSEGLET (${escapeHtml(c.sealedAt || `31.10.2026`)})</span>`
+        : (isHardBlocked
+          ? `<span class="chip chip-crimson">HARD BLOCKER · AVVIK KREVER BESLUTNING</span>`
+          : `<span class="chip chip-amber">PRE-MATCH STAGING · KONFIDENS ${c.confidence}%</span>`);
+
+      contentEl.innerHTML = `
+        <div class="panel" style="display:grid; gap: var(--space-lg);">
+          <div class="case-card-top">
+            <div>
+              <div class="case-meta-row">
+                <span class="eyebrow-mono">${escapeHtml(c.code)}</span>
+                ${statusBadge}
+              </div>
+              <h2 class="case-title">${escapeHtml(c.title)}</h2>
+              <div class="case-meta-row">${renderStdBadgesInline(c.standards)}</div>
+            </div>
+            <div>
+              ${isFinal ? `
+                <button type="button" class="btn btn-emerald" disabled>
+                  <i data-lucide="lock" aria-hidden="true"></i>
+                  Forseglet i Final Match
+                </button>
+              ` : `
+                <button type="button" class="btn btn-emerald" ${isHardBlocked ? `disabled` : ``} onclick="promoteToFinalMatch('${c.id}')">
+                  <i data-lucide="shield-check" aria-hidden="true"></i>
+                  Godkjenn &amp; Forsegl (Pre-Match → Final Match)
+                </button>
+              `}
+            </div>
+          </div>
+
+          ${blockerGateHtml}
+
+          <!-- Adra-style 2-Sided View -->
+          <div class="two-sided-grid">
+            <div class="side-panel">
+              <div class="side-header">
+                <h3 class="side-title">${escapeHtml(c.sideATitle)}</h3>
+                <span class="chip chip-cyan">Side A</span>
+              </div>
+              <div class="table-wrap">
+                <table class="fin-table">
+                  <thead>
+                    <tr>
+                      <th>Referanse</th>
+                      <th>Beskrivelse</th>
+                      <th class="num">Beløp (NOK)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${renderSideRows(c.sideALines, c.id === `case-2`)}
+                    <tr class="row-total">
+                      <td colspan="2">${c.id === `case-2` ? `Autorisert PO-ramme (GRN 670k + Åpen PO 80k)` : `Sum Side A (inkl. isolerte poster)`}</td>
+                      <td class="num">${formatNok(c.id === `case-2` ? 750000.00 : sumSideA)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="side-panel">
+              <div class="side-header">
+                <h3 class="side-title">${escapeHtml(c.sideBTitle)}</h3>
+                <span class="chip chip-cyan">Side B</span>
+              </div>
+              <div class="table-wrap">
+                <table class="fin-table">
+                  <thead>
+                    <tr>
+                      <th>Referanse</th>
+                      <th>Beskrivelse</th>
+                      <th class="num">Beløp (NOK)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${renderSideRows(c.sideBLines, false)}
+                    <tr class="row-total">
+                      <td colspan="2">Sum Side B</td>
+                      <td class="num">${formatNok(sumSideB)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Deterministic Delta Bar -->
+          <div class="delta-bar">
+            <div class="delta-equations">
+              <div class="delta-item">
+                <span class="mini-stat-label">Bilag A Debet = Kredit</span>
+                <span class="mini-stat-val">${formatNok(c.bilagA.entries.reduce((a, e) => a + e.debet, 0))}</span>
+              </div>
+              <div class="delta-item">
+                <span class="mini-stat-label">Restavvik (Netto Delta)</span>
+                <span class="mini-stat-val ${displayDelta === 0 ? `metric-sub emerald` : `metric-sub crimson`}">${formatNok(displayDelta)}</span>
+              </div>
+              <div class="delta-item">
+                <span class="mini-stat-label">SHA-256 Status</span>
+                <span class="mini-stat-val">${isFinal ? escapeHtml(c.blockHash.slice(0, 18) + `…`) : `Beregnes ved forsegling`}</span>
+              </div>
+            </div>
+            <span class="chip ${displayDelta === 0 ? `chip-emerald` : `chip-crimson`}">
+              ${displayDelta === 0 ? `Deterministisk Balanse: Δ = 0,00 NOK` : `Uavklart Kontrollavvik: ${formatNok(displayDelta)}`}
+            </span>
+          </div>
+
+          <!-- Regex Tokenization & Paired Vouchers -->
+          <div class="workbench-lower-grid">
+            <div class="side-panel">
+              <div class="side-header">
+                <h3 class="side-title">Regex-Tokenisering &amp; Rådata-ekstraksjon</h3>
+                <span class="chip chip-cyan">Raw Readability</span>
+              </div>
+              <div class="well">${c.rawPayloadHtml}</div>
+              <div class="token-chips">
+                ${c.tokens.map((t) => `
+                  <div class="token-chip">
+                    <span>${escapeHtml(t.label)}</span>
+                    <strong>${escapeHtml(t.value)}</strong>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+
+            <div class="side-panel">
+              <div class="side-header">
+                <h3 class="side-title">Foreslått Paret Bilagsføring (Closing + Auto-Reversering)</h3>
+                <span class="chip chip-amber">Bokføringsloven § 7</span>
+              </div>
+              <div class="voucher-grid">
+                <div class="voucher-card bilag-a">
+                  <div class="eyebrow-mono">CLOSING BILAG A · ${escapeHtml(c.bilagA.date)} · ${escapeHtml(c.bilagA.id)}</div>
+                  <div class="metric-sub">${escapeHtml(c.bilagA.desc)}</div>
+                  ${renderVoucherTable(c.bilagA)}
+                </div>
+                <div class="voucher-card bilag-b">
+                  <div class="eyebrow-mono">AUTO-REVERSERING BILAG B · ${escapeHtml(c.bilagB.date)} · ${escapeHtml(c.bilagB.id)}</div>
+                  <div class="metric-sub">${escapeHtml(c.bilagB.desc)}</div>
+                  ${renderVoucherTable(c.bilagB)}
+                  <div class="metric-sub">${escapeHtml(c.bilagB.note)}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function selectWorkbenchCase(caseId) {
+      appState.selectedCaseId = caseId;
+      persistState();
+      renderWorkbench();
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    // Render Tab 3: Final Match List & Live SHA-256 Audit Stream
+    function renderFinalAndAudit() {
+      const finalListEl = document.getElementById(`final-list`);
+      const auditEl = document.getElementById(`audit-stream-container`);
+      if (!finalListEl || !auditEl) return;
+
+      const finalItems = appState.cases.filter((c) => c.stage === `final`);
+      if (finalItems.length === 0) {
+        finalListEl.innerHTML = `
+          <div class="empty-state">
+            <span class="chip chip-amber">0 av 4 saker forseglet</span>
+            <h2 class="case-title">Ingen saker er forseglet i Final Match ennå</h2>
+            <p class="page-subtitle">Gå til Pre-Match eller Korreksjonsbenken for å inspisere Side A/B, avklare eventuelle kontrollblokkeringer og trykke «Godkjenn &amp; Forsegl».</p>
+            <button type="button" class="btn btn-primary" onclick="switchTab('workbench')">Åpne Gjennomgang &amp; Korreksjonsbenk</button>
+          </div>
+        `;
+      } else {
+        finalListEl.innerHTML = finalItems.map((c) => `
+          <article class="case-card finalmatch">
+            <div class="case-card-top">
+              <div>
+                <div class="case-meta-row">
+                  <span class="eyebrow-mono">${escapeHtml(c.code)}</span>
+                  <span class="chip chip-emerald">FINAL MATCH · Δ = 0,00 NOK</span>
+                  <span class="chip chip-cyan">Forseglet ${escapeHtml(c.sealedAt || ``)}</span>
+                </div>
+                <h2 class="case-title">${escapeHtml(c.title)}</h2>
+                <div class="metric-sub">SHA-256: <strong>${escapeHtml(c.blockHash || ``)}</strong></div>
+              </div>
+              <button type="button" class="btn" onclick="openCaseInWorkbench('${c.id}')">
+                <i data-lucide="eye" aria-hidden="true"></i>
+                Inspiser Låst Bilag
+              </button>
+            </div>
+            <div class="case-metrics-strip">
+              <div>
+                <div class="mini-stat-label">Brutto Avstemt Volum</div>
+                <div class="mini-stat-val">${formatNok(c.grossNok)}</div>
+              </div>
+              <div>
+                <div class="mini-stat-label">Closing Bilag A (31.10.2026)</div>
+                <div class="mini-stat-val">${escapeHtml(c.bilagA.id)}</div>
+              </div>
+              <div>
+                <div class="mini-stat-label">Auto-Reversering Bilag B (01.11.2026)</div>
+                <div class="mini-stat-val">${escapeHtml(c.bilagB.id)}</div>
+              </div>
+              <div>
+                <div class="mini-stat-label">Isolert Differanse</div>
+                <div class="mini-stat-val">${escapeHtml(c.varianceLabel)}</div>
+              </div>
+            </div>
+          </article>
+        `).join('');
+      }
+
+      // Render Cryptographic Chain (Newest first, Genesis at bottom)
+      const reversedChain = [...appState.auditChain].reverse();
+      auditEl.innerHTML = reversedChain.map((blk) => `
+        <div class="audit-block ${blk.index === 0 ? `genesis` : ``}">
+          <div class="case-card-top">
+            <div>
+              <strong>BLOKK #${blk.index} · ${escapeHtml(blk.caseCode)}</strong> — ${escapeHtml(blk.title)}
+            </div>
+            <span class="chip ${blk.index === 0 ? `chip-cyan` : `chip-emerald`}">${escapeHtml(blk.approver)}</span>
+          </div>
+          <div class="audit-hash-row">
+            <span>Tid: ${escapeHtml(blk.timestamp)}</span>
+            <span>Bilag A: ${escapeHtml(blk.voucherA)}</span>
+            <span>Bilag B: ${escapeHtml(blk.voucherB)}</span>
+            <span>Beløp: ${formatNok(blk.amountNok)}</span>
+          </div>
+          <div class="audit-hash-row">
+            <span>Prev Hash: ${escapeHtml(blk.prevHash)}</span>
+          </div>
+          <div class="audit-hash-row">
+            <span class="hash-val">SHA-256: ${escapeHtml(blk.blockHash)}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Export Modal (SAF-T XML v1.30 & ERP CSV)
+    function buildSafTXml() {
+      const sealed = appState.cases.filter((c) => c.stage === `final`);
+      const targetCases = sealed.length > 0 ? sealed : appState.cases;
+      const lines = [];
+      lines.push(`<?xml version="1.0" encoding="UTF-8"?>`);
+      lines.push(`<AuditFile xmlns="urn:StandardAuditFile-Taxation-Financial:NO">`);
+      lines.push(`  <Header>`);
+      lines.push(`    <AuditFileVersion>1.30</AuditFileVersion>`);
+      lines.push(`    <AuditFileCountry>NO</AuditFileCountry>`);
+      lines.push(`    <AuditFileDateCreated>2026-11-15</AuditFileDateCreated>`);
+      lines.push(`    <SoftwareCompanyName>CLOSE-AI</SoftwareCompanyName>`);
+      lines.push(`    <SoftwareID>CLOSE-AI-ControlRoom</SoftwareID>`);
+      lines.push(`    <DefaultCurrencyCode>NOK</DefaultCurrencyCode>`);
+      lines.push(`    <SelectionCriteria><PeriodStart>10</PeriodStart><PeriodEnd>10</PeriodEnd><PeriodYear>2026</PeriodYear></SelectionCriteria>`);
+      lines.push(`  </Header>`);
+      lines.push(`  <GeneralLedgerEntries>`);
+      lines.push(`    <NumberOfEntries>${targetCases.length * 2}</NumberOfEntries>`);
+
+      targetCases.forEach((c) => {
+        [c.bilagA, c.bilagB].forEach((bilag) => {
+          lines.push(`    <Journal>`);
+          lines.push(`      <JournalID>${escapeXmlText(bilag.id)}</JournalID>`);
+          lines.push(`      <Description>${escapeXmlText(bilag.desc)} [${c.stage === `final` ? `FINAL-SEALED` : `PRE-MATCH-DRAFT`}]</Description>`);
+          lines.push(`      <Transaction>`);
+          lines.push(`        <TransactionID>${escapeXmlText(bilag.id)}</TransactionID>`);
+          lines.push(`        <Period>10</Period>`);
+          lines.push(`        <PeriodYear>2026</PeriodYear>`);
+          lines.push(`        <TransactionDate>${bilag.date.split(`.`).reverse().join(`-`)}</TransactionDate>`);
+          if (c.blockHash) {
+            lines.push(`        <AuditBlockSHA256>${c.blockHash}</AuditBlockSHA256>`);
+          }
+          bilag.entries.forEach((e, idx) => {
+            lines.push(`        <Line>`);
+            lines.push(`          <RecordID>${idx + 1}</RecordID>`);
+            lines.push(`          <AccountID>${e.konto}</AccountID>`);
+            lines.push(`          <Description>${escapeXmlText(e.navn)}</Description>`);
+            if (e.debet > 0) lines.push(`          <DebitAmount><Amount>${e.debet.toFixed(2)}</Amount></DebitAmount>`);
+            if (e.kredit > 0) lines.push(`          <CreditAmount><Amount>${e.kredit.toFixed(2)}</Amount></CreditAmount>`);
+            lines.push(`        </Line>`);
+          });
+          lines.push(`      </Transaction>`);
+          lines.push(`    </Journal>`);
+        });
+      });
+
+      lines.push(`  </GeneralLedgerEntries>`);
+      lines.push(`</AuditFile>`);
+      return lines.join('\n');
+    }
+
+    function escapeXmlText(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    function buildErpCsv() {
+      const sealed = appState.cases.filter((c) => c.stage === `final`);
+      const targetCases = sealed.length > 0 ? sealed : appState.cases;
+      const rows = [`Sak;Status;Bilagsnummer;Dato;Konto;Kontonavn;Debet_NOK;Kredit_NOK;SHA256_Forsegling`];
+      targetCases.forEach((c) => {
+        const statusStr = c.stage === `final` ? `FINAL_MATCH_FORSEGLET` : `PRE_MATCH_UTKAST`;
+        const hashStr = c.blockHash || `IKKE_FORSEGLET`;
+        [c.bilagA, c.bilagB].forEach((bilag) => {
+          bilag.entries.forEach((e) => {
+            rows.push(`${c.code};${statusStr};${bilag.id};${bilag.date};${e.konto};"${e.navn.replace(/"/g, '""')}";${e.debet.toFixed(2)};${e.kredit.toFixed(2)};${hashStr}`);
+          });
+        });
+      });
+      return rows.join('\n');
+    }
+
+    function openExportModal() {
+      const modal = document.getElementById(`export-modal`);
+      if (!modal) return;
+      modal.classList.add(`open`);
+      renderExportPreview();
+    }
+
+    function closeExportModal() {
+      const modal = document.getElementById(`export-modal`);
+      if (modal) modal.classList.remove(`open`);
+      const fb = document.getElementById(`export-feedback`);
+      if (fb) fb.textContent = ``;
+    }
+
+    function setExportFormat(fmt) {
+      appState.exportFormat = fmt;
+      renderExportPreview();
+    }
+
+    function renderExportPreview() {
+      const sealedCount = appState.cases.filter((c) => c.stage === `final`).length;
+      const bannerEl = document.getElementById(`export-status-banner`);
+      const previewEl = document.getElementById(`export-preview-code`);
+      const xmlBtn = document.getElementById(`fmt-xml-btn`);
+      const csvBtn = document.getElementById(`fmt-csv-btn`);
+
+      if (xmlBtn) xmlBtn.className = `btn btn-sm ${appState.exportFormat === `xml` ? `btn-primary` : ``}`;
+      if (csvBtn) csvBtn.className = `btn btn-sm ${appState.exportFormat === `csv` ? `btn-primary` : ``}`;
+
+      if (bannerEl) {
+        if (sealedCount === 0) {
+          bannerEl.className = `chip chip-amber`;
+          bannerEl.textContent = `Forhåndsvisning av utkast (0 forseglede saker — forsegl i Final Match for produksjonslås)`;
+        } else {
+          bannerEl.className = `chip chip-emerald`;
+          bannerEl.textContent = `Eksporterer ${sealedCount} kryptografisk forseglede Final Match-saker (Δ = 0,00 NOK)`;
+        }
+      }
+
+      if (previewEl) {
+        previewEl.textContent = appState.exportFormat === `xml` ? buildSafTXml() : buildErpCsv();
+      }
+    }
+
+    async function copyExportPayload() {
+      const content = appState.exportFormat === `xml` ? buildSafTXml() : buildErpCsv();
+      const fb = document.getElementById(`export-feedback`);
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(content);
+          if (fb) fb.textContent = `Kopiert til utklippstavlen (${appState.exportFormat.toUpperCase()})!`;
+          return;
+        }
+      } catch (err) {
+        // Fallback selection
+      }
+      if (fb) fb.textContent = `Bruk Last ned fil eller merk teksten i forhåndsvisningen.`;
+    }
+
+    function downloadExportPayload() {
+      const isXml = appState.exportFormat === `xml`;
+      const content = isXml ? buildSafTXml() : buildErpCsv();
+      const filename = isXml ? `SAF-T_CLOSE-AI_2026-10.xml` : `ERP_Bilag_CLOSE-AI_2026-10.csv`;
+      const contentType = isXml ? `text/plain` : `text/csv`;
+      const fb = document.getElementById(`export-feedback`);
+
+      if (window.notebookAppApi && typeof window.notebookAppApi.triggerFileDownload === `function`) {
+        window.notebookAppApi.triggerFileDownload({
+          content: content,
+          contentType: contentType,
+          encoding: `UTF-8`,
+          filename: filename
+        });
+        if (fb) fb.textContent = `Nedlasting startet: ${filename}`;
+      } else {
+        const blob = new Blob([content], { type: contentType + `;charset=utf-8` });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement(`a`);
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        if (fb) fb.textContent = `Fil generert: ${filename}`;
+      }
+    }
+
+    function renderAll() {
+      renderKpis();
+      renderPrematchList();
+      renderWorkbench();
+      renderFinalAndAudit();
+      switchTab(appState.activeTab || `prematch`);
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+    }
+
+    // Keyboard & Popover Lifecycle
+    document.addEventListener(`keydown`, (e) => {
+      if (e.key === `Escape`) {
+        hideStdPopover();
+        closeExportModal();
+      }
+    });
+
+    const popEl = document.getElementById(`std-popover`);
+    if (popEl) {
+      popEl.addEventListener(`mouseenter`, () => clearTimeout(popoverHideTimer));
+      popEl.addEventListener(`mouseleave`, () => scheduleHideStdPopover());
+    }
+
+    document.addEventListener(`DOMContentLoaded`, () => {
+      loadInitialState();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,2724 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="artifact-type" content="dashboard">
+  <meta name="design-style" content="aurora">
+  <title>CLOSE-AI Kontrollrom &amp; Autonom Avstemmingsmotor — Nordic Engineering Projects AS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@1.43.0/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      color-scheme: dark;
+
+      /* Page and surfaces: deep oceanic slate steps (Aurora) */
+      --background: #0c1214;
+      --surface-container-low: #111a1e;
+      --surface-container: #152024;
+      --surface-container-high: #1c2a30;
+
+      /* Text */
+      --on-surface: #edf3f5;
+      --on-surface-variant: #94a8b0;
+
+      /* Borders */
+      --outline: #38515c;
+      --outline-variant: #213138;
+
+      /* Accents */
+      --primary: #63c7d6;
+      --on-primary: #081214;
+      --primary-container: #163840;
+      --on-primary-container: #c7f0f7;
+      --secondary: #5d7882;
+      --tertiary: #87d69b;
+      --error: #f27474;
+      --on-error: #1a0606;
+
+      /* Data series */
+      --data-1: #63c7d6;
+      --data-2: #87d69b;
+      --data-3: #e8b954;
+      --data-4: #f08c70;
+      --data-context: #415861;
+
+      /* Fonts */
+      --font-headline: 'Instrument Sans', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+      --font-label: 'Geist Mono', monospace;
+
+      /* Shape */
+      --rounded: 0.5rem;
+      --rounded-lg: 0.75rem;
+      --rounded-full: 9999px;
+
+      /* Style effects */
+      --hairline: 1px solid var(--outline-variant);
+      --hairline-strong: 1px solid var(--outline);
+      --panel-gradient: linear-gradient(180deg, #162226 0%, #111a1e 100%);
+      --heading-tracking: -0.025em;
+      --label-tracking: 0.06em;
+      --sage-tint: color-mix(in srgb, var(--tertiary) 13%, transparent);
+      --cyan-tint: color-mix(in srgb, var(--primary) 13%, transparent);
+      --amber-tint: color-mix(in srgb, var(--data-3) 14%, transparent);
+      --error-tint: color-mix(in srgb, var(--error) 14%, transparent);
+      --modal-backdrop: color-mix(in srgb, var(--background) 82%, transparent);
+      --shadow-popover: 0 8px 24px color-mix(in srgb, var(--background) 70%, transparent);
+
+      /* Shared semantic & focus tokens */
+      --positive: var(--tertiary);
+      --warning: var(--data-3);
+      --focus: var(--primary);
+
+      /* Dashboard / Tool type scale */
+      --display-size: clamp(1.65rem, 1.3rem + 1.1vw, 2.15rem);
+      --headline-size: clamp(1.2rem, 1.05rem + 0.45vw, 1.45rem);
+      --subhead-size: clamp(1rem, 0.96rem + 0.25vw, 1.15rem);
+      --body-size: clamp(0.9375rem, 0.9rem + 0.12vw, 1rem);
+      --label-size: 0.75rem;
+
+      /* Spacing scale */
+      --space-xs: 0.25rem;
+      --space-sm: 0.5rem;
+      --space-md: 1rem;
+      --space-lg: 1.5rem;
+      --space-xl: 2.5rem;
+      --space-2xl: 4rem;
+
+      /* Motion */
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+      --dur-micro: 120ms;
+      --dur-short: 220ms;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+      overflow-x: clip;
+      margin: 0;
+      padding: 0;
+      background: var(--background);
+      color: var(--on-surface);
+      font-family: var(--font-body);
+      font-size: var(--body-size);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    header { position: static !important; }
+
+    button, input, select, textarea {
+      font-family: inherit;
+      font-size: inherit;
+      color: inherit;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: 2px;
+    }
+
+    .page-grid {
+      display: grid;
+      gap: var(--space-lg);
+      padding: var(--space-lg);
+      max-width: 1360px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    .page-grid * { min-width: 0; }
+
+    /* Header & Title */
+    .app-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: var(--space-md);
+      padding-bottom: var(--space-md);
+      border-bottom: var(--hairline);
+    }
+    .title-block h1 {
+      margin: 0;
+      font-family: var(--font-headline);
+      font-size: var(--display-size);
+      font-weight: 600;
+      letter-spacing: var(--heading-tracking);
+      line-height: 1.1;
+      color: var(--on-surface);
+    }
+    .title-block p {
+      margin: var(--space-xs) 0 0;
+      color: var(--on-surface-variant);
+      font-size: var(--body-size);
+      max-width: 65ch;
+    }
+    .header-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+      align-items: center;
+    }
+
+    /* Typography helpers */
+    .data-label {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      font-weight: 500;
+      letter-spacing: var(--label-tracking);
+      text-transform: uppercase;
+      color: var(--on-surface-variant);
+    }
+    .mono {
+      font-family: var(--font-label);
+      font-variant-numeric: tabular-nums;
+    }
+    .num {
+      font-family: var(--font-label);
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+    }
+    h2 {
+      margin: 0;
+      font-family: var(--font-headline);
+      font-size: var(--headline-size);
+      font-weight: 600;
+      letter-spacing: var(--heading-tracking);
+      line-height: 1.15;
+    }
+    h3 {
+      margin: 0;
+      font-family: var(--font-headline);
+      font-size: var(--subhead-size);
+      font-weight: 600;
+      letter-spacing: var(--heading-tracking);
+      line-height: 1.2;
+    }
+
+    /* Panels & Wells */
+    .panel {
+      background: var(--panel-gradient);
+      border: var(--hairline);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-lg);
+    }
+    .panel-compact {
+      background: var(--panel-gradient);
+      border: var(--hairline);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-md);
+    }
+    .well {
+      background: var(--background);
+      border: var(--hairline);
+      border-radius: var(--rounded);
+      padding: var(--space-md);
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+      min-height: 44px;
+      padding: var(--space-xs) var(--space-md);
+      border-radius: var(--rounded);
+      border: var(--hairline-strong);
+      background: var(--surface-container);
+      color: var(--on-surface);
+      font-family: var(--font-headline);
+      font-weight: 600;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: background-color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out), opacity var(--dur-micro) var(--ease-out);
+    }
+    .btn:hover:not(:disabled) {
+      background: var(--surface-container-high);
+      border-color: var(--primary);
+    }
+    .btn:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: var(--on-primary);
+      border-color: var(--primary);
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--primary) 85%, var(--on-surface));
+      border-color: var(--primary);
+    }
+    .btn-positive {
+      background: var(--sage-tint);
+      color: var(--tertiary);
+      border-color: color-mix(in srgb, var(--tertiary) 45%, transparent);
+    }
+    .btn-positive:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--tertiary) 24%, transparent);
+      border-color: var(--tertiary);
+    }
+    .btn-danger {
+      background: var(--error-tint);
+      color: var(--error);
+      border-color: color-mix(in srgb, var(--error) 45%, transparent);
+    }
+    .btn-danger:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--error) 24%, transparent);
+      border-color: var(--error);
+    }
+    .btn-sm {
+      min-height: 36px;
+      padding: var(--space-xs) var(--space-sm);
+      font-size: 0.8125rem;
+    }
+
+    /* Status chips */
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+      padding: 0.2rem var(--space-sm);
+      border-radius: var(--rounded);
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      font-weight: 500;
+      white-space: nowrap;
+      border: var(--hairline);
+    }
+    .chip-sage {
+      background: var(--sage-tint);
+      color: var(--tertiary);
+      border-color: color-mix(in srgb, var(--tertiary) 35%, transparent);
+    }
+    .chip-cyan {
+      background: var(--cyan-tint);
+      color: var(--primary);
+      border-color: color-mix(in srgb, var(--primary) 35%, transparent);
+    }
+    .chip-amber {
+      background: var(--amber-tint);
+      color: var(--warning);
+      border-color: color-mix(in srgb, var(--warning) 35%, transparent);
+    }
+    .chip-error {
+      background: var(--error-tint);
+      color: var(--error);
+      border-color: color-mix(in srgb, var(--error) 40%, transparent);
+    }
+
+    /* Close Clock & Readiness Top Bar */
+    .close-clock-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+      gap: var(--space-lg);
+      align-items: stretch;
+    }
+    .wd-track {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: var(--space-sm);
+      margin-top: var(--space-md);
+    }
+    .wd-step {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-xs);
+      padding: var(--space-sm);
+      min-height: 44px;
+      border-radius: var(--rounded);
+      background: var(--background);
+      border: var(--hairline);
+      cursor: pointer;
+      text-align: left;
+      transition: background-color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
+    }
+    .wd-step:hover {
+      background: var(--surface-container-high);
+      border-color: var(--outline);
+    }
+    .wd-step.is-active {
+      background: var(--primary-container);
+      border-color: var(--primary);
+    }
+    .wd-step.is-done {
+      border-color: color-mix(in srgb, var(--tertiary) 40%, transparent);
+    }
+    .wd-code {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      font-weight: 600;
+      color: var(--on-surface);
+    }
+    .wd-step.is-active .wd-code { color: var(--on-primary-container); }
+    .wd-name {
+      font-size: 0.78rem;
+      color: var(--on-surface-variant);
+      line-height: 1.25;
+    }
+    .wd-step.is-active .wd-name { color: var(--on-primary-container); }
+
+    .wd-detail-bar {
+      margin-top: var(--space-md);
+      padding: var(--space-sm) var(--space-md);
+      background: var(--background);
+      border: var(--hairline);
+      border-radius: var(--rounded);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-sm);
+      font-size: 0.875rem;
+    }
+
+    .readiness-box {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: var(--space-md);
+    }
+    .readiness-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      flex-wrap: wrap;
+    }
+    .readiness-score-value {
+      font-family: var(--font-headline);
+      font-size: 2.25rem;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: var(--heading-tracking);
+      line-height: 1;
+    }
+    .progress-track {
+      width: 100%;
+      height: 10px;
+      background: var(--background);
+      border: var(--hairline);
+      border-radius: var(--rounded-full);
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: var(--rounded-full);
+      transition: width var(--dur-short) var(--ease-out), background-color var(--dur-short) var(--ease-out);
+      background: var(--primary);
+    }
+    .readiness-controls {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: var(--space-sm);
+      align-items: end;
+    }
+    .range-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    /* Navigation Tabs */
+    .nav-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+      border-bottom: var(--hairline);
+      padding-bottom: var(--space-sm);
+    }
+    .nav-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+      min-height: 44px;
+      padding: var(--space-xs) var(--space-md);
+      border-radius: var(--rounded);
+      border: var(--hairline);
+      background: var(--surface-container-low);
+      color: var(--on-surface-variant);
+      font-family: var(--font-headline);
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
+    }
+    .nav-tab:hover {
+      background: var(--surface-container-high);
+      color: var(--on-surface);
+    }
+    .nav-tab.is-active {
+      background: var(--primary-container);
+      color: var(--on-primary-container);
+      border-color: var(--primary);
+    }
+    .tab-badge {
+      font-family: var(--font-label);
+      font-size: 0.72rem;
+      padding: 1px 6px;
+      border-radius: var(--rounded-full);
+      background: var(--background);
+      color: var(--primary);
+      border: var(--hairline);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.is-active {
+      display: grid;
+      gap: var(--space-lg);
+      animation: fadeSlide var(--dur-short) var(--ease-out);
+    }
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* KPI Strip */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(230px, 100%), 1fr));
+      gap: var(--space-md);
+    }
+    .kpi-card {
+      background: var(--panel-gradient);
+      border: var(--hairline);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+    .kpi-val {
+      font-family: var(--font-headline);
+      font-size: 1.75rem;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: var(--heading-tracking);
+      line-height: 1.15;
+    }
+    .kpi-sub {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      color: var(--on-surface-variant);
+    }
+
+    /* Overview Split Layout */
+    .overview-split {
+      display: grid;
+      grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr);
+      gap: var(--space-lg);
+      align-items: start;
+    }
+
+    /* Filters Row */
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+      align-items: end;
+      justify-content: space-between;
+      margin-bottom: var(--space-md);
+    }
+    .filter-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-xs);
+    }
+
+    /* Tables */
+    .table-wrap {
+      overflow-x: auto;
+      border: var(--hairline);
+      border-radius: var(--rounded);
+      background: var(--background);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    th {
+      text-align: left;
+      padding: var(--space-sm) var(--space-md);
+      background: var(--surface-container-low);
+      border-bottom: var(--hairline);
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: var(--label-tracking);
+      color: var(--on-surface-variant);
+      white-space: nowrap;
+    }
+    th.num { text-align: right; }
+    td {
+      padding: var(--space-sm) var(--space-md);
+      border-bottom: var(--hairline);
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: 0; }
+    tbody tr {
+      transition: background-color var(--dur-micro) var(--ease-out);
+    }
+    tbody tr:hover {
+      background: var(--surface-container);
+    }
+    tbody tr.is-selected {
+      background: var(--primary-container);
+    }
+
+    /* Rich Audit Tooltips (ISA 240, ISA 315, IFRS 15) */
+    .tooltip-trigger {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: var(--rounded);
+      background: var(--surface-container);
+      border: var(--hairline-strong);
+      color: var(--primary);
+      font-family: var(--font-label);
+      font-size: 0.72rem;
+      cursor: help;
+    }
+    .tooltip-trigger:focus-visible,
+    .tooltip-trigger:hover {
+      background: var(--primary-container);
+      border-color: var(--primary);
+    }
+    .tooltip-card {
+      display: none;
+      position: absolute;
+      left: 0;
+      top: calc(100% + 6px);
+      z-index: 40;
+      width: min(320px, 78vw);
+      padding: var(--space-md);
+      background: var(--surface-container-high);
+      border: 1px solid var(--primary);
+      border-radius: var(--rounded);
+      box-shadow: var(--shadow-popover);
+      color: var(--on-surface);
+      font-family: var(--font-body);
+      font-size: 0.8125rem;
+      line-height: 1.45;
+      text-align: left;
+      white-space: normal;
+    }
+    .tooltip-trigger:hover .tooltip-card,
+    .tooltip-trigger:focus-within .tooltip-card,
+    .tooltip-trigger.is-open .tooltip-card {
+      display: block;
+    }
+    .tooltip-title {
+      font-family: var(--font-label);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: var(--label-tracking);
+      color: var(--primary);
+      margin-bottom: var(--space-xs);
+      display: block;
+    }
+
+    /* Scenarios Tab */
+    .scenario-selector-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+      gap: var(--space-md);
+    }
+    .scenario-card-btn {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+      padding: var(--space-md);
+      border-radius: var(--rounded-lg);
+      background: var(--surface-container-low);
+      border: var(--hairline);
+      text-align: left;
+      cursor: pointer;
+      min-height: 44px;
+      transition: border-color var(--dur-micro) var(--ease-out), background-color var(--dur-micro) var(--ease-out);
+    }
+    .scenario-card-btn:hover {
+      background: var(--surface-container-high);
+      border-color: var(--outline);
+    }
+    .scenario-card-btn.is-active {
+      background: var(--primary-container);
+      border-color: var(--primary);
+    }
+    .scenario-card-btn.is-active .data-label,
+    .scenario-card-btn.is-active p {
+      color: var(--on-primary-container);
+    }
+
+    .scenario-workbench {
+      display: grid;
+      gap: var(--space-lg);
+    }
+    .two-col {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr));
+      gap: var(--space-lg);
+    }
+    .code-stream {
+      font-family: var(--font-label);
+      font-size: 0.8125rem;
+      background: var(--background);
+      border: var(--hairline);
+      border-radius: var(--rounded);
+      padding: var(--space-md);
+      overflow-x: auto;
+      line-height: 1.55;
+      color: var(--on-surface);
+    }
+    .hl-token {
+      background: var(--cyan-tint);
+      color: var(--primary);
+      border: 1px solid color-mix(in srgb, var(--primary) 40%, transparent);
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-weight: 600;
+    }
+    .hl-warn {
+      background: var(--amber-tint);
+      color: var(--warning);
+      border: 1px solid color-mix(in srgb, var(--warning) 40%, transparent);
+      padding: 1px 4px;
+      border-radius: 3px;
+    }
+    .hl-err {
+      background: var(--error-tint);
+      color: var(--error);
+      border: 1px solid color-mix(in srgb, var(--error) 40%, transparent);
+      padding: 1px 4px;
+      border-radius: 3px;
+    }
+
+    /* Inputs & Form controls */
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+    .field-label {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      color: var(--on-surface-variant);
+      text-transform: uppercase;
+      letter-spacing: var(--label-tracking);
+    }
+    .input-ctrl {
+      height: 40px;
+      padding: 0 var(--space-sm);
+      border-radius: var(--rounded);
+      border: var(--hairline-strong);
+      background: var(--background);
+      color: var(--on-surface);
+      font-family: var(--font-label);
+      font-size: 0.85rem;
+      width: 100%;
+    }
+    .input-ctrl:focus {
+      outline: 2px solid var(--focus);
+      outline-offset: 1px;
+    }
+    .input-ctrl.is-invalid {
+      border-color: var(--error);
+      background: var(--error-tint);
+    }
+
+    /* Voucher Module */
+    .voucher-pair {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+      gap: var(--space-lg);
+      align-items: start;
+    }
+    .balance-banner {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-md);
+      padding: var(--space-md);
+      border-radius: var(--rounded);
+      border: var(--hairline-strong);
+    }
+    .balance-banner.is-valid {
+      background: var(--sage-tint);
+      border-color: var(--tertiary);
+      color: var(--tertiary);
+    }
+    .balance-banner.is-invalid {
+      background: var(--error-tint);
+      border-color: var(--error);
+      color: var(--error);
+    }
+
+    /* Chart container */
+    .chart-box {
+      position: relative;
+      min-height: 250px;
+      width: 100%;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: var(--modal-backdrop);
+      padding: var(--space-lg);
+      overflow-y: auto;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.is-open {
+      display: flex;
+    }
+    .modal-dialog {
+      width: min(880px, 100%);
+      max-height: 90vh;
+      overflow-y: auto;
+      background: var(--surface-container);
+      border: 1px solid var(--outline);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-lg);
+      display: grid;
+      gap: var(--space-md);
+      box-shadow: var(--shadow-popover);
+    }
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-md);
+      border-bottom: var(--hairline);
+      padding-bottom: var(--space-sm);
+    }
+
+    .inline-feedback {
+      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--rounded);
+      border: var(--hairline);
+      background: var(--surface-container);
+      font-size: 0.875rem;
+      display: none;
+    }
+    .inline-feedback.is-visible { display: block; }
+
+    /* Responsive adjustments */
+    @media (max-width: 980px) {
+      .close-clock-grid,
+      .overview-split,
+      .voucher-pair {
+        grid-template-columns: 1fr;
+      }
+    }
+    @media (max-width: 640px) {
+      .page-grid {
+        padding: var(--space-sm);
+        gap: var(--space-md);
+      }
+      .wd-track {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .panel { padding: var(--space-md); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-grid">
+    <!-- HEADER -->
+    <header class="app-header">
+      <div class="title-block">
+        <h1>CLOSE-AI Finansielt Avslutningskontrollrom</h1>
+        <p>Nordic Engineering Projects AS (Subsea / EPC) · Org.nr 914 882 310 · Periode M10 / Oktober 2026 · Autonom avstemmingsmotor og menneskelig kontrollport</p>
+      </div>
+      <div class="header-actions">
+        <button type="button" class="btn btn-primary" onclick="openExportModal()">
+          <i data-lucide="file-output" aria-hidden="true" style="width:16px;height:16px;"></i>
+          <span>Eksporter SAF-T / CSV</span>
+        </button>
+        <button type="button" class="btn" id="btn-reset-demo" onclick="resetDemoState(this)">
+          <i data-lucide="rotate-ccw" aria-hidden="true" style="width:16px;height:16px;"></i>
+          <span>Tilbakestill demo</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- 1. CLOSE CLOCK & READINESS BAR -->
+    <section class="close-clock-grid" aria-label="Close Clock og beredskapsstatus">
+      <div class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:var(--space-sm);flex-wrap:wrap;">
+          <div>
+            <span class="data-label">Close Clock · Månedsavslutning Oktober 2026</span>
+            <h2 style="margin-top:var(--space-xs);">Fremdriftslinje WD-2 til WD+4</h2>
+          </div>
+          <span class="chip chip-cyan" id="active-wd-pill">Aktiv fase: WD+1 · Matching</span>
+        </div>
+
+        <div class="wd-track" id="wd-track" role="tablist" aria-label="Arbeidsdager i avslutningssyklus">
+          <!-- Rendered by JS -->
+        </div>
+
+        <div class="wd-detail-bar" id="wd-detail-bar">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+
+      <div class="panel readiness-box">
+        <div class="readiness-top">
+          <div>
+            <span class="data-label">Close Readiness Score</span>
+            <div style="display:flex;align-items:baseline;gap:var(--space-sm);margin-top:var(--space-xs);">
+              <span class="readiness-score-value" id="readiness-pct">42%</span>
+              <span class="mono" style="font-size:0.8rem;color:var(--on-surface-variant);" id="readiness-mode-label">(Beregnet fra avstemmingsstatus)</span>
+            </div>
+          </div>
+          <span class="chip chip-error" id="global-status-badge" aria-live="polite">CLOSE BLOCKED</span>
+        </div>
+
+        <div>
+          <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="42" id="readiness-progressbar">
+            <div class="progress-fill" id="readiness-fill" style="width:42%;"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:var(--space-xs);" class="data-label">
+            <span>0% Sperret</span>
+            <span>60% Handling</span>
+            <span>95% Klar for sign-off</span>
+          </div>
+        </div>
+
+        <div class="readiness-controls">
+          <div class="range-wrap">
+            <label for="slider-readiness" class="field-label">Interaktiv terskel-simulator (0%–100%)</label>
+            <input type="range" id="slider-readiness" min="0" max="100" value="42" oninput="syncReadinessFromSlider(this.value)">
+          </div>
+          <div class="field-group" style="width:88px;">
+            <label for="input-readiness" class="field-label">Score %</label>
+            <input type="number" id="input-readiness" class="input-ctrl" min="0" max="100" value="42" oninput="syncReadinessFromNumber(this.value)">
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:var(--space-sm);flex-wrap:wrap;">
+          <span style="font-size:0.8125rem;color:var(--on-surface-variant);" id="readiness-blocker-summary">Gjenstår: 4 komplekse scenarier og signering av Bilag A+B.</span>
+          <button type="button" class="btn btn-sm" id="btn-auto-calc-readiness" onclick="restoreComputedReadiness()">Bruk faktisk score</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- INLINE ACTION FEEDBACK -->
+    <div id="global-feedback" class="inline-feedback" role="status" aria-live="polite"></div>
+
+    <!-- PRIMARY NAVIGATION TABS -->
+    <nav class="nav-tabs" role="tablist" aria-label="Kontrollrom-visninger">
+      <button type="button" class="nav-tab is-active" id="tab-btn-queue" role="tab" aria-selected="true" onclick="switchTab('queue')">
+        <i data-lucide="layers" aria-hidden="true" style="width:16px;height:16px;"></i>
+        <span>Avstemmingskø &amp; Oversikt</span>
+        <span class="tab-badge" id="badge-queue-open">6 åpne</span>
+      </button>
+      <button type="button" class="nav-tab" id="tab-btn-scenarios" role="tab" aria-selected="false" onclick="switchTab('scenarios')">
+        <i data-lucide="git-compare-arrows" aria-hidden="true" style="width:16px;height:16px;"></i>
+        <span>Komplekse Avstemminger</span>
+        <span class="tab-badge" id="badge-scenarios-open">4 scenarier</span>
+      </button>
+      <button type="button" class="nav-tab" id="tab-btn-voucher" role="tab" aria-selected="false" onclick="switchTab('voucher')">
+        <i data-lucide="file-check-2" aria-hidden="true" style="width:16px;height:16px;"></i>
+        <span>Bilag &amp; Reversering (A/B)</span>
+        <span class="tab-badge" id="badge-voucher-status">Utkast</span>
+      </button>
+      <button type="button" class="nav-tab" id="tab-btn-audit" role="tab" aria-selected="false" onclick="switchTab('audit')">
+        <i data-lucide="shield-check" aria-hidden="true" style="width:16px;height:16px;"></i>
+        <span>SHA-256 Revisjonsstrøm</span>
+        <span class="tab-badge" id="badge-audit-count">4 hendelser</span>
+      </button>
+    </nav>
+
+    <!-- TAB 1: AVSTEMMINGSKØ & OVERSIKT -->
+    <section id="tab-queue" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-btn-queue">
+      <div class="kpi-grid" id="kpi-cards">
+        <!-- Rendered by JS -->
+      </div>
+
+      <div class="overview-split">
+        <div class="panel">
+          <div class="filter-bar">
+            <div>
+              <span class="data-label">Adra Matcher-inspirert arbeidskø · Raw Readability</span>
+              <h2 style="margin-top:var(--space-xs);">Avstemmingskø og Foreslåtte Matcher</h2>
+            </div>
+            <div class="filter-group" role="group" aria-label="Filtrer avstemmingskø">
+              <button type="button" class="btn btn-sm" id="flt-all" onclick="setQueueFilter('all')">Alle</button>
+              <button type="button" class="btn btn-sm" id="flt-unmatched" onclick="setQueueFilter('Uavstemt')">Uavstemt</button>
+              <button type="button" class="btn btn-sm" id="flt-suggested" onclick="setQueueFilter('Foreslått match')">Foreslåtte</button>
+              <button type="button" class="btn btn-sm" id="flt-discrepancy" onclick="setQueueFilter('Avvik')">Avvik</button>
+              <button type="button" class="btn btn-sm" id="flt-matched" onclick="setQueueFilter('Avstemt')">Avstemt</button>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID / Dato</th>
+                  <th>Kilde &amp; Råtekst</th>
+                  <th>Kardinalitet</th>
+                  <th class="num">Beløp (NOK)</th>
+                  <th>Status</th>
+                  <th>Revisjonskrav</th>
+                  <th>Handling</th>
+                </tr>
+              </thead>
+              <tbody id="queue-tbody">
+                <!-- Rendered by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <aside style="display:grid;gap:var(--space-lg);" aria-label="Inspeksjon og eksponering">
+          <div class="panel" id="queue-inspector">
+            <!-- Rendered by JS -->
+          </div>
+
+          <div class="panel">
+            <span class="data-label">Eksponering og avviksfordeling (NOK)</span>
+            <h3 style="margin-top:var(--space-xs);margin-bottom:var(--space-md);">Avstemmingsstatus per kategori</h3>
+            <div class="chart-box">
+              <canvas id="reconChart" aria-label="Graf over avstemmingsstatus i NOK"></canvas>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- TAB 2: KOMPLEKSE AVSTEMMINGER -->
+    <section id="tab-scenarios" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-scenarios">
+      <div class="panel">
+        <span class="data-label">Autonom avviks- og multi-way motor</span>
+        <h2 style="margin-top:var(--space-xs);margin-bottom:var(--space-md);">4 Kritiske Subsea / EPC Avstemmingsscenarier</h2>
+        <div class="scenario-selector-grid" id="scenario-selector-grid">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+
+      <div class="panel scenario-workbench" id="scenario-workbench">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- TAB 3: BILAGS- OG REVERSERINGSMODUL -->
+    <section id="tab-voucher" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-voucher">
+      <div class="panel">
+        <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:var(--space-md);margin-bottom:var(--space-md);">
+          <div>
+            <span class="data-label">Human-in-the-Loop · NS 4102 Kontoplan &amp; WBS-kontroll</span>
+            <h2 style="margin-top:var(--space-xs);">Bilags- og Reverseringsmodul (Bilag A &amp; Bilag B)</h2>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:var(--space-sm);">
+            <button type="button" class="btn" id="btn-toggle-edit-voucher" onclick="toggleVoucherEdit()">
+              <i data-lucide="pencil" aria-hidden="true" style="width:16px;height:16px;"></i>
+              <span>Rediger linjer</span>
+            </button>
+            <button type="button" class="btn btn-primary" id="btn-post-vouchers" onclick="postVoucherPair()">
+              <i data-lucide="check-circle-2" aria-hidden="true" style="width:16px;height:16px;"></i>
+              <span>Godkjenn &amp; Bokfør</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="balance-banner is-valid" id="voucher-balance-banner" role="status" aria-live="polite">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+
+      <div class="voucher-pair">
+        <div class="panel" id="voucher-a-panel">
+          <!-- Rendered by JS -->
+        </div>
+        <div class="panel" id="voucher-b-panel">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: SHA-256 REVISJONSSTRØM -->
+    <section id="tab-audit" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-audit">
+      <div class="panel">
+        <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:var(--space-md);margin-bottom:var(--space-md);">
+          <div>
+            <span class="data-label">Uforanderlig kryptografisk sporbarhet · Bokføringsloven § 13</span>
+            <h2 style="margin-top:var(--space-xs);">Sanntids SHA-256 Revisjonslogg</h2>
+          </div>
+          <button type="button" class="btn btn-primary" onclick="openExportModal()">
+            <i data-lucide="download" aria-hidden="true" style="width:16px;height:16px;"></i>
+            <span>Åpne Eksportmodal (SAF-T / CSV)</span>
+          </button>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Tidspunkt (UTC)</th>
+                <th>Hendelse / Kontrollpunkt</th>
+                <th>Aktør</th>
+                <th>Referanse</th>
+                <th>Forrige Hash (kort)</th>
+                <th>SHA-256 Signatur</th>
+              </tr>
+            </thead>
+            <tbody id="audit-tbody">
+              <!-- Rendered by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- EKSPORTMODAL -->
+  <div class="modal-overlay" id="export-modal" role="dialog" aria-modal="true" aria-labelledby="export-modal-title">
+    <div class="modal-dialog">
+      <div class="modal-head">
+        <div>
+          <span class="data-label">Revisjonsklar dataeksport · Periode 2026-10</span>
+          <h2 id="export-modal-title" style="margin-top:var(--space-xs);">Eksport av SAF-T XML, ERP CSV og SHA-256 Revisjonsstrøm</h2>
+        </div>
+        <button type="button" class="btn btn-sm" onclick="closeExportModal()" aria-label="Lukk eksportmodal">
+          <i data-lucide="x" aria-hidden="true" style="width:16px;height:16px;"></i>
+          <span>Lukk</span>
+        </button>
+      </div>
+
+      <div style="display:flex;flex-wrap:wrap;gap:var(--space-sm);">
+        <button type="button" class="btn btn-sm" id="exp-tab-saft" onclick="setExportPreview('saft')">SAF-T Financial XML (v1.30)</button>
+        <button type="button" class="btn btn-sm" id="exp-tab-csv" onclick="setExportPreview('csv')">Visma / Business Central CSV</button>
+        <button type="button" class="btn btn-sm" id="exp-tab-sha" onclick="setExportPreview('sha')">SHA-256 Revisjonskjede</button>
+      </div>
+
+      <pre class="code-stream" id="export-preview-code" style="max-height:340px;margin:0;"></pre>
+
+      <div id="export-modal-msg" class="inline-feedback" role="status"></div>
+
+      <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:var(--space-sm);">
+        <span class="data-label" id="export-meta-info">Klar for nedlasting via sikker eksportkanal</span>
+        <div style="display:flex;flex-wrap:wrap;gap:var(--space-sm);">
+          <button type="button" class="btn" onclick="copyExportPreview()">
+            <i data-lucide="copy" aria-hidden="true" style="width:16px;height:16px;"></i>
+            <span>Kopier innhold</span>
+          </button>
+          <button type="button" class="btn btn-primary" onclick="downloadCurrentExport()">
+            <i data-lucide="download" aria-hidden="true" style="width:16px;height:16px;"></i>
+            <span id="btn-download-label">Last ned SAF-T XML</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <api-shim></api-shim>
+  <script>
+    // =========================================================================
+    // PURE-JS SHA-256 IMPLEMENTATION (deterministic, zero external dependency)
+    // =========================================================================
+    function sha256(ascii) {
+      function rightRotate(value, amount) {
+        return (value >>> amount) | (value << (32 - amount));
+      }
+      var mathPow = Math.pow;
+      var maxWord = mathPow(2, 32);
+      var lengthProperty = 'length';
+      var i, j;
+      var result = '';
+      var words = [];
+      var asciiBitLength = ascii[lengthProperty] * 8;
+      var hash = sha256.h = sha256.h || [];
+      var k = sha256.k = sha256.k || [];
+      var primeCounter = k[lengthProperty];
+      var isComposite = {};
+      for (var candidate = 2; primeCounter < 64; candidate++) {
+        if (!isComposite[candidate]) {
+          for (i = 0; i < 313; i += candidate) {
+            isComposite[i] = candidate;
+          }
+          hash[primeCounter] = (mathPow(candidate, 0.5) * maxWord) | 0;
+          k[primeCounter++] = (mathPow(candidate, 1 / 3) * maxWord) | 0;
+        }
+      }
+      ascii += '\x80';
+      while (ascii[lengthProperty] % 64 - 56) ascii += '\x00';
+      for (i = 0; i < ascii[lengthProperty]; i++) {
+        j = ascii.charCodeAt(i);
+        if (j >> 8) return '';
+        words[i >> 2] |= j << ((3 - i) % 4) * 8;
+      }
+      words[words[lengthProperty]] = ((asciiBitLength / maxWord) | 0);
+      words[words[lengthProperty]] = (asciiBitLength);
+      for (j = 0; j < words[lengthProperty];) {
+        var w = words.slice(j, j += 16);
+        var oldHash = hash;
+        hash = hash.slice(0, 8);
+        for (i = 0; i < 64; i++) {
+          var w15 = w[i - 15], w2 = w[i - 2];
+          var a = hash[0], e = hash[4];
+          var temp1 = hash[7]
+            + (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25))
+            + ((e & hash[5]) ^ ((~e) & hash[6]))
+            + k[i]
+            + (w[i] = (i < 16) ? w[i] : (
+              w[i - 16]
+              + (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3))
+              + w[i - 7]
+              + (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))
+            ) | 0);
+          var temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22))
+            + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
+          hash = [(temp1 + temp2) | 0].concat(hash);
+          hash[4] = (hash[4] + temp1) | 0;
+        }
+        for (i = 0; i < 8; i++) {
+          hash[i] = (hash[i] + oldHash[i]) | 0;
+        }
+      }
+      for (i = 0; i < 8; i++) {
+        for (j = 3; j + 1; j--) {
+          var b = (hash[i] >> (j * 8)) & 255;
+          result += ((b < 16) ? 0 : '') + b.toString(16);
+        }
+      }
+      return result;
+    }
+
+    // =========================================================================
+    // INITIAL DOMAIN DATA (Nordic Engineering Projects AS - Subsea / EPC)
+    // =========================================================================
+    const WORKDAYS = [
+      { code: `WD-2`, name: `Rådatainnlesing`, status: `Fullført`, summary: `Bankstrømmer (DNB/HSBC), Visma/BC hovedbok og Subsea PO/GRN-lister lest inn i råformat uten manuell Excel-vask.` },
+      { code: `WD-1`, name: `Leverandørkutt`, status: `Fullført`, summary: `Periodeskille for varemottak (GRN) og ingeniørtimer per 31.10.2026 låst med 94,2% automatch på standardposter.` },
+      { code: `WD+1`, name: `Avvik & Matching`, status: `Aktiv`, summary: `Håndtering av 4 komplekse avstemmingsscenarier (gebyrsplitt, 4-parts EPC, GBP-netting og OCR-remisse) samt foreslåtte matcher.` },
+      { code: `WD+2`, name: `IFRS 15 & Valuta`, status: `Planlagt`, summary: `Kontroll av prosjektfremdrift, agio/valutaomregning og ferdigstillelsesgrad (PoC) på Subsea-kontrakter.` },
+      { code: `WD+3`, name: `Bilag & Reversering`, status: `Planlagt`, summary: `Gjennomgang og godkjenning av periodiseringsbilag (Bilag A) og koblet autoreversering (Bilag B) med WBS-sjekk.` },
+      { code: `WD+4`, name: `Sign-off & SAF-T`, status: `Planlagt`, summary: `Controller sign-off, lukking av avviksliste og kryptografisk forseglet eksport til SAF-T Financial XML.` }
+    ];
+
+    const ISA_STANDARDS = {
+      ISA240: {
+        code: `ISA 240`,
+        title: `ISA 240 — Revisors ansvar vedrørende misligheter`,
+        desc: `Krever skjerpet kontroll ved uvanlige eller uautoriserte posteringer, overstyring av kontroller (management override) og manuelle tilleggskrav uten godkjent endringsordre (VO).`
+      },
+      ISA315: {
+        code: `ISA 315`,
+        title: `ISA 315 — Forståelse av foretaket og internkontroll`,
+        desc: `Adresserer risiko for vesentlig feilinformasjon i komplekse datastrømmer (rådata, OCR-skanning, valutaflyt) og krever sporbar kobling mellom transaksjon, regel og bevis.`
+      },
+      IFRS15: {
+        code: `IFRS 15`,
+        title: `IFRS 15 — Driftsinntekter fra kontrakter med kunder`,
+        desc: `Styrer periodisering og måling av vederlag ved samleinnbetalinger, kontantrabatter, kreditnotaer og kontraktsendringer (Variable Consideration & Contract Modifications).`
+      }
+    };
+
+    function createDefaultState() {
+      const seedLog = [];
+      function pushSeed(ts, event, actor, ref) {
+        const prev = seedLog.length ? seedLog[seedLog.length - 1].hash : `0000000000000000000000000000000000000000000000000000000000000000`;
+        const h = sha256(`${ts}|${event}|${actor}|${ref}|${prev}`);
+        seedLog.push({ ts, event, actor, ref, prevHash: prev, hash: h });
+      }
+      pushSeed(`2026-10-31T22:00:00Z`, `Rådata-innlesing: 1 428 bank- og ERP-transaksjoner importert`, `CLOSE-AI Ingestion`, `BATCH-M10-INIT`);
+      pushSeed(`2026-10-31T22:04:12Z`, `Autonom 1:1 matching fullført (1 345 transaksjoner, 94,2%)`, `Adra-Engine v4`, `RULE-EXACT-01`);
+      pushSeed(`2026-11-01T07:15:00Z`, `4 komplekse avvik flagget for menneskelig kontroll`, `AI Risk Triage`, `ISA-240/315/IFRS-15`);
+
+      return {
+        activeTab: `queue`,
+        activeDay: `WD+1`,
+        activeScenario: 1,
+        queueFilter: `all`,
+        selectedQueueId: `Q-101`,
+        readinessOverride: null,
+        exportTab: `saft`,
+        voucherEditMode: false,
+        voucherPosted: false,
+        reconChartRendered: false,
+        queueItems: [
+          {
+            id: `Q-101`,
+            date: `2026-10-29`,
+            source: `DNB Bank / Equinor Energy AS`,
+            rawText: `SWIFT-EQN-NO/BATCH-88491//NETTO_ETTER_GEBYR_SHA`,
+            cardinality: `1:Mange`,
+            amount: 89512.50,
+            variance: -2037.50,
+            status: `Avvik`,
+            standard: `IFRS15`,
+            scenarioId: 1,
+            confidence: 96,
+            ruleNote: `Regex-agent fant BATCH-88491 mot 4 fakturaer (91 550 NOK). Avvik 2 037,50 NOK isolert til gebyrkonto 7770.`
+          },
+          {
+            id: `Q-102`,
+            date: `2026-10-30`,
+            source: `Kongsberg Subsea Components AS`,
+            rawText: `INV-99210 // PO-8809 // GRN-3312 (Delvis avvist)`,
+            cardinality: `4-Parts EPC`,
+            amount: 895000.00,
+            variance: 225000.00,
+            status: `Avvik`,
+            standard: `ISA240`,
+            scenarioId: 2,
+            confidence: 99,
+            ruleNote: `80 000 NOK avvist i GRN + 145 000 NOK uautorisert overtid uten VO. Kritisk ISA 240-sjekk påkrevd.`
+          },
+          {
+            id: `Q-103`,
+            date: `2026-10-30`,
+            source: `Nordic Subsea UK Ltd (Netting)`,
+            rawText: `TREASURY-GBP-SETTLE-£125000 // 4D FLOAT`,
+            cardinality: `Mange:Mange`,
+            amount: 1724110.00,
+            variance: -26310.00,
+            status: `Uavstemt`,
+            standard: `ISA315`,
+            scenarioId: 3,
+            confidence: 94,
+            ruleNote: `12 GBP-fakturaer (£125k = 1 750 420 NOK) mot nettingoppgjør 1 724 110 NOK. Agio 26 310 NOK (8160).`
+          },
+          {
+            id: `Q-104`,
+            date: `2026-10-31`,
+            source: `Aker Offshore Service (PDF-OCR)`,
+            rawText: `REM_SCANNED_OCT26 // F-71O1, F-7102, F-7l03 - CR-11`,
+            cardinality: `OCR + Rabatt`,
+            amount: 197010.00,
+            variance: -5990.00,
+            status: `Avvik`,
+            standard: `IFRS15`,
+            scenarioId: 4,
+            confidence: 88,
+            ruleNote: `OCR-støy renset. 2 780 NOK gyldig kontantrabatt (8150) + 3 210 NOK uberettiget trekk på forfalt F-7103.`
+          },
+          {
+            id: `Q-105`,
+            date: `2026-10-28`,
+            source: `TechnipFMC Norge AS`,
+            rawText: `INNBETALING REF 4409-B // 4 DAGERS VALUTERINGSAVVIK`,
+            cardinality: `1:1`,
+            amount: 418500.00,
+            variance: 0.00,
+            status: `Foreslått match`,
+            standard: `ISA315`,
+            scenarioId: null,
+            confidence: 92,
+            ruleNote: `Foreslått match (Suggestive Matching): Eksakt beløp 418 500 NOK mot FAK-2026-4388, men 4 dagers datoavvik utenfor standard 2-dagers regel.`
+          },
+          {
+            id: `Q-106`,
+            date: `2026-10-31`,
+            source: `Subsea7 Fleet Charter`,
+            rawText: `WIRE-SS7-OCT // CHARTER-VESSEL-99 // DELSUM A+B`,
+            cardinality: `1:2`,
+            amount: 642000.00,
+            variance: 0.00,
+            status: `Foreslått match`,
+            standard: `IFRS15`,
+            scenarioId: null,
+            confidence: 95,
+            ruleNote: `Foreslått match: Innbetaling 642 000 NOK tilsvarer FAK-2026-4410 (392 000) + FAK-2026-4411 (250 000). Krever menneskelig bekreftelse.`
+          }
+        ],
+        scenarios: {
+          1: { resolved: false, regexRun: false, choice: `split_fee` },
+          2: { resolved: false, choice: `approve_delivered`, note: `Avvist 80 000 NOK pga. manglende NORSOK M-650-sertifikat; 145 000 NOK overtid avvises uten signert VO.` },
+          3: { resolved: false, floatDays: 4 },
+          4: { resolved: false, ocrVerified: false }
+        },
+        voucherALines: [
+          { id: `VA-1`, account: `4300`, accountName: `Innkjøp prosjektmateriell`, project: `PRJ-SUB-2026`, wbs: `WBS-410.02`, debit: 340000, credit: 0, text: `Påløpt materiell Subsea Manifold` },
+          { id: `VA-2`, account: `4500`, accountName: `Fremmedytelser & ROV-inspeksjon`, project: `PRJ-SUB-2026`, wbs: `WBS-410.05`, debit: 125000, credit: 0, text: `Påløpt ROV-mobilisering okt 2026` },
+          { id: `VA-3`, account: `2960`, accountName: `Påløpte kostnader, kortsiktig gjeld`, project: ``, wbs: ``, debit: 0, credit: 465000, text: `Periodisering prosjektkost M10` }
+        ],
+        auditLog: seedLog
+      };
+    }
+
+    let appState = createDefaultState();
+    let reconChartInstance = null;
+
+    // =========================================================================
+    // FORMATTING HELPERS (Norwegian locale numbers)
+    // =========================================================================
+    function fmtNok(val) {
+      const n = Number(val) || 0;
+      const abs = Math.abs(n).toLocaleString('nb-NO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      return (n < 0 ? '-' : '') + abs + ' NOK';
+    }
+    function fmtNum(val) {
+      const n = Number(val) || 0;
+      return n.toLocaleString('nb-NO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // =========================================================================
+    // STATE PERSISTENCE (notebookAppApi)
+    // =========================================================================
+    async function saveAppState() {
+      if (window.notebookAppApi && typeof window.notebookAppApi.setAppState === 'function') {
+        try {
+          await window.notebookAppApi.setAppState(appState);
+        } catch (e) {
+          // Ignore non-fatal persistence errors
+        }
+      }
+    }
+
+    function appendAudit(event, actor, ref) {
+      const ts = new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
+      const prev = appState.auditLog.length
+        ? appState.auditLog[appState.auditLog.length - 1].hash
+        : `0000000000000000000000000000000000000000000000000000000000000000`;
+      const hash = sha256(`${ts}|${event}|${actor}|${ref}|${prev}`);
+      appState.auditLog.unshift({ ts, event, actor, ref, prevHash: prev, hash });
+    }
+
+    function showFeedback(msg, tone) {
+      const box = document.getElementById('global-feedback');
+      if (!box) return;
+      box.textContent = msg;
+      box.className = 'inline-feedback is-visible';
+      box.style.borderColor = tone === 'error' ? 'var(--error)' : tone === 'warning' ? 'var(--warning)' : 'var(--tertiary)';
+      box.style.color = tone === 'error' ? 'var(--error)' : tone === 'warning' ? 'var(--warning)' : 'var(--tertiary)';
+    }
+
+    // =========================================================================
+    // CLOSE CLOCK & READINESS COMPUTATION
+    // =========================================================================
+    function computeReadinessScore() {
+      if (appState.readinessOverride !== null && appState.readinessOverride !== undefined) {
+        return Math.max(0, Math.min(100, Number(appState.readinessOverride)));
+      }
+      // Base score 30% from WD-2 and WD-1 completion
+      let score = 30;
+      // 4 scenarios: 10% each = 40%
+      [1, 2, 3, 4].forEach(id => {
+        if (appState.scenarios[id] && appState.scenarios[id].resolved) score += 10;
+      });
+      // Queue suggestive matches (Q-105, Q-106): 5% each = 10%
+      const q105 = appState.queueItems.find(q => q.id === 'Q-105');
+      const q106 = appState.queueItems.find(q => q.id === 'Q-106');
+      if (q105 && q105.status === 'Avstemt') score += 5;
+      if (q106 && q106.status === 'Avstemt') score += 5;
+      // Bilag A + B posted: 20%
+      if (appState.voucherPosted) score += 20;
+      return Math.min(100, score);
+    }
+
+    function renderCloseClockAndReadiness() {
+      const track = document.getElementById('wd-track');
+      const detailBar = document.getElementById('wd-detail-bar');
+      const activePill = document.getElementById('active-wd-pill');
+      if (!track || !detailBar) return;
+
+      track.innerHTML = WORKDAYS.map(wd => {
+        const isActive = appState.activeDay === wd.code;
+        const isDone = wd.status === 'Fullført' || (wd.code === 'WD+3' && appState.voucherPosted);
+        const statusTxt = isDone ? 'Fullført' : (isActive ? 'Aktiv nå' : wd.status);
+        return `
+          <button type="button" class="wd-step ${isActive ? 'is-active' : ''} ${isDone ? 'is-done' : ''}" onclick="selectWorkday('${wd.code}')" role="tab" aria-selected="${isActive}">
+            <div style="display:flex;justify-content:space-between;width:100%;align-items:center;">
+              <span class="wd-code">${wd.code}</span>
+              <span class="mono" style="font-size:0.68rem;color:${isDone ? 'var(--tertiary)' : 'var(--on-surface-variant)'};">${statusTxt}</span>
+            </div>
+            <span class="wd-name">${wd.name}</span>
+          </button>
+        `;
+      }).join('');
+
+      const activeWd = WORKDAYS.find(w => w.code === appState.activeDay) || WORKDAYS[2];
+      if (activePill) activePill.textContent = `Valgt fase: ${activeWd.code} · ${activeWd.name}`;
+      detailBar.innerHTML = `
+        <div>
+          <strong class="mono" style="color:var(--primary);">${activeWd.code}</strong>
+          <span style="color:var(--on-surface);margin-left:var(--space-sm);">${escapeHtml(activeWd.summary)}</span>
+        </div>
+        <span class="chip ${activeWd.status === 'Fullført' ? 'chip-sage' : 'chip-cyan'}">${activeWd.status}</span>
+      `;
+
+      // Readiness Score & Status Indicator
+      const score = computeReadinessScore();
+      const pctEl = document.getElementById('readiness-pct');
+      const modeEl = document.getElementById('readiness-mode-label');
+      const badgeEl = document.getElementById('global-status-badge');
+      const fillEl = document.getElementById('readiness-fill');
+      const barEl = document.getElementById('readiness-progressbar');
+      const sliderEl = document.getElementById('slider-readiness');
+      const inputEl = document.getElementById('input-readiness');
+      const sumEl = document.getElementById('readiness-blocker-summary');
+
+      if (pctEl) pctEl.textContent = `${score}%`;
+      if (modeEl) modeEl.textContent = appState.readinessOverride !== null ? `(Simulert terskelmodus)` : `(Beregnet fra åpne kontroller)`;
+      if (fillEl) fillEl.style.width = `${score}%`;
+      if (barEl) barEl.setAttribute('aria-valuenow', String(score));
+      if (sliderEl) sliderEl.value = String(score);
+      if (inputEl) inputEl.value = String(score);
+
+      const openScenarios = [1, 2, 3, 4].filter(id => !appState.scenarios[id].resolved).length;
+      const openSuggested = appState.queueItems.filter(q => q.status === 'Foreslått match').length;
+
+      let statusText = 'CLOSE BLOCKED';
+      let chipClass = 'chip chip-error';
+      let fillColor = 'var(--error)';
+      if (score >= 95 && (appState.readinessOverride !== null || (openScenarios === 0 && appState.voucherPosted))) {
+        statusText = 'READY FOR SIGN-OFF';
+        chipClass = 'chip chip-sage';
+        fillColor = 'var(--tertiary)';
+      } else if (score >= 60) {
+        statusText = 'ACTION REQUIRED';
+        chipClass = 'chip chip-amber';
+        fillColor = 'var(--warning)';
+      }
+      if (badgeEl) {
+        badgeEl.textContent = statusText;
+        badgeEl.className = chipClass;
+      }
+      if (fillEl) fillEl.style.backgroundColor = fillColor;
+
+      if (sumEl) {
+        if (openScenarios === 0 && openSuggested === 0 && appState.voucherPosted) {
+          sumEl.textContent = `Alle 4 scenarier, foreslåtte matcher og Bilag A+B er godkjent. Klar for Controller Sign-off og SAF-T.`;
+        } else {
+          const parts = [];
+          if (openScenarios > 0) parts.push(`${openScenarios} komplekse scenarier`);
+          if (openSuggested > 0) parts.push(`${openSuggested} foreslåtte matcher`);
+          if (!appState.voucherPosted) parts.push(`bokføring av Bilag A+B`);
+          sumEl.textContent = `Gjenstår før sign-off: ${parts.join(', ')}.`;
+        }
+      }
+    }
+
+    function selectWorkday(code) {
+      appState.activeDay = code;
+      renderCloseClockAndReadiness();
+      saveAppState();
+    }
+
+    function syncReadinessFromSlider(val) {
+      const n = Math.max(0, Math.min(100, Number(val) || 0));
+      const inputEl = document.getElementById('input-readiness');
+      if (inputEl) inputEl.value = String(n);
+      appState.readinessOverride = n;
+      renderCloseClockAndReadiness();
+      saveAppState();
+    }
+
+    function syncReadinessFromNumber(val) {
+      const n = Math.max(0, Math.min(100, Number(val) || 0));
+      const sliderEl = document.getElementById('slider-readiness');
+      if (sliderEl) sliderEl.value = String(n);
+      appState.readinessOverride = n;
+      renderCloseClockAndReadiness();
+      saveAppState();
+    }
+
+    function restoreComputedReadiness() {
+      appState.readinessOverride = null;
+      renderCloseClockAndReadiness();
+      saveAppState();
+      showFeedback(`Beredskapsscore er koblet tilbake til sanntids avstemmingsstatus.`, `info`);
+    }
+
+    // =========================================================================
+    // TAB SWITCHING & BADGES
+    // =========================================================================
+    function updateTabBadges() {
+      const openQueue = appState.queueItems.filter(q => q.status !== 'Avstemt').length;
+      const openScen = [1, 2, 3, 4].filter(id => !appState.scenarios[id].resolved).length;
+      const bq = document.getElementById('badge-queue-open');
+      const bs = document.getElementById('badge-scenarios-open');
+      const bv = document.getElementById('badge-voucher-status');
+      const ba = document.getElementById('badge-audit-count');
+      if (bq) bq.textContent = openQueue ? `${openQueue} åpne` : `Alle avstemt`;
+      if (bs) bs.textContent = openScen ? `${openScen} uløste` : `4/4 løst`;
+      if (bv) bv.textContent = appState.voucherPosted ? `Bokført A+B` : `Utkast`;
+      if (ba) ba.textContent = `${appState.auditLog.length} hendelser`;
+    }
+
+    function switchTab(tabName) {
+      appState.activeTab = tabName;
+      ['queue', 'scenarios', 'voucher', 'audit'].forEach(t => {
+        const panel = document.getElementById(`tab-${t}`);
+        const btn = document.getElementById(`tab-btn-${t}`);
+        if (panel) panel.classList.toggle('is-active', t === tabName);
+        if (btn) {
+          btn.classList.toggle('is-active', t === tabName);
+          btn.setAttribute('aria-selected', String(t === tabName));
+        }
+      });
+      if (tabName === 'queue') renderQueueView();
+      if (tabName === 'scenarios') renderScenariosView();
+      if (tabName === 'voucher') renderVoucherView();
+      if (tabName === 'audit') renderAuditTable();
+      if (window.lucide) window.lucide.createIcons();
+      saveAppState();
+    }
+
+    // =========================================================================
+    // TAB 1: AVSTEMMINGSKØ & OVERSIKT
+    // =========================================================================
+    function setQueueFilter(flt) {
+      appState.queueFilter = flt;
+      renderQueueView();
+      saveAppState();
+    }
+
+    function selectQueueItem(id) {
+      appState.selectedQueueId = id;
+      renderQueueView();
+      saveAppState();
+    }
+
+    function toggleTooltip(btn) {
+      const wasOpen = btn.classList.contains('is-open');
+      document.querySelectorAll('.tooltip-trigger.is-open').forEach(el => el.classList.remove('is-open'));
+      if (!wasOpen) btn.classList.add('is-open');
+    }
+
+    function confirmSuggestedMatch(id) {
+      const item = appState.queueItems.find(q => q.id === id);
+      if (!item) return;
+      item.status = `Avstemt`;
+      appendAudit(`Foreslått match bekreftet (Human-in-the-Loop): ${item.source}`, `Senior Controller`, item.id);
+      renderAll();
+      showFeedback(`Match ${item.id} (${item.source}) er godkjent og flyttet til avstemte poster.`, `positive`);
+      saveAppState();
+    }
+
+    function rejectSuggestedMatch(id) {
+      const item = appState.queueItems.find(q => q.id === id);
+      if (!item) return;
+      item.status = `Uavstemt`;
+      appendAudit(`Foreslått match forkastet til manuell gjennomgang: ${item.source}`, `Senior Controller`, item.id);
+      renderAll();
+      showFeedback(`Forslag ${item.id} ble forkastet og satt tilbake til Uavstemt.`, `warning`);
+      saveAppState();
+    }
+
+    function openScenarioFromQueue(scenarioId) {
+      appState.activeScenario = scenarioId;
+      switchTab('scenarios');
+    }
+
+    function renderQueueView() {
+      // KPI Cards
+      const kpiGrid = document.getElementById('kpi-cards');
+      const openItems = appState.queueItems.filter(q => q.status !== 'Avstemt');
+      const suggestedItems = appState.queueItems.filter(q => q.status === 'Foreslått match');
+      const discrepancyItems = appState.queueItems.filter(q => q.status === 'Avvik');
+      const totalOpenAmt = openItems.reduce((s, q) => s + q.amount, 0);
+      const totalItemsCount = 1428;
+      const matchedCount = totalItemsCount - openItems.length;
+      const autoRate = ((matchedCount / totalItemsCount) * 100).toFixed(1).replace('.', ',');
+
+      if (kpiGrid) {
+        kpiGrid.innerHTML = `
+          <div class="kpi-card">
+            <span class="data-label">Uavstemte / Åpne poster</span>
+            <span class="kpi-val">${openItems.length} stk</span>
+            <span class="kpi-sub">${fmtNok(totalOpenAmt)} i eksponert volum</span>
+          </div>
+          <div class="kpi-card">
+            <span class="data-label">Autonom matchingsgrad</span>
+            <span class="kpi-val" style="color:var(--primary);">${autoRate}%</span>
+            <span class="kpi-sub">${matchedCount} av ${totalItemsCount} linjer automatisk avstemt</span>
+          </div>
+          <div class="kpi-card">
+            <span class="data-label">Foreslåtte matcher (Suggestive)</span>
+            <span class="kpi-val" style="color:var(--tertiary);">${suggestedItems.length} stk</span>
+            <span class="kpi-sub">Venter på human-in-the-loop godkjenning</span>
+          </div>
+          <div class="kpi-card">
+            <span class="data-label">Kritiske avvik (ISA / IFRS)</span>
+            <span class="kpi-val" style="color:${discrepancyItems.length ? 'var(--error)' : 'var(--tertiary)'};">${discrepancyItems.length} stk</span>
+            <span class="kpi-sub">Gebyr, 4-parts EPC, valutafloat &amp; OCR</span>
+          </div>
+        `;
+      }
+
+      // Filter button styling
+      const filterMap = {
+        all: 'flt-all',
+        'Uavstemt': 'flt-unmatched',
+        'Foreslått match': 'flt-suggested',
+        'Avvik': 'flt-discrepancy',
+        'Avstemt': 'flt-matched'
+      };
+      Object.entries(filterMap).forEach(([key, btnId]) => {
+        const b = document.getElementById(btnId);
+        if (b) {
+          b.className = appState.queueFilter === key ? 'btn btn-sm btn-primary' : 'btn btn-sm';
+        }
+      });
+
+      const filtered = appState.queueFilter === 'all'
+        ? appState.queueItems
+        : appState.queueItems.filter(q => q.status === appState.queueFilter);
+
+      const tbody = document.getElementById('queue-tbody');
+      if (tbody) {
+        if (!filtered.length) {
+          tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:var(--space-lg);color:var(--on-surface-variant);">Ingen transaksjoner i dette filteret. Velg «Alle» for å se hele avstemmingskøen.</td></tr>`;
+        } else {
+          tbody.innerHTML = filtered.map(q => {
+            const std = ISA_STANDARDS[q.standard];
+            const statusClass = q.status === 'Avstemt' ? 'chip-sage' : q.status === 'Foreslått match' ? 'chip-cyan' : q.status === 'Avvik' ? 'chip-error' : 'chip-amber';
+            const isSelected = appState.selectedQueueId === q.id;
+            let actionHtml = '';
+            if (q.status === 'Foreslått match') {
+              actionHtml = `
+                <div style="display:flex;gap:var(--space-xs);flex-wrap:wrap;">
+                  <button type="button" class="btn btn-sm btn-positive" onclick="event.stopPropagation();confirmSuggestedMatch('${q.id}')">Godkjenn</button>
+                  <button type="button" class="btn btn-sm btn-danger" onclick="event.stopPropagation();rejectSuggestedMatch('${q.id}')">Forkast</button>
+                </div>
+              `;
+            } else if (q.scenarioId) {
+              actionHtml = `<button type="button" class="btn btn-sm" onclick="event.stopPropagation();openScenarioFromQueue(${q.scenarioId})">Løs i Scenario ${q.scenarioId} →</button>`;
+            } else {
+              actionHtml = `<span class="mono" style="font-size:0.75rem;color:var(--tertiary);">Bokført &amp; lukket</span>`;
+            }
+
+            return `
+              <tr class="${isSelected ? 'is-selected' : ''}" onclick="selectQueueItem('${q.id}')" style="cursor:pointer;">
+                <td>
+                  <div class="mono" style="font-weight:600;">${q.id}</div>
+                  <div class="mono" style="font-size:0.72rem;color:var(--on-surface-variant);">${q.date}</div>
+                </td>
+                <td>
+                  <div style="font-weight:600;">${escapeHtml(q.source)}</div>
+                  <div class="mono" style="font-size:0.72rem;color:var(--on-surface-variant);max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(q.rawText)}</div>
+                </td>
+                <td><span class="chip chip-cyan">${escapeHtml(q.cardinality)}</span></td>
+                <td class="num">
+                  <div>${fmtNum(q.amount)}</div>
+                  ${q.variance !== 0 ? `<div class="mono" style="font-size:0.72rem;color:var(--warning);">Avvik: ${fmtNum(q.variance)}</div>` : ''}
+                </td>
+                <td><span class="chip ${statusClass}">${escapeHtml(q.status)}</span></td>
+                <td onclick="event.stopPropagation();">
+                  <button type="button" class="tooltip-trigger" onclick="toggleTooltip(this)" aria-label="Vis detaljer for ${std.code}">
+                    <i data-lucide="info" aria-hidden="true" style="width:12px;height:12px;"></i>
+                    <span>${std.code}</span>
+                    <span class="tooltip-card" role="tooltip">
+                      <span class="tooltip-title">${escapeHtml(std.title)}</span>
+                      <span>${escapeHtml(std.desc)}</span>
+                    </span>
+                  </button>
+                </td>
+                <td>${actionHtml}</td>
+              </tr>
+            `;
+          }).join('');
+        }
+      }
+
+      // Inspector panel
+      const insp = document.getElementById('queue-inspector');
+      const sel = appState.queueItems.find(q => q.id === appState.selectedQueueId) || appState.queueItems[0];
+      if (insp && sel) {
+        const std = ISA_STANDARDS[sel.standard];
+        insp.innerHTML = `
+          <span class="data-label">Transaksjonsinspektør · ${sel.id}</span>
+          <h3 style="margin-top:var(--space-xs);">${escapeHtml(sel.source)}</h3>
+          <div class="well" style="margin-top:var(--space-md);">
+            <div class="data-label">Råtekst fra kildefil (Raw Readability)</div>
+            <div class="mono" style="font-size:0.8rem;margin-top:var(--space-xs);word-break:break-all;color:var(--primary);">${escapeHtml(sel.rawText)}</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-sm);margin-top:var(--space-md);">
+            <div class="well">
+              <div class="data-label">AI Tillit</div>
+              <div class="mono" style="font-size:1.1rem;font-weight:600;margin-top:2px;">${sel.confidence}%</div>
+            </div>
+            <div class="well">
+              <div class="data-label">Netto avvik</div>
+              <div class="mono" style="font-size:1.1rem;font-weight:600;margin-top:2px;color:${sel.variance ? 'var(--warning)' : 'var(--tertiary)'};">${fmtNok(sel.variance)}</div>
+            </div>
+          </div>
+          <p style="margin:var(--space-md) 0 0;font-size:0.875rem;color:var(--on-surface);">${escapeHtml(sel.ruleNote)}</p>
+          <div class="well" style="margin-top:var(--space-md);border-color:var(--outline);">
+            <div class="data-label" style="color:var(--primary);">${escapeHtml(std.title)}</div>
+            <p style="margin:var(--space-xs) 0 0;font-size:0.8125rem;color:var(--on-surface-variant);">${escapeHtml(std.desc)}</p>
+          </div>
+        `;
+      }
+
+      renderReconChart();
+    }
+
+    function renderReconChart() {
+      const canvas = document.getElementById('reconChart');
+      if (!canvas || typeof Chart === 'undefined') return;
+
+      const styles = getComputedStyle(document.documentElement);
+      const c1 = styles.getPropertyValue('--data-1').trim();
+      const c2 = styles.getPropertyValue('--data-2').trim();
+      const c3 = styles.getPropertyValue('--data-3').trim();
+      const c4 = styles.getPropertyValue('--error').trim();
+      const txtColor = styles.getPropertyValue('--on-surface-variant').trim();
+      const gridColor = styles.getPropertyValue('--outline-variant').trim();
+
+      const sumByStatus = (status) => appState.queueItems
+        .filter(q => q.status === status)
+        .reduce((s, q) => s + q.amount, 0) / 1000;
+
+      const dataVals = [
+        4820 + sumByStatus('Avstemt'),
+        sumByStatus('Foreslått match'),
+        sumByStatus('Uavstemt'),
+        sumByStatus('Avvik')
+      ];
+
+      if (reconChartInstance) {
+        reconChartInstance.data.datasets[0].data = dataVals;
+        reconChartInstance.update();
+        return;
+      }
+
+      reconChartInstance = new Chart(canvas, {
+        type: 'bar',
+        data: {
+          labels: ['Avstemt', 'Foreslått', 'Uavstemt', 'Avvik'],
+          datasets: [{
+            label: 'Beløp (tNOK)',
+            data: dataVals,
+            backgroundColor: [c2, c1, c3, c4],
+            borderRadius: 3
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => `${Math.round(ctx.raw).toLocaleString('nb-NO')} tNOK`
+              }
+            }
+          },
+          scales: {
+            x: {
+              ticks: { color: txtColor, font: { family: 'Geist Mono', size: 11 } },
+              grid: { display: false }
+            },
+            y: {
+              ticks: { color: txtColor, font: { family: 'Geist Mono', size: 11 } },
+              grid: { color: gridColor }
+            }
+          }
+        }
+      });
+    }
+
+    // =========================================================================
+    // TAB 2: KOMPLEKSE AVSTEMMINGER (4 SCENARIER)
+    // =========================================================================
+    const SCENARIO_META = [
+      { id: 1, tag: `1:Mange · Gebyrsplitt`, title: `Scenario 1: Samleinnbetaling & Bankgebyr`, summary: `89 512,50 NOK mot 4 fakturaer (91 550,00 NOK) · Regex BATCH-88491` },
+      { id: 2, tag: `Multi-Way 4-Parts EPC`, title: `Scenario 2: PO-8809 vs GRN vs Faktura`, summary: `750k PO vs 670k godkjent / 80k avvist vs 895k faktura (+145k overtid)` },
+      { id: 3, tag: `Mange:Mange · Valuta & Float`, title: `Scenario 3: 12 GBP-fakturaer & Konsernnetting`, summary: `£125 000 (1 750 420 NOK) vs 4 dagers flyt (1 724 110 NOK) · Agio 26 310` },
+      { id: 4, tag: `Noisy OCR · Kontantrabatt`, title: `Scenario 4: Skannet remisse & CR-11`, summary: `2 delinnbetalinger (197 010 NOK) · 2% rabatt (2 780) + 3 210 uberettiget` }
+    ];
+
+    function selectScenario(id) {
+      appState.activeScenario = id;
+      renderScenariosView();
+      saveAppState();
+    }
+
+    function runScenario1Regex() {
+      appState.scenarios[1].regexRun = true;
+      renderScenariosView();
+      saveAppState();
+      showFeedback(`Regex-agent ekstraherte batch-token '88491' og isolerte 2 037,50 NOK til konto 7770.`, `info`);
+    }
+
+    function resolveScenario(id) {
+      appState.scenarios[id].resolved = true;
+      const qMap = { 1: 'Q-101', 2: 'Q-102', 3: 'Q-103', 4: 'Q-104' };
+      const qItem = appState.queueItems.find(q => q.id === qMap[id]);
+      if (qItem) qItem.status = 'Avstemt';
+
+      const auditMsgs = {
+        1: [`Scenario 1 godkjent: 1:Mange match (BATCH-88491) + 2 037,50 NOK gebyr til konto 7770`, `Regex-Agent / Controller`, `BATCH-88491`],
+        2: [`Scenario 2 EPC-beslutning (${appState.scenarios[2].choice}): 670 000 NOK godkjent, 225 000 NOK avvist/tvist`, `Subsea Procurement / Controller`, `PO-8809`],
+        3: [`Scenario 3 godkjent: M:M GBP netting £125 000 + 26 310,00 NOK agio til konto 8160`, `Treasury-Agent / Controller`, `NET-GBP-125K`],
+        4: [`Scenario 4 godkjent: OCR-remisse, 2 780 NOK kontantrabatt (8150) & 3 210 NOK purrekrav på F-7103`, `OCR-Agent / Controller`, `CR-11 / F-7103`]
+      };
+      const [ev, act, ref] = auditMsgs[id];
+      appendAudit(ev, act, ref);
+
+      renderAll();
+      showFeedback(`${ev}. Beredskapsscore og SHA-256-logg er oppdatert.`, `positive`);
+      saveAppState();
+    }
+
+    function setScenario2Choice(choice) {
+      appState.scenarios[2].choice = choice;
+      renderScenariosView();
+      saveAppState();
+    }
+
+    function updateScenario2Note(val) {
+      appState.scenarios[2].note = val;
+      saveAppState();
+    }
+
+    function verifyScenario4Ocr() {
+      appState.scenarios[4].ocrVerified = true;
+      renderScenariosView();
+      saveAppState();
+      showFeedback(`OCR-referanser (F-7101, F-7102, F-7103, CR-11) verifisert mot reskontro.`, `info`);
+    }
+
+    function renderScenariosView() {
+      const selGrid = document.getElementById('scenario-selector-grid');
+      if (selGrid) {
+        selGrid.innerHTML = SCENARIO_META.map(m => {
+          const isActive = appState.activeScenario === m.id;
+          const isDone = appState.scenarios[m.id].resolved;
+          return `
+            <button type="button" class="scenario-card-btn ${isActive ? 'is-active' : ''}" onclick="selectScenario(${m.id})">
+              <div style="display:flex;justify-content:space-between;width:100%;align-items:center;gap:var(--space-xs);">
+                <span class="data-label">${escapeHtml(m.tag)}</span>
+                <span class="chip ${isDone ? 'chip-sage' : 'chip-amber'}">${isDone ? 'Avstemt' : 'Krever aksjon'}</span>
+              </div>
+              <strong style="font-family:var(--font-headline);font-size:0.98rem;">${escapeHtml(m.title)}</strong>
+              <p style="margin:0;font-size:0.8rem;color:var(--on-surface-variant);">${escapeHtml(m.summary)}</p>
+            </button>
+          `;
+        }).join('');
+      }
+
+      const wb = document.getElementById('scenario-workbench');
+      if (!wb) return;
+      const id = appState.activeScenario;
+
+      if (id === 1) {
+        const s1 = appState.scenarios[1];
+        const rawDisplay = s1.regexRun
+          ? `INNBETALING // REF:SWIFT-EQN-NO/<span class="hl-token">BATCH-88491</span>//NETTO_ETTER_GEBYR_SHA//VAL:<span class="hl-token">NOK89512,50</span>//OPPD:2026-10-29`
+          : `INNBETALING // REF:SWIFT-EQN-NO/BATCH-88491//NETTO_ETTER_GEBYR_SHA//VAL:NOK89512,50//OPPD:2026-10-29`;
+        wb.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:var(--space-md);">
+            <div>
+              <span class="data-label">Scenario 1 · 1:Mange med gebyrsplitt (IFRS 15)</span>
+              <h2 style="margin-top:var(--space-xs);">Samleinnbetaling 89 512,50 NOK mot 4 prosjektfakturaer (91 550,00 NOK)</h2>
+            </div>
+            <span class="chip ${s1.resolved ? 'chip-sage' : 'chip-amber'}">${s1.resolved ? 'Fullført & Bokført til 7770' : 'Avventer godkjenning'}</span>
+          </div>
+
+          <div class="well">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:var(--space-sm);margin-bottom:var(--space-sm);">
+              <span class="data-label">Støyete banktekst (ISO 20022 camt.053) · Regex-mønster: /BATCH-(\\d{5})/</span>
+              <button type="button" class="btn btn-sm" onclick="runScenario1Regex()">
+                <i data-lucide="scan-search" aria-hidden="true" style="width:15px;height:15px;"></i>
+                <span>${s1.regexRun ? 'Regex-token ekstrahert: 88491' : 'Kjør Regex-agent'}</span>
+              </button>
+            </div>
+            <div class="code-stream">${rawDisplay}</div>
+          </div>
+
+          <div class="two-col">
+            <div>
+              <h3 style="margin-bottom:var(--space-sm);">Matchede prosjektfakturaer (Equinor Energy AS)</h3>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Fakturanr</th>
+                      <th>Prosjektbeskrivelse</th>
+                      <th class="num">Beløp (NOK)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td class="mono">FAK-2026-4401</td><td>Subsea Umbilical Phase 1</td><td class="num">28 400,00</td></tr>
+                    <tr><td class="mono">FAK-2026-4402</td><td>ROV Inspection Tools</td><td class="num">19 750,00</td></tr>
+                    <tr><td class="mono">FAK-2026-4403</td><td>Hyperbaric Welding Support</td><td class="num">31 200,00</td></tr>
+                    <tr><td class="mono">FAK-2026-4404</td><td>Mobilization Fee Bergen</td><td class="num">12 200,00</td></tr>
+                    <tr><td colspan="2"><strong>Sum 4 prosjektfakturaer (Brutto)</strong></td><td class="num"><strong>91 550,00</strong></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="well" style="display:flex;flex-direction:column;justify-content:space-between;gap:var(--space-md);">
+              <div>
+                <span class="data-label">Automatisk gebyrsplitt · Konto 7770</span>
+                <h3 style="margin-top:var(--space-xs);">Regnskapsmessig avstemming</h3>
+                <div style="display:grid;gap:var(--space-sm);margin-top:var(--space-md);" class="mono">
+                  <div style="display:flex;justify-content:space-between;"><span>Brutto utestående (4 fakturaer)</span><span>91 550,00 NOK</span></div>
+                  <div style="display:flex;justify-content:space-between;"><span>Bankinnbetaling (Netto DNB)</span><span>-89 512,50 NOK</span></div>
+                  <div style="display:flex;justify-content:space-between;border-top:var(--hairline);padding-top:var(--space-sm);color:var(--warning);font-weight:600;">
+                    <span>Isolert bankgebyr (Konto 7770)</span><span>2 037,50 NOK</span>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;color:var(--tertiary);">
+                    <span>Netto uforklart restavvik</span><span>0,00 NOK</span>
+                  </div>
+                </div>
+              </div>
+              <button type="button" class="btn btn-primary" ${s1.resolved ? 'disabled' : ''} onclick="resolveScenario(1)">
+                <i data-lucide="check" aria-hidden="true" style="width:16px;height:16px;"></i>
+                <span>${s1.resolved ? 'Scenario 1 Godkjent' : 'Godkjenn 1:Mange-match & isoler 2 037,50 NOK til konto 7770'}</span>
+              </button>
+            </div>
+          </div>
+        `;
+      } else if (id === 2) {
+        const s2 = appState.scenarios[2];
+        wb.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:var(--space-md);">
+            <div>
+              <span class="data-label">Scenario 2 · Multi-Way 4-Parts EPC-avstemming (ISA 240 &amp; ISA 315)</span>
+              <h2 style="margin-top:var(--space-xs);">PO-8809 vs Varemottak GRN-3312 vs Leverandørfaktura INV-99210</h2>
+            </div>
+            <span class="chip ${s2.resolved ? 'chip-sage' : 'chip-error'}">${s2.resolved ? 'EPC-beslutning utført' : '225 000 NOK Avvik / ISA 240'}</span>
+          </div>
+
+          <div class="kpi-grid">
+            <div class="well">
+              <span class="data-label">1. Innkjøpsordre (PO-8809)</span>
+              <div class="kpi-val" style="margin-top:var(--space-xs);">750 000,00</div>
+              <div class="kpi-sub">16 stk Subsea Manifold Valves · WBS-410.02</div>
+            </div>
+            <div class="well">
+              <span class="data-label">2. Varemottak (GRN-3312)</span>
+              <div class="kpi-val" style="margin-top:var(--space-xs);color:var(--tertiary);">670 000,00</div>
+              <div class="kpi-sub" style="color:var(--error);">80 000,00 NOK avvist (2 stk feil på M-650-test)</div>
+            </div>
+            <div class="well">
+              <span class="data-label">3. Faktura (INV-99210)</span>
+              <div class="kpi-val" style="margin-top:var(--space-xs);color:var(--error);">895 000,00</div>
+              <div class="kpi-sub" style="color:var(--warning);">Inkl. 145 000,00 NOK uautorisert overtid</div>
+            </div>
+            <div class="well">
+              <span class="data-label">4. Endringslogg (VO-register)</span>
+              <div class="kpi-val" style="margin-top:var(--space-xs);">0,00 NOK</div>
+              <div class="kpi-sub">Ingen signert Variation Order for tilleggskrav</div>
+            </div>
+          </div>
+
+          <div class="two-col">
+            <div class="well">
+              <span class="data-label" style="color:var(--error);">AI-Etterforskningsdossier (ISA 240 Kontroll)</span>
+              <h3 style="margin-top:var(--space-xs);margin-bottom:var(--space-sm);">Avdekkede kontraktsavvik: Totalt 225 000,00 NOK</h3>
+              <ul style="margin:0;padding-left:1.25rem;display:grid;gap:var(--space-sm);font-size:0.875rem;">
+                <li><strong>Avvist varemottak (80 000,00 NOK):</strong> Kvalitetskontroll i Stavanger avviste 2 ventilsett på GRN-3312 grunnet manglende NORSOK M-650 trykksertifikat. Leverandør har likevel fakturert full PO-verdi.</li>
+                <li><strong>Uautorisert overtidskrav (145 000,00 NOK):</strong> Linje 4 på INV-99210 krever helge- og verkstedovertid uten referanse til godkjent Variation Order (VO) i EPC-kontrakten. Flagg for potensiell feilfakturering / kontrolloverstyring (ISA 240).</li>
+                <li><strong>AI-anbefaling:</strong> Godkjenn kun fysisk levert og kvalitetsgodkjent del på <strong>670 000,00 NOK</strong> til betaling, og utsted automatisk avviksmelding/kreditnotakrav på <strong>225 000,00 NOK</strong>.</li>
+              </ul>
+            </div>
+
+            <div class="well" style="display:flex;flex-direction:column;gap:var(--space-md);">
+              <div>
+                <span class="data-label">Velg kontrollhandling</span>
+                <div style="display:grid;gap:var(--space-sm);margin-top:var(--space-sm);">
+                  <button type="button" class="btn ${s2.choice === 'approve_delivered' ? 'btn-primary' : ''}" onclick="setScenario2Choice('approve_delivered')">
+                    Godkjenn levert del (670 000 NOK) &amp; avvis 225 000 NOK
+                  </button>
+                  <button type="button" class="btn ${s2.choice === 'quarantine_all' ? 'btn-danger' : ''}" onclick="setScenario2Choice('quarantine_all')">
+                    Sett hele INV-99210 (895 000 NOK) i tvistekarantene
+                  </button>
+                </div>
+              </div>
+              <div class="field-group">
+                <label for="s2-note" class="field-label">Revisjonsnotat for EPC-dossier</label>
+                <input type="text" id="s2-note" class="input-ctrl" value="${escapeHtml(s2.note)}" oninput="updateScenario2Note(this.value)">
+              </div>
+              <button type="button" class="btn btn-positive" ${s2.resolved ? 'disabled' : ''} onclick="resolveScenario(2)">
+                <i data-lucide="shield-check" aria-hidden="true" style="width:16px;height:16px;"></i>
+                <span>${s2.resolved ? 'EPC-beslutning loggført' : 'Utfør EPC-beslutning & oppdater revisjonslogg'}</span>
+              </button>
+            </div>
+          </div>
+        `;
+      } else if (id === 3) {
+        const s3 = appState.scenarios[3];
+        const gbpInvoices = [
+          [`UK-101`, `£12 500,00`, `175 042,00`], [`UK-102`, `£8 400,00`, `117 628,22`],
+          [`UK-103`, `£15 000,00`, `210 050,40`], [`UK-104`, `£9 200,00`, `128 830,91`],
+          [`UK-105`, `£11 000,00`, `154 036,96`], [`UK-106`, `£7 500,00`, `105 025,20`],
+          [`UK-107`, `£14 300,00`, `200 248,05`], [`UK-108`, `£6 100,00`, `85 420,50`],
+          [`UK-109`, `£10 000,00`, `140 033,60`], [`UK-110`, `£13 500,00`, `189 045,36`],
+          [`UK-111`, `£9 500,00`, `133 031,92`], [`UK-112`, `£8 000,00`, `112 026,88`]
+        ];
+        wb.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:var(--space-md);">
+            <div>
+              <span class="data-label">Scenario 3 · Mange:Mange Valuta &amp; Konsernnetting med Bank Float (ISA 315)</span>
+              <h2 style="margin-top:var(--space-xs);">12 ingeniørfakturaer i GBP (£125 000) mot samlet oppgjør med 4 dagers valutaflyt</h2>
+            </div>
+            <span class="chip ${s3.resolved ? 'chip-sage' : 'chip-amber'}">${s3.resolved ? 'Agio bokført til 8160' : 'Valutaflyt 26 310 NOK'}</span>
+          </div>
+
+          <div class="two-col">
+            <div>
+              <h3 style="margin-bottom:var(--space-sm);">12 GBP-fakturaer til Nordic Subsea UK Ltd (Sum £125 000,00)</h3>
+              <div class="table-wrap" style="max-height:290px;">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Faktura</th>
+                      <th class="num">GBP</th>
+                      <th class="num">Bokført NOK (Snitt 14,0034)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${gbpInvoices.map(r => `<tr><td class="mono">${r[0]}</td><td class="num">${r[1]}</td><td class="num">${r[2]}</td></tr>`).join('')}
+                    <tr><td><strong>Sum 12 fakturaer</strong></td><td class="num"><strong>£125 000,00</strong></td><td class="num"><strong>1 750 420,00</strong></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="well" style="display:flex;flex-direction:column;justify-content:space-between;gap:var(--space-md);">
+              <div>
+                <span class="data-label">4 dagers valutaflyt (Bank Float: 26.10 → 30.10.2026)</span>
+                <h3 style="margin-top:var(--space-xs);">Automatisk agio / valutatap-isolering</h3>
+                <div style="display:grid;gap:var(--space-sm);margin-top:var(--space-md);" class="mono">
+                  <div style="display:flex;justify-content:space-between;"><span>12 fakturaer i GBP (kurs 14,00336)</span><span>1 750 420,00 NOK</span></div>
+                  <div style="display:flex;justify-content:space-between;"><span>Konsernnetting oppgjør (kurs 13,79288)</span><span>-1 724 110,00 NOK</span></div>
+                  <div style="display:flex;justify-content:space-between;border-top:var(--hairline);padding-top:var(--space-sm);color:var(--warning);font-weight:600;">
+                    <span>Realisert valutatap / Agio (Konto 8160)</span><span>26 310,00 NOK</span>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;color:var(--tertiary);">
+                    <span>Valutadifferanse i GBP (£125k vs £125k)</span><span>£0,00</span>
+                  </div>
+                </div>
+                <p style="margin:var(--space-md) 0 0;font-size:0.8125rem;color:var(--on-surface-variant);">
+                  Motoren kobler alle 12 fakturaer mot ett treasury-oppgjør og isolerer hele NOK-differansen på 26 310,00 NOK til realisert agio/tap (konto 8160) uten manuell valutaberegning.
+                </p>
+              </div>
+              <button type="button" class="btn btn-primary" ${s3.resolved ? 'disabled' : ''} onclick="resolveScenario(3)">
+                <i data-lucide="check" aria-hidden="true" style="width:16px;height:16px;"></i>
+                <span>${s3.resolved ? 'Scenario 3 Godkjent' : 'Godkjenn M:M Valutamatch & bokfør 26 310 NOK til konto 8160'}</span>
+              </button>
+            </div>
+          </div>
+        `;
+      } else {
+        const s4 = appState.scenarios[4];
+        const ocrRaw = s4.ocrVerified
+          ? `REMITTANCE ADVICE — AKER OFFSHORE SERVICE AS (300DPI PDF)\nBETALING #1: NOK 112 400,00 -> [<span class="hl-token">F-7101</span>: 85 000] + [<span class="hl-token">CR-11</span>: -18 000] + del av [<span class="hl-token">F-7102</span>]\nBETALING #2: NOK 84 610,00 -> Rest [<span class="hl-token">F-7102</span>] + [<span class="hl-token">F-7103</span>: 64 000]\nFRADRAG OPPGITT: 2% RABATT = 2 780,00 (OK) + <span class="hl-err">EKSTRA TREKK 3 210,00 (FORFALT F-7103)</span>`
+          : `REM1TTANCE ADVlCE -- AKER OFFSH0RE SERVlCE AS (SKANNET PDF)\nBET#1: N0K 112 4OO,OO -> REF <span class="hl-warn">F-71O1</span>, <span class="hl-warn">CR-ll</span>, <span class="hl-warn">F-7l02</span>\nBET#2: N0K 84 610,OO -> REF F-7102 / <span class="hl-warn">F-71O3</span>\nMERKNAD: TREKK FOR K0NTANTRABATT 2% OG DIV AVV1K`;
+        wb.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:var(--space-md);">
+            <div>
+              <span class="data-label">Scenario 4 · Noisy OCR &amp; Kontantrabatt (IFRS 15)</span>
+              <h2 style="margin-top:var(--space-xs);">Skannet PDF-remisse: 2 delinnbetalinger mot 3 fakturaer minus kreditnota CR-11</h2>
+            </div>
+            <span class="chip ${s4.resolved ? 'chip-sage' : 'chip-amber'}">${s4.resolved ? 'Rabatt & Purrekrav opprettet' : 'Uberettiget trekk 3 210 NOK'}</span>
+          </div>
+
+          <div class="well">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:var(--space-sm);margin-bottom:var(--space-sm);">
+              <span class="data-label">Skannet PDF-remisse (REM_SCANNED_OCT26.pdf) · OCR-normalisering</span>
+              <button type="button" class="btn btn-sm" onclick="verifyScenario4Ocr()">
+                <i data-lucide="sparkles" aria-hidden="true" style="width:15px;height:15px;"></i>
+                <span>${s4.ocrVerified ? 'OCR-støy renset & verifisert' : 'Rens OCR-støy & koble reskontro'}</span>
+              </button>
+            </div>
+            <pre class="code-stream" style="margin:0;">${ocrRaw}</pre>
+          </div>
+
+          <div class="two-col">
+            <div>
+              <h3 style="margin-bottom:var(--space-sm);">Reskontroposter &amp; Betalingsgrunnlag</h3>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Dokument</th>
+                      <th>Forfall / Frist</th>
+                      <th class="num">Beløp (NOK)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td class="mono">F-7101</td><td>Innen 10-dagers rabattfrist</td><td class="num">85 000,00</td></tr>
+                    <tr><td class="mono">F-7102</td><td>Innen 10-dagers rabattfrist</td><td class="num">72 000,00</td></tr>
+                    <tr><td class="mono">CR-11</td><td>Kreditnota (trekker fra rabattgrunnlag)</td><td class="num">-18 000,00</td></tr>
+                    <tr><td class="mono">F-7103</td><td style="color:var(--error);">Betalt dag 24 (rabattfrist utløpt!)</td><td class="num">64 000,00</td></tr>
+                    <tr><td colspan="2"><strong>Netto fordring etter CR-11</strong></td><td class="num"><strong>203 000,00</strong></td></tr>
+                    <tr><td colspan="2">Sum 2 delinnbetalinger (112 400 + 84 610)</td><td class="num">-197 010,00</td></tr>
+                    <tr><td colspan="2"><strong>Totalt kundetrekk å forklare</strong></td><td class="num"><strong>5 990,00</strong></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="well" style="display:flex;flex-direction:column;justify-content:space-between;gap:var(--space-md);">
+              <div>
+                <span class="data-label">Splitt mellom berettiget rabatt og uberettiget trekk</span>
+                <h3 style="margin-top:var(--space-xs);">Kontantrabatt-analyse (Konto 8150)</h3>
+                <div style="display:grid;gap:var(--space-sm);margin-top:var(--space-md);" class="mono">
+                  <div style="display:flex;justify-content:space-between;"><span>Berettiget grunnlag (85k + 72k - 18k)</span><span>139 000,00 NOK</span></div>
+                  <div style="display:flex;justify-content:space-between;color:var(--tertiary);"><span>Godkjent 2% kontantrabatt (Konto 8150)</span><span>2 780,00 NOK</span></div>
+                  <div style="display:flex;justify-content:space-between;color:var(--error);font-weight:600;border-top:var(--hairline);padding-top:var(--space-sm);">
+                    <span>Uberettiget trekk på F-7103 (åpent krav)</span><span>3 210,00 NOK</span>
+                  </div>
+                </div>
+                <p style="margin:var(--space-md) 0 0;font-size:0.8125rem;color:var(--on-surface-variant);">
+                  Kunden tok uberettiget rabatt og gebyrfradrag på forfalt faktura F-7103. 2 780 NOK føres til konto 8150, mens 3 210 NOK blir stående som åpent inkassovarsel/purrekrav.
+                </p>
+              </div>
+              <button type="button" class="btn btn-primary" ${s4.resolved ? 'disabled' : ''} onclick="resolveScenario(4)">
+                <i data-lucide="check" aria-hidden="true" style="width:16px;height:16px;"></i>
+                <span>${s4.resolved ? 'Scenario 4 Godkjent' : 'Godkjenn rabatt (2 780 NOK) & opprett krav (3 210 NOK)'}</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // =========================================================================
+    // TAB 3: BILAGS- OG REVERSERINGSMODUL (HUMAN-IN-THE-LOOP)
+    // =========================================================================
+    function validateVouchers() {
+      let sumDebit = 0;
+      let sumCredit = 0;
+      const missingDims = [];
+
+      appState.voucherALines.forEach((line, idx) => {
+        const d = Number(line.debit) || 0;
+        const c = Number(line.credit) || 0;
+        sumDebit += d;
+        sumCredit += c;
+        const acc = String(line.account || '').trim();
+        if (acc.startsWith('4')) {
+          if (!String(line.project || '').trim() || !String(line.wbs || '').trim()) {
+            missingDims.push(`Linje ${idx + 1} (Konto ${acc}) mangler påkrevd Prosjekt- og/eller WBS-kode.`);
+          }
+        }
+      });
+
+      const diff = Math.round((sumDebit - sumCredit) * 100) / 100;
+      const isBalanced = Math.abs(diff) < 0.01 && sumDebit > 0;
+      const isValid = isBalanced && missingDims.length === 0;
+      return { sumDebit, sumCredit, diff, isBalanced, missingDims, isValid };
+    }
+
+    function toggleVoucherEdit() {
+      if (appState.voucherPosted) {
+        appState.voucherPosted = false;
+        appendAudit(`Bilag A & B gjenåpnet for redigering`, `Controller`, `BILAG-2026-10A/B`);
+      }
+      appState.voucherEditMode = !appState.voucherEditMode;
+      renderAll();
+      saveAppState();
+    }
+
+    function updateVoucherField(idx, field, value) {
+      const line = appState.voucherALines[idx];
+      if (!line) return;
+      if (field === 'debit' || field === 'credit') {
+        line[field] = Math.max(0, Number(value) || 0);
+      } else {
+        line[field] = value;
+      }
+      // Update balance banner & Bilag B live without blowing input focus
+      renderVoucherValidationAndB();
+      saveAppState();
+    }
+
+    function addVoucherLine() {
+      appState.voucherALines.push({
+        id: `VA-${Date.now()}`,
+        account: `4100`,
+        accountName: `Prosjektkostnad tillegg`,
+        project: ``,
+        wbs: ``,
+        debit: 0,
+        credit: 0,
+        text: `Ny periodiseringslinje`
+      });
+      renderVoucherView();
+      saveAppState();
+    }
+
+    function removeVoucherLine(idx) {
+      if (appState.voucherALines.length <= 2) return;
+      appState.voucherALines.splice(idx, 1);
+      renderVoucherView();
+      saveAppState();
+    }
+
+    function postVoucherPair() {
+      const v = validateVouchers();
+      if (!v.isValid) {
+        showFeedback(`Kan ikke bokføre: ${!v.isBalanced ? 'Debet og Kredit balanserer ikke. ' : ''}${v.missingDims.join(' ')}`, `error`);
+        return;
+      }
+      appState.voucherPosted = true;
+      appState.voucherEditMode = false;
+      appendAudit(
+        `Bilag A (31.10.2026) & Autoreversering Bilag B (01.11.2026) bokført (${fmtNok(v.sumDebit)})`,
+        `Controller Sign-off`,
+        `BILAG-2026-10A/B`
+      );
+      renderAll();
+      showFeedback(`Bilag A og paret autoreversering Bilag B er bokført og kryptografisk signert.`, `positive`);
+      saveAppState();
+    }
+
+    function renderVoucherValidationAndB() {
+      const v = validateVouchers();
+      const banner = document.getElementById('voucher-balance-banner');
+      const postBtn = document.getElementById('btn-post-vouchers');
+      const bPanel = document.getElementById('voucher-b-panel');
+
+      if (banner) {
+        banner.className = `balance-banner ${v.isValid ? 'is-valid' : 'is-invalid'}`;
+        if (v.isValid) {
+          banner.innerHTML = `
+            <div>
+              <strong>BALANSEVALIDATOR OK: Debet = Kredit (${fmtNok(v.sumDebit)})</strong>
+              <div style="font-size:0.8125rem;margin-top:2px;">Alle kontoer i 4000-serien har gyldig Prosjekt- og WBS-dimensjon. ${appState.voucherPosted ? 'Bilag A og B er bokført.' : 'Klar for bokføring.'}</div>
+            </div>
+            <span class="chip chip-sage">${appState.voucherPosted ? 'BOKFØRT' : 'BALANSERT'}</span>
+          `;
+        } else {
+          const errs = [];
+          if (!v.isBalanced) errs.push(`Ubalanse på ${fmtNok(v.diff)} (Debet ${fmtNum(v.sumDebit)} vs Kredit ${fmtNum(v.sumCredit)})`);
+          v.missingDims.forEach(m => errs.push(m));
+          banner.innerHTML = `
+            <div>
+              <strong>BOKFØRING SPERRET — KONTROLLFEIL:</strong>
+              <div style="font-size:0.8125rem;margin-top:2px;">${escapeHtml(errs.join(' · '))}</div>
+            </div>
+            <span class="chip chip-error">AVVIK / MANGLENDE DIMENSJON</span>
+          `;
+        }
+      }
+
+      if (postBtn) {
+        postBtn.disabled = !v.isValid || appState.voucherPosted;
+      }
+
+      // Highlight missing 4000-series inputs if editing
+      appState.voucherALines.forEach((line, idx) => {
+        const is4k = String(line.account || '').trim().startsWith('4');
+        const pEl = document.getElementById(`va-proj-${idx}`);
+        const wEl = document.getElementById(`va-wbs-${idx}`);
+        if (pEl) pEl.classList.toggle('is-invalid', is4k && !String(line.project || '').trim());
+        if (wEl) wEl.classList.toggle('is-invalid', is4k && !String(line.wbs || '').trim());
+      });
+
+      if (bPanel) {
+        bPanel.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:var(--space-sm);margin-bottom:var(--space-md);">
+            <div>
+              <span class="data-label">Paret motbilag · Auto-generert</span>
+              <h3 style="margin-top:var(--space-xs);">Bilag B: Autoreversering (01.11.2026)</h3>
+            </div>
+            <span class="chip ${appState.voucherPosted ? 'chip-sage' : 'chip-cyan'}">${appState.voucherPosted ? 'Bokført 01.11' : 'Speilet utkast'}</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Konto</th>
+                  <th>Prosjekt / WBS</th>
+                  <th class="num">Debet</th>
+                  <th class="num">Kredit</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${appState.voucherALines.map(line => `
+                  <tr>
+                    <td>
+                      <div class="mono" style="font-weight:600;">${escapeHtml(line.account)}</div>
+                      <div style="font-size:0.75rem;color:var(--on-surface-variant);">${escapeHtml(line.accountName)}</div>
+                    </td>
+                    <td class="mono" style="font-size:0.78rem;">${line.project ? `${escapeHtml(line.project)} / ${escapeHtml(line.wbs)}` : '—'}</td>
+                    <td class="num">${fmtNum(line.credit)}</td>
+                    <td class="num">${fmtNum(line.debit)}</td>
+                  </tr>
+                `).join('')}
+                <tr>
+                  <td colspan="2"><strong>Sum Bilag B (Reversert)</strong></td>
+                  <td class="num"><strong>${fmtNum(v.sumCredit)}</strong></td>
+                  <td class="num"><strong>${fmtNum(v.sumDebit)}</strong></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="margin:var(--space-md) 0 0;font-size:0.8125rem;color:var(--on-surface-variant);">
+            Bilag B reverserer automatisk alle periodiseringslinjer fra Bilag A første virkedag i november for å hindre dobbeltkostnadsføring når leverandørfaktura ankommer.
+          </p>
+        `;
+      }
+    }
+
+    function renderVoucherView() {
+      const aPanel = document.getElementById('voucher-a-panel');
+      const editBtn = document.getElementById('btn-toggle-edit-voucher');
+      if (editBtn) {
+        editBtn.innerHTML = appState.voucherEditMode
+          ? `<i data-lucide="eye" aria-hidden="true" style="width:16px;height:16px;"></i><span>Visningsmodus</span>`
+          : `<i data-lucide="pencil" aria-hidden="true" style="width:16px;height:16px;"></i><span>Rediger linjer</span>`;
+      }
+
+      if (aPanel) {
+        const v = validateVouchers();
+        aPanel.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:var(--space-sm);margin-bottom:var(--space-md);flex-wrap:wrap;">
+            <div>
+              <span class="data-label">Periodejustering · Hovedbok</span>
+              <h3 style="margin-top:var(--space-xs);">Bilag A: Periodejustering (31.10.2026)</h3>
+            </div>
+            ${appState.voucherEditMode ? `<button type="button" class="btn btn-sm" onclick="addVoucherLine()">+ Legg til linje</button>` : ''}
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Konto</th>
+                  <th>Prosjekt (4000-krav)</th>
+                  <th>WBS (4000-krav)</th>
+                  <th class="num">Debet</th>
+                  <th class="num">Kredit</th>
+                  ${appState.voucherEditMode ? '<th></th>' : ''}
+                </tr>
+              </thead>
+              <tbody>
+                ${appState.voucherALines.map((line, idx) => {
+                  const is4k = String(line.account || '').trim().startsWith('4');
+                  if (!appState.voucherEditMode) {
+                    const missing = is4k && (!line.project || !line.wbs);
+                    return `
+                      <tr>
+                        <td>
+                          <div class="mono" style="font-weight:600;">${escapeHtml(line.account)}</div>
+                          <div style="font-size:0.75rem;color:var(--on-surface-variant);">${escapeHtml(line.accountName)}</div>
+                        </td>
+                        <td class="mono" style="color:${missing ? 'var(--error)' : 'var(--on-surface)'};">${line.project ? escapeHtml(line.project) : (is4k ? 'MANGLER!' : '—')}</td>
+                        <td class="mono" style="color:${missing ? 'var(--error)' : 'var(--on-surface)'};">${line.wbs ? escapeHtml(line.wbs) : (is4k ? 'MANGLER!' : '—')}</td>
+                        <td class="num">${fmtNum(line.debit)}</td>
+                        <td class="num">${fmtNum(line.credit)}</td>
+                      </tr>
+                    `;
+                  }
+                  return `
+                    <tr>
+                      <td>
+                        <label for="va-acc-${idx}" class="field-label">Konto</label>
+                        <input id="va-acc-${idx}" type="text" class="input-ctrl" style="width:88px;" value="${escapeHtml(line.account)}" oninput="updateVoucherField(${idx}, 'account', this.value)">
+                      </td>
+                      <td>
+                        <label for="va-proj-${idx}" class="field-label">Prosjekt</label>
+                        <input id="va-proj-${idx}" type="text" class="input-ctrl ${is4k && !line.project ? 'is-invalid' : ''}" value="${escapeHtml(line.project)}" oninput="updateVoucherField(${idx}, 'project', this.value)">
+                      </td>
+                      <td>
+                        <label for="va-wbs-${idx}" class="field-label">WBS</label>
+                        <input id="va-wbs-${idx}" type="text" class="input-ctrl ${is4k && !line.wbs ? 'is-invalid' : ''}" value="${escapeHtml(line.wbs)}" oninput="updateVoucherField(${idx}, 'wbs', this.value)">
+                      </td>
+                      <td>
+                        <label for="va-deb-${idx}" class="field-label">Debet</label>
+                        <input id="va-deb-${idx}" type="number" step="0.01" class="input-ctrl num" style="width:120px;" value="${line.debit}" oninput="updateVoucherField(${idx}, 'debit', this.value)">
+                      </td>
+                      <td>
+                        <label for="va-cred-${idx}" class="field-label">Kredit</label>
+                        <input id="va-cred-${idx}" type="number" step="0.01" class="input-ctrl num" style="width:120px;" value="${line.credit}" oninput="updateVoucherField(${idx}, 'credit', this.value)">
+                      </td>
+                      <td style="vertical-align:bottom;">
+                        <button type="button" class="btn btn-sm btn-danger" onclick="removeVoucherLine(${idx})" aria-label="Slett linje ${idx + 1}">×</button>
+                      </td>
+                    </tr>
+                  `;
+                }).join('')}
+                <tr>
+                  <td colspan="3"><strong>Sum Bilag A</strong></td>
+                  <td class="num"><strong>${fmtNum(v.sumDebit)}</strong></td>
+                  <td class="num"><strong>${fmtNum(v.sumCredit)}</strong></td>
+                  ${appState.voucherEditMode ? '<td></td>' : ''}
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+      renderVoucherValidationAndB();
+    }
+
+    // =========================================================================
+    // TAB 4: SHA-256 REVISJONSSTRØM & EKSPORTMODAL
+    // =========================================================================
+    function renderAuditTable() {
+      const tbody = document.getElementById('audit-tbody');
+      if (!tbody) return;
+      tbody.innerHTML = appState.auditLog.map(entry => `
+        <tr>
+          <td class="mono" style="white-space:nowrap;font-size:0.78rem;">${escapeHtml(entry.ts)}</td>
+          <td>${escapeHtml(entry.event)}</td>
+          <td><span class="chip chip-cyan">${escapeHtml(entry.actor)}</span></td>
+          <td class="mono" style="font-size:0.78rem;">${escapeHtml(entry.ref)}</td>
+          <td class="mono" style="font-size:0.72rem;color:var(--on-surface-variant);">${entry.prevHash.slice(0, 12)}…</td>
+          <td class="mono" style="font-size:0.72rem;color:var(--tertiary);word-break:break-all;">${entry.hash}</td>
+        </tr>
+      `).join('');
+    }
+
+    function buildSaftXml() {
+      const v = validateVouchers();
+      const linesXml = appState.voucherALines.map((l, i) => `
+        <Line>
+          <RecordID>${i + 1}</RecordID>
+          <AccountID>${escapeHtml(l.account)}</AccountID>
+          <Analysis><AnalysisType>PROSJEKT</AnalysisType><AnalysisID>${escapeHtml(l.project || 'N/A')}</AnalysisID></Analysis>
+          <Analysis><AnalysisType>WBS</AnalysisType><AnalysisID>${escapeHtml(l.wbs || 'N/A')}</AnalysisID></Analysis>
+          <Description>${escapeHtml(l.text)}</Description>
+          ${l.debit > 0 ? `<DebitAmount><Amount>${Number(l.debit).toFixed(2)}</Amount></DebitAmount>` : `<CreditAmount><Amount>${Number(l.credit).toFixed(2)}</Amount></CreditAmount>`}
+        </Line>`).join('');
+
+      return `<?xml version="1.0" encoding="UTF-8"?>
+<AuditFile xmlns="urn:StandardAuditFile-Taxation-Financial:NO">
+  <Header>
+    <AuditFileVersion>1.30</AuditFileVersion>
+    <AuditFileCountry>NO</AuditFileCountry>
+    <AuditFileDateCreated>2026-11-15</AuditFileDateCreated>
+    <SoftwareCompanyName>CLOSE-AI Control Room</SoftwareCompanyName>
+    <Company>
+      <RegistrationNumber>914882310</RegistrationNumber>
+      <Name>Nordic Engineering Projects AS</Name>
+    </Company>
+    <DefaultCurrencyCode>NOK</DefaultCurrencyCode>
+    <SelectionCriteria>
+      <SelectionStartDate>2026-10-01</SelectionStartDate>
+      <SelectionEndDate>2026-10-31</SelectionEndDate>
+    </SelectionCriteria>
+  </Header>
+  <GeneralLedgerEntries>
+    <NumberOfEntries>${appState.voucherALines.length * 2}</NumberOfEntries>
+    <TotalDebit>${(v.sumDebit + v.sumCredit).toFixed(2)}</TotalDebit>
+    <TotalCredit>${(v.sumCredit + v.sumDebit).toFixed(2)}</TotalCredit>
+    <Journal>
+      <JournalID>CLOSE-M10</JournalID>
+      <Description>Periodejustering &amp; Autoreversering Oktober 2026</Description>
+      <Transaction>
+        <TransactionID>BILAG-2026-10A</TransactionID>
+        <Period>10</Period>
+        <PeriodYear>2026</PeriodYear>
+        <TransactionDate>2026-10-31</TransactionDate>
+        <SourceID>CLOSE-AI-HITL</SourceID>${linesXml}
+      </Transaction>
+    </Journal>
+  </GeneralLedgerEntries>
+</AuditFile>`;
+    }
+
+    function buildVismaCsv() {
+      const header = `Bilagsnr;Dato;Konto;Prosjekt;WBS;Debet;Kredit;Valuta;Tekst;SHA256_Ref`;
+      const topHash = appState.auditLog[0] ? appState.auditLog[0].hash.slice(0, 16) : `0000`;
+      const rowsA = appState.voucherALines.map(l =>
+        `BILAG-2026-10A;2026-10-31;${l.account};${l.project};${l.wbs};${Number(l.debit).toFixed(2)};${Number(l.credit).toFixed(2)};NOK;${l.text};${topHash}`
+      );
+      const rowsB = appState.voucherALines.map(l =>
+        `BILAG-2026-11B;2026-11-01;${l.account};${l.project};${l.wbs};${Number(l.credit).toFixed(2)};${Number(l.debit).toFixed(2)};NOK;Reversering: ${l.text};${topHash}`
+      );
+      const extra = [];
+      if (appState.scenarios[1].resolved) extra.push(`MATCH-S1;2026-10-29;7770;PRJ-SUB-2026;WBS-410.01;2037.50;0.00;NOK;Bankgebyr BATCH-88491;${topHash}`);
+      if (appState.scenarios[3].resolved) extra.push(`MATCH-S3;2026-10-30;8160;PRJ-UK-NET;WBS-900.01;26310.00;0.00;NOK;Realisert valutatap GBP float;${topHash}`);
+      if (appState.scenarios[4].resolved) extra.push(`MATCH-S4;2026-10-31;8150;PRJ-SUB-2026;WBS-410.04;2780.00;0.00;NOK;Godkjent 2% kontantrabatt;${topHash}`);
+      return [header, ...rowsA, ...rowsB, ...extra].join('\n');
+    }
+
+    function buildAuditJsonText() {
+      return appState.auditLog.map(e =>
+        `${e.ts} | ${e.ref} | ${e.actor} | ${e.event}\n  PREV: ${e.prevHash}\n  HASH: ${e.hash}`
+      ).join('\n\n');
+    }
+
+    function setExportPreview(tab) {
+      appState.exportTab = tab;
+      ['saft', 'csv', 'sha'].forEach(t => {
+        const b = document.getElementById(`exp-tab-${t}`);
+        if (b) b.className = tab === t ? 'btn btn-sm btn-primary' : 'btn btn-sm';
+      });
+      const pre = document.getElementById('export-preview-code');
+      const dlLbl = document.getElementById('btn-download-label');
+      const meta = document.getElementById('export-meta-info');
+      if (!pre) return;
+
+      if (tab === 'saft') {
+        pre.textContent = buildSaftXml();
+        if (dlLbl) dlLbl.textContent = `Last ned SAF-T XML`;
+        if (meta) meta.textContent = `Format: Norsk SAF-T Financial v1.30 (UTF-8)`;
+      } else if (tab === 'csv') {
+        pre.textContent = buildVismaCsv();
+        if (dlLbl) dlLbl.textContent = `Last ned Visma / BC CSV`;
+        if (meta) meta.textContent = `Format: Semikolon-separert ERP-import (Visma / Business Central)`;
+      } else {
+        pre.textContent = buildAuditJsonText();
+        if (dlLbl) dlLbl.textContent = `Last ned SHA-256 Revisjonslogg`;
+        if (meta) meta.textContent = `Format: Kjedet SHA-256 kryptografisk revisjonsstrøm`;
+      }
+    }
+
+    function openExportModal() {
+      const m = document.getElementById('export-modal');
+      if (!m) return;
+      m.classList.add('is-open');
+      setExportPreview(appState.exportTab || 'saft');
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function closeExportModal() {
+      const m = document.getElementById('export-modal');
+      if (m) m.classList.remove('is-open');
+    }
+
+    function copyExportPreview() {
+      const pre = document.getElementById('export-preview-code');
+      const msg = document.getElementById('export-modal-msg');
+      if (!pre) return;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(pre.textContent).then(() => {
+          if (msg) {
+            msg.textContent = `Eksportinnhold kopiert til utklippstavle.`;
+            msg.className = `inline-feedback is-visible`;
+            msg.style.color = `var(--tertiary)`;
+          }
+        }).catch(() => {});
+      }
+    }
+
+    function downloadCurrentExport() {
+      const tab = appState.exportTab || 'saft';
+      let content = '';
+      let contentType = 'text/plain';
+      let filename = 'SAFT_NordicEngineering_2026-10.xml';
+      if (tab === 'saft') {
+        content = buildSaftXml();
+        contentType = 'text/plain';
+        filename = 'SAFT_NordicEngineering_2026-10.xml';
+      } else if (tab === 'csv') {
+        content = buildVismaCsv();
+        contentType = 'text/csv';
+        filename = 'Visma_BC_Bilag_2026-10.csv';
+      } else {
+        content = buildAuditJsonText();
+        contentType = 'text/plain';
+        filename = 'SHA256_Revisjonslogg_2026-10.txt';
+      }
+
+      appendAudit(`Eksport generert: ${filename}`, `Controller`, tab.toUpperCase());
+      renderAuditTable();
+      updateTabBadges();
+      saveAppState();
+
+      if (window.notebookAppApi && typeof window.notebookAppApi.triggerFileDownload === 'function') {
+        window.notebookAppApi.triggerFileDownload({
+          content,
+          contentType,
+          encoding: 'UTF-8',
+          filename
+        });
+      }
+      const msg = document.getElementById('export-modal-msg');
+      if (msg) {
+        msg.textContent = `Nedlasting startet for ${filename}, og hendelsen er signert i SHA-256-loggen.`;
+        msg.className = `inline-feedback is-visible`;
+        msg.style.color = `var(--tertiary)`;
+      }
+    }
+
+    // =========================================================================
+    // RESET DEMO (Inline two-step confirmation — no confirm() or alert())
+    // =========================================================================
+    function resetDemoState(btn) {
+      if (btn.dataset.armed !== 'true') {
+        btn.dataset.armed = 'true';
+        btn.innerHTML = `<i data-lucide="alert-triangle" aria-hidden="true" style="width:16px;height:16px;"></i><span>Klikk igjen for å nullstille</span>`;
+        btn.classList.add('btn-danger');
+        if (window.lucide) window.lucide.createIcons();
+        setTimeout(() => {
+          if (btn.dataset.armed === 'true') {
+            btn.dataset.armed = 'false';
+            btn.classList.remove('btn-danger');
+            btn.innerHTML = `<i data-lucide="rotate-ccw" aria-hidden="true" style="width:16px;height:16px;"></i><span>Tilbakestill demo</span>`;
+            if (window.lucide) window.lucide.createIcons();
+          }
+        }, 4000);
+        return;
+      }
+      btn.dataset.armed = 'false';
+      btn.classList.remove('btn-danger');
+      btn.innerHTML = `<i data-lucide="rotate-ccw" aria-hidden="true" style="width:16px;height:16px;"></i><span>Tilbakestill demo</span>`;
+      appState = createDefaultState();
+      renderAll();
+      saveAppState();
+      showFeedback(`Kontrollrommet er tilbakestilt til utgangspunktet for periode M10.`, `info`);
+    }
+
+    // =========================================================================
+    // MASTER RENDER & INIT
+    // =========================================================================
+    function renderAll() {
+      renderCloseClockAndReadiness();
+      updateTabBadges();
+      renderQueueView();
+      renderScenariosView();
+      renderVoucherView();
+      renderAuditTable();
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    async function initApp() {
+      if (window.notebookAppApi && typeof window.notebookAppApi.getAppState === 'function') {
+        try {
+          const saved = await window.notebookAppApi.getAppState();
+          if (saved && saved.queueItems && saved.scenarios) {
+            appState = Object.assign(createDefaultState(), saved);
+          }
+        } catch (e) {
+          // Use defaults
+        }
+      }
+      switchTab(appState.activeTab || 'queue');
+      renderAll();
+      if (window.notebookAppApi && typeof window.notebookAppApi.notifyAppReady === 'function') {
+        window.notebookAppApi.notifyAppReady();
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', initApp);
+  </script>
+</body>
+</html>
