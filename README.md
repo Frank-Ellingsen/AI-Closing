@@ -1,11 +1,11 @@
 # CLOSE-AI: Autonomous Financial Close, Complex Reconciliation & Balance Control Architecture (v3.0)
 
-A production-grade financial close and audit control room engineered for engineering, maritime, and project-heavy organizations (exemplified by **Nordic Engineering Projects AS**). The solution combines deterministic accounting checks, combinatorial subset-sum matching, autonomous regex investigation, two-way interactive reconciliation lifecycle, Adra Balancer formulation, and a cryptographic SHA-256 audit chain.
+A production-grade financial close and audit control room engineered for engineering, maritime, and project-heavy organizations (exemplified by **Nordic Engineering Projects AS**). The solution combines deterministic accounting checks, combinatorial subset-sum matching, autonomous regex investigation, two-way interactive reconciliation lifecycle, AI Close Balancer formulation, and a cryptographic SHA-256 audit chain.
 
 ## Core Capabilities (v3.0 Architecture)
 
 - **Multi-Period Ingestion Engine**: Native switching between fiscal periods (**August 2026** historical baseline, **September 2026** prior period cut-off, and **Oktober 2026** active close window) with CAMT.053 XML and SAFT CSV file upload simulation.
-- **Balansekontroll & Avstemmingsbro (Adra Balancer)**: Mathematical proof of $\mathbf{IB} + \sum \text{Periodens bevegelser} = \mathbf{UB}$ across general ledger and bank statement, isolating timing differences, unbooked items, and posting errors down to $\Delta = 0.00\text{ NOK}$.
+- **Balansekontroll & Avstemmingsbro (AI Close Balancer)**: Mathematical proof of $\mathbf{IB} + \sum \text{Periodens bevegelser} = \mathbf{UB}$ across general ledger and bank statement, isolating timing differences, unbooked items, and posting errors down to $\Delta = 0.00\text{ NOK}$.
 - **Reconciliation Rule Ladder (R-01 to R-AI)**: Prioritized execution hierarchy from 1:1 exact KID/OCR matching to combinatorial 1:M merchant batch settlement, multi-currency netting (agio/disagio), and fuzzy vendor recognition.
 - **Two-Way Interactive Lifecycle**: Full bidirectional workflow supporting manual multi-line matching (**"Avstem Valgte"**) and instant audit rollback (**"Opphev Avstemming / Unmatch"**) returning lines to open items.
 - **Autonomous AI Copilot (`AIMatchSuggester`)**: Natural language forensic reasoning, root-cause diagnosis, and zero-delta balanced journal voucher proposals for complex exceptions (e.g. unapproved shipyard overtime under ISA 240/315).
@@ -68,7 +68,7 @@ python test_close_system.py
 
 ### 3. Run Close Pipeline & Performance Benchmarks
 ```bash
-# Full 5-stage close execution (Adra pre-match, spin-offs, aging, SHA-256 chain)
+# Full 5-stage close execution (AI Close pre-match, spin-offs, aging, SHA-256 chain)
 python scripts/run_close_pipeline.py
 
 # High-volume throughput & latency benchmark

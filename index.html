@@ -858,7 +858,7 @@
     <header class="cockpit-header">
       <div class="header-identity">
         <h1>CLOSE-AI Control Room</h1>
-        <p class="header-subtitle">Nordic Engineering Projects AS (Org.nr 984 210 552) — Autonom månedsavslutning, Adra Matcher transaksjonsmotor, Balansekontroll og SHA-256 revisjonskjede.</p>
+        <p class="header-subtitle">Nordic Engineering Projects AS (Org.nr 984 210 552) — Autonom månedsavslutning, AI Close Matcher transaksjonsmotor, Balansekontroll og SHA-256 revisjonskjede.</p>
       </div>
       <div class="header-controls">
         <div class="field-group">
@@ -894,7 +894,7 @@
     <!-- FOOTER / SOURCE ATTRIBUTION -->
     <footer class="panel panel-compact" style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:var(--space-md);">
       <span class="data-label">Nordic Engineering Projects AS · Konto 1920 Driftskonto NOK · Close Cockpit v2026.10</span>
-      <span class="text-muted" style="font-size:0.82rem;">Metodegrunnlag: Trintech Adra Matcher / Balancer dokumentasjon, Numeric 2026 Account Reconciliation Guide, Bluecopa 2026 &amp; ERP Research.</span>
+      <span class="text-muted" style="font-size:0.82rem;">Metodegrunnlag: Trintech AI Close Matcher / Balancer dokumentasjon, Numeric 2026 Account Reconciliation Guide, Bluecopa 2026 &amp; ERP Research.</span>
     </footer>
   </div>
 
@@ -932,10 +932,10 @@
           { id: `ER-0805`, date: `2026-08-29`, desc: `Bilag #L-0840 Skattetrekk T4`, ref: `KID 0071829011`, wbs: `WBS-900 Konsern / Felles`, amount: -305000, status: `matched`, matchId: `M-08-004`, ageDays: 0 }
         ],
         clusters: [
-          { matchId: `M-08-001`, rule: `R-01`, desc: `Equinor ASA Milepæl 2 (KID eksakt)`, timestamp: `2026-08-08 14:12`, actor: `Adra Matcher v4.2`, bankIds: [`BK-0801`], erpIds: [`ER-0801`], bankTotal: 3240000, erpTotal: 3240000, variance: 0, voucherId: null },
-          { matchId: `M-08-002`, rule: `R-01`, desc: `Aker Solutions Underleveranse (KID eksakt)`, timestamp: `2026-08-14 10:40`, actor: `Adra Matcher v4.2`, bankIds: [`BK-0802`], erpIds: [`ER-0802`], bankTotal: -1180000, erpTotal: -1180000, variance: 0, voucherId: null },
-          { matchId: `M-08-003`, rule: `R-03`, desc: `Nets Batch #72 — 1:2 oppgjør m/kortgebyr`, timestamp: `2026-08-22 16:05`, actor: `Adra Matcher v4.2`, bankIds: [`BK-0803`], erpIds: [`ER-0803`, `ER-0804`], bankTotal: 615450, erpTotal: 625000, variance: -9550, voucherId: `BIL-0801` },
-          { matchId: `M-08-004`, rule: `R-01`, desc: `Skatteetaten Termin 4 (KID eksakt)`, timestamp: `2026-08-29 11:20`, actor: `Adra Matcher v4.2`, bankIds: [`BK-0804`], erpIds: [`ER-0805`], bankTotal: -305000, erpTotal: -305000, variance: 0, voucherId: null }
+          { matchId: `M-08-001`, rule: `R-01`, desc: `Equinor ASA Milepæl 2 (KID eksakt)`, timestamp: `2026-08-08 14:12`, actor: `AI Close Matcher v4.2`, bankIds: [`BK-0801`], erpIds: [`ER-0801`], bankTotal: 3240000, erpTotal: 3240000, variance: 0, voucherId: null },
+          { matchId: `M-08-002`, rule: `R-01`, desc: `Aker Solutions Underleveranse (KID eksakt)`, timestamp: `2026-08-14 10:40`, actor: `AI Close Matcher v4.2`, bankIds: [`BK-0802`], erpIds: [`ER-0802`], bankTotal: -1180000, erpTotal: -1180000, variance: 0, voucherId: null },
+          { matchId: `M-08-003`, rule: `R-03`, desc: `Nets Batch #72 — 1:2 oppgjør m/kortgebyr`, timestamp: `2026-08-22 16:05`, actor: `AI Close Matcher v4.2`, bankIds: [`BK-0803`], erpIds: [`ER-0803`, `ER-0804`], bankTotal: 615450, erpTotal: 625000, variance: -9550, voucherId: `BIL-0801` },
+          { matchId: `M-08-004`, rule: `R-01`, desc: `Skatteetaten Termin 4 (KID eksakt)`, timestamp: `2026-08-29 11:20`, actor: `AI Close Matcher v4.2`, bankIds: [`BK-0804`], erpIds: [`ER-0805`], bankTotal: -305000, erpTotal: -305000, variance: 0, voucherId: null }
         ],
         aiSuggestions: [],
         vouchers: [
@@ -966,8 +966,8 @@
           { id: `ER-0903`, date: `2026-09-27`, desc: `Remittering Bunke #81 Visma ERP`, ref: `BUNKE-81`, wbs: `WBS-412 Landanlegg West`, amount: -530450, status: `open`, matchId: null, autoRule: `R-02`, ageDays: 33 }
         ],
         clusters: [
-          { matchId: `M-09-001`, rule: `R-01`, desc: `Vår Energi ASA Framdrift #4 (KID eksakt)`, timestamp: `2026-09-09 09:15`, actor: `Adra Matcher v4.2`, bankIds: [`BK-0901`], erpIds: [`ER-0901`], bankTotal: 2890000, erpTotal: 2890000, variance: 0, voucherId: null },
-          { matchId: `M-09-002`, rule: `R-01`, desc: `TechnipFMC Materiell Subsea (KID eksakt)`, timestamp: `2026-09-18 13:45`, actor: `Adra Matcher v4.2`, bankIds: [`BK-0902`], erpIds: [`ER-0902`], bankTotal: -940000, erpTotal: -940000, variance: 0, voucherId: null }
+          { matchId: `M-09-001`, rule: `R-01`, desc: `Vår Energi ASA Framdrift #4 (KID eksakt)`, timestamp: `2026-09-09 09:15`, actor: `AI Close Matcher v4.2`, bankIds: [`BK-0901`], erpIds: [`ER-0901`], bankTotal: 2890000, erpTotal: 2890000, variance: 0, voucherId: null },
+          { matchId: `M-09-002`, rule: `R-01`, desc: `TechnipFMC Materiell Subsea (KID eksakt)`, timestamp: `2026-09-18 13:45`, actor: `AI Close Matcher v4.2`, bankIds: [`BK-0902`], erpIds: [`ER-0902`], bankTotal: -940000, erpTotal: -940000, variance: 0, voucherId: null }
         ],
         aiSuggestions: [],
         vouchers: [],
@@ -1016,9 +1016,9 @@
           { id: `ER-1014`, date: `2026-10-31`, desc: `Innbetaling underveis Bergen Marine`, ref: `TR-3110`, wbs: `WBS-412 Landanlegg West`, amount: 45000, status: `open`, matchId: null, autoRule: null, ageDays: 1, isInTransit: true }
         ],
         clusters: [
-          { matchId: `M-10-001`, rule: `R-01`, desc: `Equinor ASA Milepæl 3 (KID eksakt)`, timestamp: `2026-10-03 10:15`, actor: `Adra Matcher v4.2`, bankIds: [`BK-1001`], erpIds: [`ER-1001`], bankTotal: 1850000, erpTotal: 1850000, variance: 0, voucherId: null },
-          { matchId: `M-10-002`, rule: `R-01`, desc: `Kongsberg Gruppen Styringssystem (KID eksakt)`, timestamp: `2026-10-06 11:30`, actor: `Adra Matcher v4.2`, bankIds: [`BK-1002`], erpIds: [`ER-1002`], bankTotal: -760000, erpTotal: -760000, variance: 0, voucherId: null },
-          { matchId: `M-10-003`, rule: `R-02`, desc: `DNB Lønnstrekk Oktober (Ref ±2d toleranse)`, timestamp: `2026-10-11 08:50`, actor: `Adra Matcher v4.2`, bankIds: [`BK-1003`], erpIds: [`ER-1003`], bankTotal: -412500, erpTotal: -412500, variance: 0, voucherId: null }
+          { matchId: `M-10-001`, rule: `R-01`, desc: `Equinor ASA Milepæl 3 (KID eksakt)`, timestamp: `2026-10-03 10:15`, actor: `AI Close Matcher v4.2`, bankIds: [`BK-1001`], erpIds: [`ER-1001`], bankTotal: 1850000, erpTotal: 1850000, variance: 0, voucherId: null },
+          { matchId: `M-10-002`, rule: `R-01`, desc: `Kongsberg Gruppen Styringssystem (KID eksakt)`, timestamp: `2026-10-06 11:30`, actor: `AI Close Matcher v4.2`, bankIds: [`BK-1002`], erpIds: [`ER-1002`], bankTotal: -760000, erpTotal: -760000, variance: 0, voucherId: null },
+          { matchId: `M-10-003`, rule: `R-02`, desc: `DNB Lønnstrekk Oktober (Ref ±2d toleranse)`, timestamp: `2026-10-11 08:50`, actor: `AI Close Matcher v4.2`, bankIds: [`BK-1003`], erpIds: [`ER-1003`], bankTotal: -412500, erpTotal: -412500, variance: 0, voucherId: null }
         ],
         aiSuggestions: [
           {
@@ -1093,7 +1093,7 @@
 
     const TABS = [
       { id: `import`, label: `Data Import & Kilder`, icon: `download` },
-      { id: `balancer`, label: `Balansekontroll (Adra Balancer)`, icon: `scale` },
+      { id: `balancer`, label: `Balansekontroll (AI Close Balancer)`, icon: `scale` },
       { id: `open`, label: `Åpne Poster (Unreconciled)`, icon: `list-checks` },
       { id: `reconciled`, label: `Avstemte Poster (Reconciled)`, icon: `check-circle-2` },
       { id: `aging`, label: `Aldersfordeling & Tapsavsetning`, icon: `bar-chart-3` },
@@ -1214,7 +1214,7 @@
       if (appState.auditLog.length > 0) return;
       await appendAuditEvent(`Genesis — Kontrollrom initialisert for Nordic Engineering Projects AS`, `SYS`, `System`, 0, `GENESIS`);
       await appendAuditEvent(`Periode 08 (August 2026) lukket og signert på WD+4`, `R-01/R-03`, `Controller (HITL)`, 14820450, `P08-CLOSE`);
-      await appendAuditEvent(`Periode 10 (Oktober 2026) grunnlinje importert (3 autoklynger)`, `R-01/R-02`, `Adra Matcher v4.2`, 677500, `M-10-001..003`);
+      await appendAuditEvent(`Periode 10 (Oktober 2026) grunnlinje importert (3 autoklynger)`, `R-01/R-02`, `AI Close Matcher v4.2`, 677500, `M-10-001..003`);
     }
 
     // =========================================================================
@@ -1299,7 +1299,7 @@
 
       const inTransitClearedOrTagged = p.inTransitRecognized || p.erpLines.every((l) => !l.isInTransit || l.status === `matched`);
 
-      // Adjusted balances in Adra Balancer
+      // Adjusted balances in AI Close Balancer
       const adjBank = ubBank + (inTransitClearedOrTagged ? inTransitAmount : 0);
       const adjErp = ubErp + draftVouchersImpact;
 
@@ -1578,7 +1578,7 @@
           <div class="clock-step ${wd2State}">
             <span class="data-label">WD+2 · ${isClosed ? `Fullført` : `Aktiv`}</span>
             <strong style="font-size:0.88rem;">Avstemming &amp; Bilag</strong>
-            <span class="text-muted" style="font-size:0.78rem;">Adra Matcher &amp; HITL</span>
+            <span class="text-muted" style="font-size:0.78rem;">AI Close Matcher &amp; HITL</span>
           </div>
           <div class="clock-step ${wd4State}">
             <span class="data-label">WD+4 · ${isClosed ? `Godkjent` : `Avventer`}</span>
@@ -1675,7 +1675,7 @@
                 <span class="data-label">Datakilder &amp; Automatisk Regelmotor (Raw Readability)</span>
                 <h2 class="section-title">Data Import &amp; Autonom Avstemming — ${escapeHtml(p.label)}</h2>
                 <p class="text-muted" style="margin:0; max-width:68ch;">
-                  Adra Matcher leser rå CAMT.053 bankstrømmer og Visma / Business Central SAF-T-uttrekk uten manuell kolonnevask. Kjør regelhierarkiet R-01 til R-04 for å lukke eksakte, toleransebaserte og komplekse batch-poster.
+                  AI Close Matcher leser rå CAMT.053 bankstrømmer og Visma / Business Central SAF-T-uttrekk uten manuell kolonnevask. Kjør regelhierarkiet R-01 til R-04 for å lukke eksakte, toleransebaserte og komplekse batch-poster.
                 </p>
               </div>
               <div style="display:flex; flex-wrap:wrap; gap:var(--space-sm);">
@@ -1760,7 +1760,7 @@
 
           <div class="panel">
             <span class="data-label">Konfigurert Regelhierarki</span>
-            <h3 class="subhead" style="margin-bottom:var(--space-md);">Adra Matcher — Eksekveringsrekkefølge</h3>
+            <h3 class="subhead" style="margin-bottom:var(--space-md);">AI Close Matcher — Eksekveringsrekkefølge</h3>
             <div class="table-scroll">
               <table>
                 <thead>
@@ -1810,7 +1810,7 @@
     }
 
     // =========================================================================
-    // TAB 2: BALANSEKONTROLL (ADRA BALANCER)
+    // TAB 2: BALANSEKONTROLL (AI CLOSE BALANCER)
     // =========================================================================
     function buildBalancerTab() {
       const p = getPeriod();
@@ -1823,7 +1823,7 @@
           <div class="panel">
             <div class="toolbar-row">
               <div>
-                <span class="data-label">Adra Balancer · Periodens Rullering &amp; Bevisføring</span>
+                <span class="data-label">AI Close Balancer · Periodens Rullering &amp; Bevisføring</span>
                 <h2 class="section-title">Balansekontroll: Konto 1920 Driftskonto NOK — ${escapeHtml(p.label)}</h2>
                 <p class="text-muted" style="margin:0;">Verifiserer at Inngående Balanse (IB) + Periodens transaksjoner = Utgående Balanse (UB) for både Bank og Hovedbok, samt avstemmer tidsavvik og ikke-bokførte bankposter.</p>
               </div>
@@ -2847,7 +2847,7 @@ ${voucherXml || `    <!-- Ingen bilag i utkast/bokført ennå -->`}
           rule: bLine.autoRule,
           desc: bLine.desc,
           timestamp: nowTimestamp().slice(0, 16),
-          actor: `Adra Matcher v4.2`,
+          actor: `AI Close Matcher v4.2`,
           bankIds: [bLine.id],
           erpIds: matchingErp.map((e) => e.id),
           bankTotal: bLine.amount,
@@ -2858,7 +2858,7 @@ ${voucherXml || `    <!-- Ingen bilag i utkast/bokført ennå -->`}
 
         clustersCreated++;
         linesMatched += 1 + matchingErp.length;
-        await appendAuditEvent(`Auto-avstemt ${bLine.desc} (${matchId})`, bLine.autoRule, `Adra Matcher v4.2`, bLine.amount, matchId);
+        await appendAuditEvent(`Auto-avstemt ${bLine.desc} (${matchId})`, bLine.autoRule, `AI Close Matcher v4.2`, bLine.amount, matchId);
       }
 
       appState.autoMatchSummary = { clustersCreated, linesMatched, vouchersCreated };

@@ -2,7 +2,7 @@
 
 Corporate accounting and financial close operations mandate uncompromising precision, deterministic double-entry invariants, and strict compliance with international auditing standards. Traditional month-end close software and spreadsheet-based workflows operate retrospectively: they present reports and status dashboards only after human accountants have manually investigated, adjusted, and reconciled fragmented ledger records. In high-volume, project-oriented industries such as energy and civil engineering, this operating model creates severe friction during the pre-dashboard window—the critical operational phase where controllers must determine whether ledger balances are exposed to error and whether fiscal periods can be closed with integrity.
 
-The CLOSE-AI architecture establishes a continuous, autonomous, and auditable financial close operating framework engineered for project-driven enterprises, exemplified by Nordic Engineering Projects AS. Drawing directly from enterprise reconciliation methodologies pioneered at KLP Kapitalforvaltning with Adra Matcher and SimCorp Dimension, this v3.0 specification unifies deterministic rule matching, combinatorial optimization, autonomous agentic reasoning, two-way interactive matching lifecycle, formulaic balance control, and cryptographic auditability into an integrated financial control room. The live production reference implementation is deployed and accessible at the [CLOSE-AI Financial Close Cockpit](https://frank-ellingsen.github.io/AI-Closing/).
+The CLOSE-AI architecture establishes a continuous, autonomous, and auditable financial close operating framework engineered for project-driven enterprises, exemplified by Nordic Engineering Projects AS. Drawing directly from enterprise reconciliation methodologies pioneered at KLP Kapitalforvaltning with AI Close Matcher and SimCorp Dimension, this v3.0 specification unifies deterministic rule matching, combinatorial optimization, autonomous agentic reasoning, two-way interactive matching lifecycle, formulaic balance control, and cryptographic auditability into an integrated financial control room. The live production reference implementation is deployed and accessible at the [CLOSE-AI Financial Close Cockpit](https://frank-ellingsen.github.io/AI-Closing/).
 
 ---
 
@@ -12,7 +12,7 @@ Enterprise financial operations have progressed across three distinct technologi
 
 ```
 +----------------------------------------------------------------------------------------------------+
-| 2006: Rule-Based Batch Automation (Adra Matcher / SimCorp / SAP)                                   |
+| 2006: Rule-Based Batch Automation (AI Close Matcher / SimCorp / SAP)                                   |
 | • Scheduled overnight batch matching jobs reaching 99% 1:1 automation by 08:00.                    |
 | • Scripted SQL "spin-offs" auto-booking predictable fees and interest back to source systems.      |
 | • Residual 1% exceptions required extensive manual detective work across siloed systems.           |
@@ -79,9 +79,9 @@ When a user switches fiscal periods, the platform dynamically rehydrates:
 
 ---
 
-## 3. Balansekontroll (Adra Balancer Formulation & Ledger Verification)
+## 3. Balansekontroll (AI Close Balancer Formulation & Ledger Verification)
 
-The Balansekontroll module enforces the classic accounting invariant established in Adra Balancer and statutory Norwegian accounting practice (God regnskapsskikk). Every financial statement account must be reconciled by proving that the transition from opening balance to closing balance is fully explained by audited transactions.
+The Balansekontroll module enforces the classic accounting invariant established in AI Close Balancer and statutory Norwegian accounting practice (God regnskapsskikk). Every financial statement account must be reconciled by proving that the transition from opening balance to closing balance is fully explained by audited transactions.
 
 ### 3.1. The Mathematical Balance Formula
 For both the Bank Statement and the General Ledger, the system verifies the fundamental transition equation:
@@ -426,6 +426,6 @@ Benchmarking across simulated multi-year enterprise datasets establishes that to
 
 ## 11. Conclusion & Operational Roadmap
 
-CLOSE-AI v3.0 demonstrates how corporate accounting can transcend the limitations of historical batch processing without abandoning deterministic rigor. By marrying the time-tested reconciliation foundations of Adra Matcher with modern autonomous agents, combinatorial mathematics, interactive two-way lifecycle management, and cryptographic auditability, the platform delivers a truly continuous financial close.
+CLOSE-AI v3.0 demonstrates how corporate accounting can transcend the limitations of historical batch processing without abandoning deterministic rigor. By marrying the time-tested reconciliation foundations of AI Close Matcher with modern autonomous agents, combinatorial mathematics, interactive two-way lifecycle management, and cryptographic auditability, the platform delivers a truly continuous financial close.
 
 Controllers no longer spend the final days of the month trapped in manual reconciliation triage. Instead, they operate an automated, transparent control room where balances are continuous, exceptions are investigated autonomously, and the general ledger remains perpetually auditable and ready for sign-off.

@@ -48,7 +48,7 @@ def run_pipeline():
     # ---------------------------------------------------------
     # 2. Pre-Match & Complex 1:M Matching
     # ---------------------------------------------------------
-    console.print("\n[bold]2. Executing Stage 1: Pre-Match (Adra-Style Regex & Combinatorial Solver)...[/bold]")
+    console.print("\n[bold]2. Executing Stage 1: Pre-Match (AI Close-Style Regex & Combinatorial Solver)...[/bold]")
     matcher = ComplexReconciliationEngine(fee_tolerance_pct=0.03, max_date_delta_days=5)
     proposals = matcher.run_pre_match(bank_transactions=bank_lines, subledger_items=open_invoices)
 
