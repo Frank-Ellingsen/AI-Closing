@@ -13,6 +13,7 @@ from src.engine.complex_matcher import ComplexReconciliationEngine
 from src.engine.voucher_generator import VoucherGenerator
 from src.engine.aging_analyzer import AgingAnalyzer
 from src.governance.audit_logger import AuditLogger
+from src.lakehouse.reconciliation_duckdb import ReconciliationDuckDBManager
 
 console = Console()
 
@@ -133,6 +134,21 @@ def run_pipeline():
         console.print(f" [green]✓[/green] Cryptographic audit chain verified: {audit_status['verified_records']} records intact.")
     else:
         console.print(f" [red]✗[/red] Integrity failure: {audit_status.get('error')}")
+
+    # ---------------------------------------------------------
+    # 6. DuckDB Real-Time Reconciliation Store Sync
+    # ---------------------------------------------------------
+    console.print("\n[bold]6. Syncing DuckDB Analytical Store (reconciled & unreconciled)...[/bold]")
+    duckdb_mgr = ReconciliationDuckDBManager()
+    duckdb_mgr.populate_from_pipeline_feed(
+        bank_lines=bank_lines,
+        open_invoices=open_invoices,
+        proposals=proposals
+    )
+    metrics = duckdb_mgr.get_metrics()
+    console.print(f" [green]✓[/green] DuckDB updated: [cyan]{metrics['reconciled_count']}[/cyan] reconciled items ({metrics['reconciled_gross_nok']:,.2f} NOK) | [yellow]{metrics['unreconciled_count']}[/yellow] unreconciled open items ({metrics['unreconciled_open_nok']:,.2f} NOK).")
+    console.print(f"   • RAG distribution in DuckDB: [red]● {metrics['rag_distribution']['red']} Red[/red] | [yellow]● {metrics['rag_distribution']['amber']} Amber[/yellow] | [green]● {metrics['rag_distribution']['green']} Green[/green]")
+    duckdb_mgr.close()
 
     console.print("\n[bold green]Pipeline executed successfully.[/bold green]\n")
 

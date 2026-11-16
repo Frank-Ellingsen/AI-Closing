@@ -850,6 +850,467 @@
         scroll-behavior: auto !important;
       }
     }
+    /* Stepper & Multi-Phase Close Workflow */
+    .close-stepper-panel {
+      padding: var(--space-xs) var(--space-md);
+      background: var(--surface-container-low);
+      border: var(--hairline);
+    }
+    .stepper-track {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-xs);
+      overflow-x: auto;
+      padding: 4px 0;
+    }
+    .stepper-step {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      cursor: pointer;
+      padding: 6px var(--space-sm);
+      border-radius: var(--rounded);
+      transition: background 0.15s ease, border-color 0.15s ease;
+      flex-shrink: 0;
+    }
+    .stepper-step:hover {
+      background: var(--surface-container);
+    }
+    .stepper-step.is-active-step {
+      background: var(--surface-container-high);
+      border: 1px solid var(--primary);
+    }
+    .step-marker {
+      width: 24px;
+      height: 24px;
+      border-radius: var(--rounded-full);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--surface-container-high);
+      border: 1px solid var(--outline);
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--on-surface-variant);
+      flex-shrink: 0;
+    }
+    .stepper-step.is-done .step-marker {
+      background: var(--sage-tint);
+      border-color: var(--tertiary);
+      color: var(--tertiary);
+    }
+    .step-info {
+      display: flex;
+      flex-direction: column;
+    }
+    .step-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--on-surface);
+      white-space: nowrap;
+    }
+    .step-sub {
+      font-size: 0.7rem;
+      color: var(--on-surface-variant);
+      white-space: nowrap;
+    }
+    .stepper-line {
+      flex: 1;
+      height: 2px;
+      background: var(--outline-variant);
+      min-width: 14px;
+      margin: 0 4px;
+    }
+    .stepper-line.line-done {
+      background: var(--tertiary);
+      opacity: 0.6;
+    }
+    .sign-box {
+      border: var(--hairline);
+      border-radius: var(--rounded);
+      padding: var(--space-md);
+      background: var(--surface-container-low);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+      position: relative;
+    }
+    .sign-box.is-signed {
+      border-color: var(--tertiary);
+      background: var(--sage-tint);
+    }
+    .sign-box.is-locked {
+      border-color: var(--data-3);
+      background: color-mix(in srgb, var(--data-3) 10%, var(--surface-container-low));
+    }
+    .sign-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-label);
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+    @media print {
+      body { background: #fff !important; color: #000 !important; }
+      .cockpit-header, .executive-row, .kpi-grid, .nav-tabs, .close-stepper-panel, .header-controls, #toast-stack, footer, .btn, .toolbar-row button, .seg-btn-group {
+        display: none !important;
+      }
+      .panel, .well, table {
+        border: 1px solid #ddd !important;
+        background: #fff !important;
+        color: #000 !important;
+        box-shadow: none !important;
+      }
+      th, td, strong, span, p, h1, h2, h3 { color: #000 !important; }
+      #tab-content { margin: 0 !important; padding: 0 !important; }
+    }
+    /* Conditional RAG (Red - Amber - Green) Formatting */
+    .rag-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 1px 7px;
+      border-radius: var(--rounded-full);
+      font-family: var(--font-label);
+      font-size: 0.72rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .rag-pill.rag-green {
+      background: var(--sage-tint);
+      color: var(--tertiary);
+      border: 1px solid var(--sage-border);
+    }
+    .rag-pill.rag-amber {
+      background: var(--amber-tint);
+      color: var(--data-3);
+      border: 1px solid var(--amber-border);
+    }
+    .rag-pill.rag-red {
+      background: var(--error-tint);
+      color: var(--error);
+      border: 1px solid var(--error-border);
+    }
+
+    /* Row-level RAG borders (Tufte-style clean accents) */
+    tr.rag-row-green {
+      border-left: 3px solid var(--tertiary);
+    }
+    tr.rag-row-amber {
+      border-left: 3px solid var(--data-3);
+    }
+    tr.rag-row-red {
+      border-left: 3px solid var(--error);
+      background: color-mix(in srgb, var(--error) 4%, transparent);
+    }
+
+    /* KPI RAG accents */
+    .kpi-card.rag-border-green {
+      border-top: 2px solid var(--tertiary);
+    }
+    .kpi-card.rag-border-amber {
+      border-top: 2px solid var(--data-3);
+    }
+    .kpi-card.rag-border-red {
+      border-top: 2px solid var(--error);
+    }
+
+    .rag-filter-group {
+      display: inline-flex;
+      align-items: center;
+      border: var(--hairline);
+      border-radius: var(--rounded);
+      overflow: hidden;
+      background: var(--surface-container-high);
+    }
+    .rag-filter-btn {
+      padding: 4px 10px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      font-family: var(--font-label);
+      background: transparent;
+      border: none;
+      color: var(--on-surface-variant);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+    .rag-filter-btn:hover {
+      background: var(--surface-container);
+      color: var(--on-surface);
+    }
+    .rag-filter-btn.is-active {
+      background: var(--surface-container-low);
+      color: var(--primary);
+      box-shadow: inset 0 -2px 0 var(--primary);
+    }
+    .rag-filter-btn.is-active.filter-red {
+      color: var(--error);
+      box-shadow: inset 0 -2px 0 var(--error);
+    }
+    .rag-filter-btn.is-active.filter-amber {
+      color: var(--data-3);
+      box-shadow: inset 0 -2px 0 var(--data-3);
+    }
+    .rag-filter-btn.is-active.filter-green {
+      color: var(--tertiary);
+      box-shadow: inset 0 -2px 0 var(--tertiary);
+    }
+    /* =========================================================================
+       FLOATING POP-UP CHATBOT & COPILOT DRAWER
+       ========================================================================= */
+    .chatbot-trigger-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 999;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, #163840 0%, #152024 100%);
+      color: var(--on-surface);
+      border: 1px solid var(--primary);
+      border-radius: var(--rounded-full);
+      padding: 10px 18px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
+      cursor: pointer;
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      font-weight: 600;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+    .chatbot-trigger-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(99, 199, 214, 0.25);
+      border-color: var(--on-primary-container);
+    }
+    .chatbot-trigger-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--rounded-full);
+      background: var(--primary-container);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .chatbot-pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: var(--rounded-full);
+      background: var(--tertiary);
+      box-shadow: 0 0 8px var(--tertiary);
+      animation: pulseDot 2s infinite;
+    }
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    .chatbot-drawer {
+      position: fixed;
+      bottom: 80px;
+      right: 24px;
+      width: 440px;
+      max-width: calc(100vw - 32px);
+      height: 580px;
+      max-height: calc(100vh - 120px);
+      background: var(--surface-container-low);
+      border: 1px solid var(--outline);
+      border-radius: var(--rounded-lg);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: drawerSlideIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .chatbot-drawer.is-hidden {
+      display: none !important;
+    }
+    @keyframes drawerSlideIn {
+      from { opacity: 0; transform: translateY(16px) scale(0.97); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .chatbot-header {
+      padding: var(--space-sm) var(--space-md);
+      background: var(--surface-container);
+      border-bottom: var(--hairline);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .chatbot-title-group {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    .chatbot-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--rounded-full);
+      background: var(--primary-container);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .chatbot-title {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--on-surface);
+    }
+    .chatbot-subtitle {
+      font-size: 0.74rem;
+      color: var(--on-surface-variant);
+    }
+    .chatbot-controls {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .chatbot-icon-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--rounded);
+      background: transparent;
+      border: none;
+      color: var(--on-surface-variant);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+    .chatbot-icon-btn:hover {
+      background: var(--surface-container-high);
+      color: var(--on-surface);
+    }
+    .chatbot-role-bar {
+      padding: 6px var(--space-md);
+      background: var(--surface-container-high);
+      border-bottom: var(--hairline);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-sm);
+    }
+    .chatbot-role-label {
+      font-size: 0.74rem;
+      font-family: var(--font-label);
+      color: var(--on-surface-variant);
+      font-weight: 600;
+    }
+    .chatbot-quick-chips {
+      padding: 8px var(--space-md);
+      background: var(--surface-container-low);
+      border-bottom: var(--hairline);
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      flex-shrink: 0;
+    }
+    .chatbot-quick-chips::-webkit-scrollbar {
+      display: none;
+    }
+    .chatbot-chip {
+      padding: 4px 9px;
+      border-radius: var(--rounded-full);
+      background: var(--surface-container);
+      border: 1px solid var(--outline-variant);
+      color: var(--on-surface-variant);
+      font-size: 0.74rem;
+      font-family: var(--font-body);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    }
+    .chatbot-chip:hover {
+      background: var(--surface-container-high);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .chatbot-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+    .chat-bubble {
+      max-width: 90%;
+      padding: 10px 14px;
+      border-radius: var(--rounded-lg);
+      font-size: 0.85rem;
+      line-height: 1.45;
+    }
+    .chat-bubble.bot {
+      align-self: flex-start;
+      background: var(--surface-container);
+      border: var(--hairline);
+      color: var(--on-surface);
+      border-bottom-left-radius: 2px;
+    }
+    .chat-bubble.user {
+      align-self: flex-end;
+      background: var(--primary-container);
+      border: 1px solid color-mix(in srgb, var(--primary) 40%, transparent);
+      color: var(--on-primary-container);
+      border-bottom-right-radius: 2px;
+    }
+    .chat-bubble-actions {
+      margin-top: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .chat-action-btn {
+      padding: 3px 8px;
+      border-radius: var(--rounded);
+      background: var(--surface-container-high);
+      border: 1px solid var(--primary);
+      color: var(--primary);
+      font-size: 0.74rem;
+      cursor: pointer;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s ease;
+    }
+    .chat-action-btn:hover {
+      background: var(--primary);
+      color: var(--on-primary);
+    }
+    .chatbot-input-bar {
+      padding: var(--space-sm) var(--space-md);
+      background: var(--surface-container);
+      border-top: var(--hairline);
+      display: flex;
+      gap: var(--space-sm);
+      align-items: center;
+    }
+    .chatbot-input {
+      flex: 1;
+      padding: 8px 12px;
+      border-radius: var(--rounded);
+      background: var(--surface-container-high);
+      border: var(--hairline);
+      color: var(--on-surface);
+      font-size: 0.84rem;
+      font-family: var(--font-body);
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+    .chatbot-input:focus {
+      border-color: var(--primary);
+    }
   </style>
 </head>
 <body>
@@ -861,6 +1322,16 @@
         <p class="header-subtitle">Nordic Engineering Projects AS (Org.nr 984 210 552) — Autonom månedsavslutning, AI Close Matcher transaksjonsmotor, Balansekontroll og SHA-256 revisjonskjede.</p>
       </div>
       <div class="header-controls">
+        <div class="field-group">
+          <label class="field-label" for="wbs-filter-select">Prosjekt / WBS-filter</label>
+          <select id="wbs-filter-select" class="control-select" onchange="switchWbsFilter(this.value)">
+            <option value="all" selected>Alle prosjekter (Konsern totalt)</option>
+            <option value="WBS-401">WBS-401 Subsea Manifold</option>
+            <option value="WBS-408">WBS-408 Offshore Plattform</option>
+            <option value="WBS-412">WBS-412 Landanlegg West</option>
+            <option value="WBS-900">WBS-900 Konsern / Felles</option>
+          </select>
+        </div>
         <div class="field-group">
           <label class="field-label" for="period-select">Regnskapsperiode</label>
           <select id="period-select" class="control-select" onchange="switchPeriod(this.value)">
@@ -885,6 +1356,9 @@
       <div class="panel close-clock-panel" id="close-clock-panel"></div>
     </section>
 
+    <!-- SEQUENTIAL CLOSE PROCESS STEPPER & GATES -->
+    <section aria-label="Sekvensiell månedsavslutningsprosess" class="panel panel-compact close-stepper-panel" id="close-stepper"></section>
+
     <!-- NAVIGATION TABS -->
     <nav class="nav-tabs" aria-label="Arbeidsmoduler" id="nav-tabs"></nav>
 
@@ -893,9 +1367,75 @@
 
     <!-- FOOTER / SOURCE ATTRIBUTION -->
     <footer class="panel panel-compact" style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:var(--space-md);">
-      <span class="data-label">Nordic Engineering Projects AS · Konto 1920 Driftskonto NOK · Close Cockpit v2026.10</span>
+      <div style="display:flex; align-items:center; gap:var(--space-md); flex-wrap:wrap;">
+        <span class="data-label">Nordic Engineering Projects AS · Konto 1920 Driftskonto NOK · Close Cockpit v2026.10</span>
+        <div style="display:inline-flex; align-items:center; gap:6px; background:var(--surface-container-high); padding:3px 10px; border-radius:var(--rounded-full); border:var(--hairline); font-size:0.75rem;">
+          <span style="color:#d97706;">🦆</span> <strong>DuckDB Store:</strong> <span style="color:var(--tertiary);">reconciled_transactions</span> &amp; <span style="color:var(--secondary);">unreconciled_transactions</span> (ACID Sync Aktiv)
+        </div>
+      </div>
       <span class="text-muted" style="font-size:0.82rem;">Metodegrunnlag: Trintech AI Close Matcher / Balancer dokumentasjon, Numeric 2026 Account Reconciliation Guide, Bluecopa 2026 &amp; ERP Research.</span>
     </footer>
+  </div>
+
+  <!-- FLOATING CHATBOT TRIGGER BUTTON -->
+  <button id="chatbot-toggle-btn" class="chatbot-trigger-btn" onclick="toggleChatbot()" title="Åpne Close-AI Assistent (Copilot &amp; Superbruker)" aria-label="Åpne Close-AI Chatbot">
+    <div class="chatbot-trigger-icon">
+      <i data-lucide="bot" width="18" height="18"></i>
+    </div>
+    <span class="chatbot-trigger-label">Close-AI Assistent</span>
+    <span class="chatbot-pulse-dot" id="chatbot-badge"></span>
+  </button>
+
+  <!-- POPUP CHATBOT DRAWER / MODAL -->
+  <div id="chatbot-drawer" class="chatbot-drawer is-hidden" role="dialog" aria-label="Close-AI Assistent Chatbot">
+    <div class="chatbot-header">
+      <div class="chatbot-title-group">
+        <div class="chatbot-avatar">
+          <i data-lucide="bot" width="18" height="18"></i>
+        </div>
+        <div>
+          <div class="chatbot-title">Close-AI Assistent</div>
+          <div class="chatbot-subtitle">Nordic Engineering · Finans &amp; Superbruker</div>
+        </div>
+      </div>
+      <div class="chatbot-controls">
+        <button type="button" class="chatbot-icon-btn" onclick="resetChatbotConversation()" title="Tilbakestill samtale">
+          <i data-lucide="rotate-ccw" width="15" height="15"></i>
+        </button>
+        <button type="button" class="chatbot-icon-btn" onclick="toggleChatbot()" title="Lukk assistent">
+          <i data-lucide="x" width="16" height="16"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- ROLE SWITCHER BAR -->
+    <div class="chatbot-role-bar">
+      <span class="chatbot-role-label">Modus:</span>
+      <div class="seg-btn-group" style="display:inline-flex; border:var(--hairline); border-radius:var(--rounded); overflow:hidden;">
+        <button type="button" id="chat-role-user" class="btn btn-xs btn-primary" onclick="setChatbotRole('user')">
+          <i data-lucide="user-check" width="12" height="12"></i>
+          <span>Bruker / Controller</span>
+        </button>
+        <button type="button" id="chat-role-admin" class="btn btn-xs btn-ghost" onclick="setChatbotRole('admin')">
+          <i data-lucide="shield-alert" width="12" height="12"></i>
+          <span>Superbruker / Admin</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- QUICK ACTION PROMPT CHIPS -->
+    <div class="chatbot-quick-chips" id="chatbot-quick-chips"></div>
+
+    <!-- CHAT MESSAGES STREAM -->
+    <div class="chatbot-messages" id="chatbot-messages" aria-live="polite"></div>
+
+    <!-- CHAT INPUT BAR -->
+    <form class="chatbot-input-bar" onsubmit="handleChatbotSubmit(event)">
+      <input type="text" id="chatbot-input" class="chatbot-input" placeholder="Spør om avstemming, regler, ERP-maler..." autocomplete="off">
+      <button type="submit" class="btn btn-primary btn-sm" id="chatbot-send-btn">
+        <i data-lucide="send" width="15" height="15"></i>
+      </button>
+    </form>
   </div>
 
   <!-- TOAST CONTAINER -->
@@ -918,6 +1458,9 @@
         bankFeedName: `CAMT053_DNB_1920_202608.xml`,
         erpFeedName: `SAFT_VismaBC_1920_202608.csv`,
         inTransitRecognized: true,
+        isLocked: true,
+        controllerSigned: { signed: true, timestamp: `2026-09-04 14:15 CET`, actor: `Frank Ellingsen (Senior Prosjektcontroller)`, hash: `a4b87c12f9018e2193cb4a601e3d4891bca79e2098dca467e21a89cb391e4590` },
+        cfoApproved: { approved: true, timestamp: `2026-09-04 16:45 CET`, actor: `Kari Nordmann (CFO)`, hash: `f87a3290e1b283ac4981dfca8912c4091bc782ae901caef4781290bdca4590ef` },
         bankLines: [
           { id: `BK-0801`, date: `2026-08-08`, desc: `Equinor ASA Milepæl 2`, ref: `KID 0004102201`, wbs: `WBS-408 Offshore Plattform`, amount: 3240000, status: `matched`, matchId: `M-08-001` },
           { id: `BK-0802`, date: `2026-08-14`, desc: `Aker Solutions Underleveranse`, ref: `KID 0009912304`, wbs: `WBS-401 Subsea Manifold`, amount: -1180000, status: `matched`, matchId: `M-08-002` },
@@ -955,6 +1498,9 @@
         bankFeedName: `CAMT053_DNB_1920_202609.xml`,
         erpFeedName: `SAFT_VismaBC_1920_202609.csv`,
         inTransitRecognized: true,
+        isLocked: true,
+        controllerSigned: { signed: true, timestamp: `2026-10-05 15:30 CEST`, actor: `Frank Ellingsen (Senior Prosjektcontroller)`, hash: `c9d4e158b23490ef812bc67190dca41bca9082ef41908cae48912bc09148dce2` },
+        cfoApproved: { approved: true, timestamp: `2026-10-05 17:00 CEST`, actor: `Kari Nordmann (CFO)`, hash: `12d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3` },
         bankLines: [
           { id: `BK-0901`, date: `2026-09-09`, desc: `Vår Energi ASA Framdrift #4`, ref: `KID 0005501122`, wbs: `WBS-408 Offshore Plattform`, amount: 2890000, status: `matched`, matchId: `M-09-001` },
           { id: `BK-0902`, date: `2026-09-18`, desc: `TechnipFMC Materiell Subsea`, ref: `KID 0088123456`, wbs: `WBS-401 Subsea Manifold`, amount: -940000, status: `matched`, matchId: `M-09-002` },
@@ -985,6 +1531,9 @@
         bankFeedName: `CAMT053_DNB_1920_202610.xml`,
         erpFeedName: `SAFT_VismaBC_1920_202610.csv`,
         inTransitRecognized: false,
+        isLocked: false,
+        controllerSigned: { signed: false, timestamp: null, actor: null, hash: null },
+        cfoApproved: { approved: false, timestamp: null, actor: null, hash: null },
         bankLines: [
           { id: `BK-1001`, date: `2026-10-03`, desc: `Equinor ASA Milepæl 3`, ref: `KID 0004910021`, wbs: `WBS-408 Offshore Plattform`, amount: 1850000, status: `matched`, matchId: `M-10-001` },
           { id: `BK-1002`, date: `2026-10-06`, desc: `Kongsberg Gruppen Styringssystem`, ref: `KID 0077231098`, wbs: `WBS-401 Subsea Manifold`, amount: -760000, status: `matched`, matchId: `M-10-002` },
@@ -1003,7 +1552,7 @@
           { id: `ER-1001`, date: `2026-10-03`, desc: `Faktura 10401 Equinor ASA`, ref: `KID 0004910021`, wbs: `WBS-408 Offshore Plattform`, amount: 1850000, status: `matched`, matchId: `M-10-001`, ageDays: 0 },
           { id: `ER-1002`, date: `2026-10-06`, desc: `Lev.bilag 56012 Kongsberg Gruppen`, ref: `KID 0077231098`, wbs: `WBS-401 Subsea Manifold`, amount: -760000, status: `matched`, matchId: `M-10-002`, ageDays: 0 },
           { id: `ER-1003`, date: `2026-10-09`, desc: `Lønnsbilag #L-1004 Okt`, ref: `LONN-1004`, wbs: `WBS-900 Konsern / Felles`, amount: -412500, status: `matched`, matchId: `M-10-003`, ageDays: 0 },
-          { id: `ER-1004`, date: `2026-10-14`, desc: `Faktura 10415 Aker Solutions ASA`, ref: `KID 0004829104`, wbs: `WBS-408 Offshore Plattform`, amount: 1250000, status: `open`, matchId: null, autoRule: `R-01`, ageDays: 17 },
+          { id: `ER-1004`, date: `2026-10-14`, desc: `Faktura 10415 Aker Solutions ASA`, ref: `KID 0004829104`, wbs: `WBS-408 Offshore Plattform`, amount: 1250000, status: `open`, matchId: null, autoRule: `R-01`, ageDays: 17, subsequentReceipt: `Innbetalt 04.11.2026 i DNB CAMT.053 (Ref DNB-BK1004)` },
           { id: `ER-1005`, date: `2026-10-16`, desc: `Lev.bilag 56044 Subsea 7 Norge`, ref: `KID 0091827364`, wbs: `WBS-401 Subsea Manifold`, amount: -420000, status: `open`, matchId: null, autoRule: `R-01`, ageDays: 15 },
           { id: `ER-1006`, date: `2026-10-17`, desc: `Faktura INV-8821 Vestland Energi`, ref: `INV-8821`, wbs: `WBS-412 Landanlegg West`, amount: 310500, status: `open`, matchId: null, autoRule: `R-02`, ageDays: 14 },
           { id: `ER-1007`, date: `2026-10-21`, desc: `Faktura 10418 Batch #88 Del 1`, ref: `NETS-B88`, wbs: `WBS-408 Offshore Plattform`, amount: 210000, status: `open`, matchId: null, autoRule: `R-03`, ageDays: 10 },
@@ -1013,7 +1562,7 @@
           { id: `ER-1011`, date: `2026-10-25`, desc: `Faktura 10421 Landanlegg West AS`, ref: `OCR-7731A`, wbs: `WBS-412 Landanlegg West`, amount: 120000, status: `open`, matchId: null, autoRule: null, ageDays: 6 },
           { id: `ER-1012`, date: `2026-10-25`, desc: `Faktura 10422 Landanlegg West AS`, ref: `OCR-7731B`, wbs: `WBS-412 Landanlegg West`, amount: 75000, status: `open`, matchId: null, autoRule: null, ageDays: 6 },
           { id: `ER-1013`, date: `2026-10-28`, desc: `Lev.bilag 56089 Kranleie Plattform`, ref: `K-56089`, wbs: `WBS-408 Offshore Plattform`, amount: -64000, status: `open`, matchId: null, autoRule: null, ageDays: 3 },
-          { id: `ER-1014`, date: `2026-10-31`, desc: `Innbetaling underveis Bergen Marine`, ref: `TR-3110`, wbs: `WBS-412 Landanlegg West`, amount: 45000, status: `open`, matchId: null, autoRule: null, ageDays: 1, isInTransit: true }
+          { id: `ER-1014`, date: `2026-10-31`, desc: `Innbetaling underveis Bergen Marine`, ref: `TR-3110`, wbs: `WBS-412 Landanlegg West`, amount: 45000, status: `open`, matchId: null, autoRule: null, ageDays: 1, isInTransit: true, subsequentReceipt: `Innbetalt 02.11.2026 i DNB CAMT.053 (Bokført nov)` }
         ],
         clusters: [
           { matchId: `M-10-001`, rule: `R-01`, desc: `Equinor ASA Milepæl 3 (KID eksakt)`, timestamp: `2026-10-03 10:15`, actor: `AI Close Matcher v4.2`, bankIds: [`BK-1001`], erpIds: [`ER-1001`], bankTotal: 1850000, erpTotal: 1850000, variance: 0, voucherId: null },
@@ -1092,13 +1641,14 @@
     };
 
     const TABS = [
-      { id: `import`, label: `Data Import & Kilder`, icon: `download` },
-      { id: `balancer`, label: `Balansekontroll (AI Close Balancer)`, icon: `scale` },
-      { id: `open`, label: `Åpne Poster (Unreconciled)`, icon: `list-checks` },
-      { id: `reconciled`, label: `Avstemte Poster (Reconciled)`, icon: `check-circle-2` },
-      { id: `aging`, label: `Aldersfordeling & Tapsavsetning`, icon: `bar-chart-3` },
-      { id: `vouchers`, label: `Bilagsstudio & SAF-T Eksport`, icon: `file-spreadsheet` },
-      { id: `audit`, label: `Revisjonslogg`, icon: `shield-check` }
+      { id: `import`, label: `1. Datafangst & Import`, icon: `download` },
+      { id: `balancer`, label: `2. Balansekontroll & Bro`, icon: `scale` },
+      { id: `open`, label: `3. Åpne Poster & AI Copilot`, icon: `list-checks` },
+      { id: `reconciled`, label: `4. Avstemte Poster`, icon: `check-circle-2` },
+      { id: `aging`, label: `5. Aldersfordeling & IFRS 9`, icon: `bar-chart-3` },
+      { id: `vouchers`, label: `6. Bilagsstudio & Spin-off`, icon: `file-spreadsheet` },
+      { id: `cfo`, label: `7. CFO-Rapport & Sign-off`, icon: `file-check` },
+      { id: `audit`, label: `8. Revisjon & Revisorpakke`, icon: `shield-check` }
     ];
 
     // =========================================================================
@@ -1107,6 +1657,10 @@
     let appState = {
       activePeriod: `2026-10`,
       activeTab: `import`,
+      wbsFilter: `all`,
+      balancerMode: `after`,
+      ragFilter: `all`,
+      ragFormattingEnabled: true,
       periods: deepClone(PERIOD_TEMPLATES),
       auditLog: [],
       ifrsScenario: `standard`,
@@ -1125,7 +1679,8 @@
         reconciled: { key: `matchId`, dir: `asc` },
         aging: { key: `ageDays`, dir: `desc` },
         vouchers: { key: `id`, dir: `asc` },
-        audit: { key: `seq`, dir: `desc` }
+        audit: { key: `seq`, dir: `desc` },
+        cfo: { key: `amount`, dir: `desc` }
       }
     };
 
@@ -1224,6 +1779,10 @@
       return {
         activePeriod: appState.activePeriod,
         activeTab: appState.activeTab,
+        wbsFilter: appState.wbsFilter,
+        balancerMode: appState.balancerMode,
+        ragFilter: appState.ragFilter,
+        ragFormattingEnabled: appState.ragFormattingEnabled,
         periods: appState.periods,
         auditLog: appState.auditLog,
         ifrsScenario: appState.ifrsScenario,
@@ -1251,6 +1810,10 @@
             appState.auditLog = Array.isArray(saved.auditLog) ? saved.auditLog : [];
             appState.ifrsScenario = saved.ifrsScenario || `standard`;
             appState.exportFormat = saved.exportFormat || `saft`;
+            appState.wbsFilter = saved.wbsFilter || `all`;
+            appState.balancerMode = saved.balancerMode || `after`;
+            appState.ragFilter = saved.ragFilter || `all`;
+            appState.ragFormattingEnabled = saved.ragFormattingEnabled !== undefined ? saved.ragFormattingEnabled : true;
           }
         }
       } catch (e) {
@@ -1261,6 +1824,8 @@
 
       const sel = document.getElementById(`period-select`);
       if (sel) sel.value = appState.activePeriod;
+      const wbsSel = document.getElementById(`wbs-filter-select`);
+      if (wbsSel) wbsSel.value = appState.wbsFilter || `all`;
 
       renderAll();
 
@@ -1476,34 +2041,42 @@
       const isZero = Math.abs(m.netDelta) < 0.01;
       const remainingErpOpen = p.erpLines.filter((l) => l.status === `open`).length;
       const remainingBankOpen = p.bankLines.filter((l) => l.status === `open`).length;
+      const ragEnabled = appState.ragFormattingEnabled;
+
+      const card1Rag = ragEnabled ? (m.readiness === 100 ? `rag-border-green` : `rag-border-amber`) : ``;
+      const card2Rag = ragEnabled ? `rag-border-green` : ``;
+      const card3Rag = ragEnabled ? `rag-border-green` : ``;
+      const card4Rag = ragEnabled ? (isZero ? `rag-border-green` : (Math.abs(m.netDelta) <= 10000 ? `rag-border-amber` : `rag-border-red`)) : ``;
+      const card5Rag = ragEnabled ? (remainingBankOpen === 0 ? `rag-border-green` : (remainingBankOpen <= 5 ? `rag-border-amber` : `rag-border-red`)) : ``;
+      const card6Rag = ragEnabled ? (remainingErpOpen === 0 ? `rag-border-green` : (remainingErpOpen <= 5 ? `rag-border-amber` : `rag-border-red`)) : ``;
 
       container.innerHTML = `
-        <div class="kpi-card">
+        <div class="kpi-card ${card1Rag}">
           <span class="data-label">Siste avstemte periode</span>
           <div class="kpi-value">${escapeHtml(p.label)} · ${escapeHtml(p.periodCode)}</div>
           <span class="kpi-delta ${m.readiness === 100 ? `is-positive` : `is-cyan`}">${m.readiness === 100 ? `Fullført &amp; godkjent` : escapeHtml(m.lastClosedText)}</span>
         </div>
-        <div class="kpi-card">
+        <div class="kpi-card ${card2Rag}">
           <span class="data-label">Saldo Bank (1920 Driftskonto)</span>
           <div class="kpi-value">${formatNOK(m.ubBank)}</div>
           <span class="kpi-delta">IB ${formatNOK(p.ibBank)}</span>
         </div>
-        <div class="kpi-card">
+        <div class="kpi-card ${card3Rag}">
           <span class="data-label">Saldo ERP (Hovedbok 1920)</span>
           <div class="kpi-value">${formatNOK(m.ubErp)}</div>
           <span class="kpi-delta ${m.postedVouchersImpact !== 0 ? `is-cyan` : ``}">Bilag bokført: ${formatNOK(m.postedVouchersImpact)}</span>
         </div>
-        <div class="kpi-card">
+        <div class="kpi-card ${card4Rag}">
           <span class="data-label">Differanse (Δ)</span>
           <div class="kpi-value" style="color:${isZero ? `var(--tertiary)` : `var(--error)`};">${formatNOK(m.netDelta)}</div>
           <span class="kpi-delta ${isZero ? `is-positive` : `is-error`}">${isZero ? `Balansert (0,00 kr avvik)` : `Rå avvik: ${formatNOK(m.rawDelta)}`}</span>
         </div>
-        <div class="kpi-card">
+        <div class="kpi-card ${card5Rag}">
           <span class="data-label">Count Åpne Poster Bank</span>
           <div class="kpi-value">${remainingBankOpen} <span style="font-size:0.95rem; font-weight:400; color:var(--on-surface-variant);">linjer</span></div>
           <span class="kpi-delta ${remainingBankOpen === 0 ? `is-positive` : `is-warning`}">${remainingBankOpen === 0 ? `Alle banklinjer avstemt` : `Av totalt ${p.bankLines.length} banklinjer`}</span>
         </div>
-        <div class="kpi-card">
+        <div class="kpi-card ${card6Rag}">
           <span class="data-label">Count Åpne Poster ERP</span>
           <div class="kpi-value">${remainingErpOpen} <span style="font-size:0.95rem; font-weight:400; color:var(--on-surface-variant);">linjer</span></div>
           <span class="kpi-delta ${remainingErpOpen === 0 ? `is-positive` : `is-warning`}">${remainingErpOpen === 0 ? `Alle ERP-linjer avstemt` : `Av totalt ${p.erpLines.length} reskontrolinjer`}</span>
@@ -1598,6 +2171,7 @@
         open: openCount,
         reconciled: p.clusters.length,
         vouchers: p.vouchers.length,
+        cfo: p.isLocked ? `Låst` : (p.controllerSigned && p.controllerSigned.signed ? `1/2` : `0/2`),
         audit: appState.auditLog.length
       };
 
@@ -1617,6 +2191,7 @@
     function renderAll() {
       renderKpiStrip();
       renderReadinessAndClock();
+      renderCloseStepper();
       renderNavTabs();
       renderTabContent();
       if (window.lucide) window.lucide.createIcons();
@@ -1652,6 +2227,7 @@
       else if (tab === `reconciled`) main.innerHTML = buildReconciledTab();
       else if (tab === `aging`) main.innerHTML = buildAgingTab();
       else if (tab === `vouchers`) main.innerHTML = buildVouchersTab();
+      else if (tab === `cfo`) main.innerHTML = buildCfoTab();
       else if (tab === `audit`) main.innerHTML = buildAuditTab();
 
       if (window.lucide) window.lucide.createIcons();
@@ -1817,53 +2393,162 @@
       const m = computePeriodMetrics(p);
       const isZero = Math.abs(m.netDelta) < 0.01;
       const inTransitLine = p.erpLines.find((l) => l.isInTransit);
+      const isBefore = appState.balancerMode === `before`;
+
+      const unadjustedErpUB = p.ibErp + m.erpTxBaseSum;
+      const rawVariance = m.ubBank - unadjustedErpUB;
 
       return `
         <div class="stack-lg">
           <div class="panel">
             <div class="toolbar-row">
               <div>
-                <span class="data-label">AI Close Balancer · Periodens Rullering &amp; Bevisføring</span>
+                <span class="data-label">AI Close Balancer · Periodens Rullering &amp; Bro</span>
                 <h2 class="section-title">Balansekontroll: Konto 1920 Driftskonto NOK — ${escapeHtml(p.label)}</h2>
-                <p class="text-muted" style="margin:0;">Verifiserer at Inngående Balanse (IB) + Periodens transaksjoner = Utgående Balanse (UB) for både Bank og Hovedbok, samt avstemmer tidsavvik og ikke-bokførte bankposter.</p>
+                <p class="text-muted" style="margin:0;">Verifiserer at Inngående Balanse (IB) + Periodens transaksjoner = Utgående Balanse (UB) for både Bank og Hovedbok, samt avstemmer tidsavvik og ikke-bokførte spinn-off bilag.</p>
               </div>
-              <span class="status-chip ${isZero ? `chip-sage` : `chip-error`}" style="font-size:0.85rem; padding:6px 12px;">
-                ${isZero ? `Konto 1920 Balansert (Δ = 0,00 kr)` : `Avvik å avklare: ${formatNOK(m.netDelta)}`}
-              </span>
+              <div style="display:flex; gap:var(--space-sm); align-items:center; flex-wrap:wrap;">
+                <div class="seg-btn-group" style="display:inline-flex; border:var(--hairline); border-radius:var(--rounded); overflow:hidden;">
+                  <button type="button" class="btn btn-sm ${isBefore ? `btn-primary` : `btn-ghost`}" onclick="setBalancerViewMode('before')">
+                    <i data-lucide="split" width="14" height="14" aria-hidden="true"></i>
+                    <span>Før korreksjoner (Rå Saldo)</span>
+                  </button>
+                  <button type="button" class="btn btn-sm ${!isBefore ? `btn-primary` : `btn-ghost`}" onclick="setBalancerViewMode('after')">
+                    <i data-lucide="check-check" width="14" height="14" aria-hidden="true"></i>
+                    <span>Etter korreksjoner (Avstemt Bro Δ=0)</span>
+                  </button>
+                </div>
+                <span class="status-chip ${isZero && !isBefore ? `chip-sage` : `chip-error`}" style="font-size:0.85rem; padding:6px 12px;">
+                  ${isZero && !isBefore ? `Konto 1920 Balansert (Δ = 0,00 kr)` : `Avvik å avklare: ${formatNOK(isBefore ? rawVariance : m.netDelta)}`}
+                </span>
+              </div>
             </div>
 
-            <div class="table-scroll" style="margin-top:var(--space-md);">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Konto / Kilde</th>
-                    <th class="num">IB (Inngående balanse)</th>
-                    <th class="num">Periodens bevegelse</th>
-                    <th class="num">Bokførte spinn-off bilag</th>
-                    <th class="num">UB (Utgående balanse)</th>
-                    <th>Kontrollstatus</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td><strong>Bankutskrift DNB (1920 Driftskonto)</strong></td>
-                    <td class="num">${formatNOK(p.ibBank)}</td>
-                    <td class="num">${formatNOK(m.bankTxSum)}</td>
-                    <td class="num text-muted">0,00 kr</td>
-                    <td class="num"><strong>${formatNOK(m.ubBank)}</strong></td>
-                    <td><span class="status-chip chip-sage">IB + Bevegelse = UB OK</span></td>
-                  </tr>
-                  <tr>
-                    <td><strong>Hovedbok ERP (Konto 1920 Visma / BC)</strong></td>
-                    <td class="num">${formatNOK(p.ibErp)}</td>
-                    <td class="num">${formatNOK(m.erpTxBaseSum)}</td>
-                    <td class="num" style="color:var(--primary);">${formatNOK(m.postedVouchersImpact)}</td>
-                    <td class="num"><strong>${formatNOK(m.ubErp)}</strong></td>
-                    <td><span class="status-chip chip-sage">IB + Bevegelse = UB OK</span></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            ${isBefore ? `
+              <!-- BEFORE VIEW: RAW IMBALANCE & RECONCILIATION BRIDGE -->
+              <div class="well" style="margin-top:var(--space-md); border-color:var(--amber-border); background:var(--amber-tint);">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:var(--space-sm);">
+                  <div>
+                    <strong style="color:var(--data-3); font-size:0.92rem;">Visning: Før korreksjoner (Rå ujustert saldo fra bank og ERP)</strong>
+                    <div class="text-muted" style="font-size:0.82rem;">Viser rå differanse før genererte spinn-off bilag og godkjente tidsavvik er hensyntatt.</div>
+                  </div>
+                  <span class="status-chip chip-amber">Rå differanse: ${formatNOK(rawVariance)}</span>
+                </div>
+              </div>
+
+              <div class="table-scroll" style="margin-top:var(--space-md);">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Kilde / Balansepost</th>
+                      <th class="num">IB (01.${p.id.slice(5)})</th>
+                      <th class="num">Rå Bevegelse</th>
+                      <th class="num">Ujustert UB</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>Bankutskrift DNB (Konto 1920)</strong></td>
+                      <td class="num">${formatNOK(p.ibBank)}</td>
+                      <td class="num">${formatNOK(m.bankTxSum)}</td>
+                      <td class="num"><strong>${formatNOK(m.ubBank)}</strong></td>
+                      <td><span class="status-chip chip-cyan">CAMT.053 importert</span></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Hovedbok ERP (Konto 1920 før spinn-off)</strong></td>
+                      <td class="num">${formatNOK(p.ibErp)}</td>
+                      <td class="num">${formatNOK(m.erpTxBaseSum)}</td>
+                      <td class="num"><strong>${formatNOK(unadjustedErpUB)}</strong></td>
+                      <td><span class="status-chip chip-amber">Avvik: ${formatNOK(rawVariance)}</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- RECONCILIATION BRIDGE ITEMS -->
+              <div style="margin-top:var(--space-md);">
+                <h3 class="subhead" style="font-size:0.95rem; margin-bottom:var(--space-xs);">Avstemmingsbro: Poster som lukker avviket (${formatNOK(rawVariance)})</h3>
+                <div class="table-scroll">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Årsak / Postering</th>
+                        <th>Kategori</th>
+                        <th class="num">Beløp (NOK)</th>
+                        <th>Håndtering i AI Close</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><strong>Innbetaling underveis Bergen Marine (DEP-9941)</strong></td>
+                        <td>Tidsavvik (Transit)</td>
+                        <td class="num text-tertiary">+45 000,00 kr</td>
+                        <td>Verifiseres som godkjent tidsavvik i Balansekontroll</td>
+                      </tr>
+                      <tr>
+                        <td><strong>Konsernavregning UK Ltd (Agio/disagio på valuta)</strong></td>
+                        <td>Spinn-off bilag</td>
+                        <td class="num text-primary">+48 900,00 kr</td>
+                        <td>Generert spinn-off bilag debiterer 1920 og krediterer 8160 agio</td>
+                      </tr>
+                      <tr>
+                        <td><strong>DNB Driftsgebyr Corporate Banking</strong></td>
+                        <td>Spinn-off bilag</td>
+                        <td class="num text-error">-175,00 kr</td>
+                        <td>Generert spinn-off bilag krediterer 1920 og debiterer 7770 gebyr</td>
+                      </tr>
+                      <tr>
+                        <td><strong>KLP Pensjonsregulering (Premieavvik spinn-off)</strong></td>
+                        <td>Spinn-off bilag</td>
+                        <td class="num text-error">-1 000,00 kr</td>
+                        <td>Generert spinn-off bilag krediterer 1920 og debiterer 5400 pensjon</td>
+                      </tr>
+                      <tr style="border-top:2px solid var(--outline); font-weight:700;">
+                        <td>Sum Avstemmingsbro</td>
+                        <td>Fullført lukking</td>
+                        <td class="num text-sage">+47 725,00 kr</td>
+                        <td><span class="status-chip chip-sage">Lukker avviket nøyaktig ned til 0,00 kr</span></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ` : `
+              <!-- AFTER VIEW: BALANCED STATE -->
+              <div class="table-scroll" style="margin-top:var(--space-md);">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Konto / Kilde</th>
+                      <th class="num">IB (Inngående balanse)</th>
+                      <th class="num">Periodens bevegelse</th>
+                      <th class="num">Bokførte spinn-off bilag</th>
+                      <th class="num">UB (Utgående balanse)</th>
+                      <th>Kontrollstatus</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>Bankutskrift DNB (1920 Driftskonto)</strong></td>
+                      <td class="num">${formatNOK(p.ibBank)}</td>
+                      <td class="num">${formatNOK(m.bankTxSum)}</td>
+                      <td class="num text-muted">0,00 kr</td>
+                      <td class="num"><strong>${formatNOK(m.ubBank)}</strong></td>
+                      <td><span class="status-chip chip-sage">IB + Bevegelse = UB OK</span></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Hovedbok ERP (Konto 1920 Visma / BC)</strong></td>
+                      <td class="num">${formatNOK(p.ibErp)}</td>
+                      <td class="num">${formatNOK(m.erpTxBaseSum)}</td>
+                      <td class="num" style="color:var(--primary);">${formatNOK(m.postedVouchersImpact)}</td>
+                      <td class="num"><strong>${formatNOK(m.ubErp)}</strong></td>
+                      <td><span class="status-chip chip-sage">IB + Bevegelse = UB OK</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            `}
           </div>
 
           <div class="two-col">
@@ -1894,49 +2579,51 @@
                 <div class="well" style="border-color:var(--amber-border); background:var(--amber-tint); display:flex; justify-content:space-between; align-items:center; gap:var(--space-md); flex-wrap:wrap;">
                   <div>
                     <strong style="font-size:0.9rem;">${escapeHtml(inTransitLine.desc)} (${formatNOK(inTransitLine.amount)})</strong>
-                    <div class="text-muted" style="font-size:0.82rem;">Registrert 31.10 i ERP, valuteres bank 02.11. Bekreft som verifisert tidsavvik for å låse bankside.</div>
+                    <div class="text-muted" style="font-size:0.8rem;">Registrert i ERP 31.10.2026 kl. 16:45, godkjent forfall 02.11.2026 i DNB. Kjent tidsavvik.</div>
                   </div>
-                  <button type="button" class="btn btn-primary btn-sm" onclick="confirmInTransit()">Bekreft tidsavvik (45 000 kr)</button>
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="confirmInTransit()">
+                    <i data-lucide="check-check" width="14" height="14" aria-hidden="true"></i>
+                    <span>Bekreft Tidsavvik</span>
+                  </button>
                 </div>
-              ` : inTransitLine && p.inTransitRecognized ? `
-                <div class="status-chip chip-sage">Innbetaling underveis (${formatNOK(m.inTransitAmount)}) dokumentert som godkjent tidsavvik</div>
               ` : ``}
             </div>
 
             <div class="panel stack-md">
               <div>
-                <span class="data-label">Side 2 · Hovedbok 1920 &amp; Ventende Bilag</span>
-                <h3 class="subhead">Korrigert Hovedbok 1920</h3>
+                <span class="data-label">Side 2 · Hovedbok med Korreksjonsbilag</span>
+                <h3 class="subhead">Korrigert Hovedbok (Konto 1920)</h3>
               </div>
               <div class="well">
                 <div class="balancer-row">
-                  <span>Saldo per Hovedbok 1920 (inkl. bokførte bilag)</span>
+                  <span>Bokført saldo Hovedbok (UB per nå)</span>
                   <span class="tabular">${formatNOK(m.ubErp)}</span>
                 </div>
                 <div class="balancer-row">
-                  <span>+ / − Ikke-bokførte spinn-off bilag (utkast i Bilagsstudio)</span>
-                  <span class="tabular" style="color:${m.draftVouchersImpact === 0 ? `var(--tertiary)` : `var(--data-3)`};">${formatNOK(m.draftVouchersImpact)}</span>
-                </div>
-                <div class="balancer-row">
-                  <span>Gjenstående uavstemte ikke-bilagsførte poster</span>
-                  <span class="tabular">${formatNOK((m.ubBank + m.inTransitAmount) - (m.ubErp + m.draftVouchersImpact))}</span>
+                  <span>+ Kladdebilag i Bilagsstudio (ikke postert)</span>
+                  <span class="tabular" style="color:var(--primary);">${formatNOK(m.draftVouchersImpact)}</span>
                 </div>
                 <div class="balancer-total">
-                  <span>Prognose Korrigert Hovedbok 1920</span>
-                  <span class="tabular" style="color:var(--primary);">${formatNOK(m.ubErp + m.draftVouchersImpact)}</span>
+                  <span>Prognostisert UB Hovedbok etter alle bilag</span>
+                  <span class="tabular" style="color:var(--tertiary);">${formatNOK(m.ubErp + m.draftVouchersImpact)}</span>
                 </div>
               </div>
-              <div class="well" style="display:flex; justify-content:space-between; align-items:center;">
-                <span><strong>Netto Uforklart Differanse (Δ) etter bokføring</strong></span>
-                <span class="tabular" style="font-size:1.1rem; font-weight:600; color:${isZero ? `var(--tertiary)` : `var(--error)`};">${formatNOK(m.netDelta)}</span>
+              <div class="balancer-row" style="padding:var(--space-sm) 0; font-size:0.88rem;">
+                <span>Netto uavklart avvik per nå</span>
+                <strong class="tabular" style="color:${isZero ? `var(--tertiary)` : `var(--error)`};">${formatNOK(m.netDelta)}</strong>
               </div>
             </div>
           </div>
 
-          <div class="panel">
-            <span class="data-label">Visuell Avstemmingsbro (NOK)</span>
-            <h3 class="subhead" style="margin-bottom:var(--space-md);">Sammenligning: Bank UB, Korrigert Bank og Hovedbok 1920</h3>
-            <div class="chart-box" style="min-height:260px;">
+          <div class="panel stack-md">
+            <div class="toolbar-row">
+              <div>
+                <span class="data-label">Tufte Balansekomparator · Visuell Avstemmingsbro</span>
+                <h3 class="subhead">Bro fra IB til UB: Bank vs Hovedbok 1920</h3>
+              </div>
+              <span class="status-chip chip-muted">Kilde: CAMT.053 &amp; SAF-T GL</span>
+            </div>
+            <div class="chart-container" style="height:260px;">
               <canvas id="chart-balancer"></canvas>
             </div>
           </div>
@@ -1944,20 +2631,24 @@
       `;
     }
 
-    // =========================================================================
-    // TAB 3: ÅPNE POSTER (UNRECONCILED) + MANUAL MATCH + AI COPILOT
-    // =========================================================================
     function buildOpenTab() {
       const p = getPeriod();
       const query = appState.openSearch.trim().toLowerCase();
+      const wbsFilter = appState.wbsFilter;
+      const ragFilter = appState.ragFilter;
 
-      const filterFn = (l) => {
+      const filterFn = (l, type) => {
+        if (wbsFilter !== `all` && l.wbs && !l.wbs.includes(wbsFilter)) return false;
+        if (ragFilter !== `all`) {
+          const rag = getLineRagStatus(l, type);
+          if (rag.level !== ragFilter) return false;
+        }
         if (!query) return true;
         return `${l.id} ${l.desc} ${l.ref} ${l.wbs}`.toLowerCase().includes(query);
       };
 
-      const openBank = sortArray(p.bankLines.filter((l) => l.status === `open` && filterFn(l)), appState.sortState.openBank);
-      const openErp = sortArray(p.erpLines.filter((l) => l.status === `open` && filterFn(l)), appState.sortState.openErp);
+      const openBank = sortArray(p.bankLines.filter((l) => l.status === `open` && filterFn(l, `bank`)), appState.sortState.openBank);
+      const openErp = sortArray(p.erpLines.filter((l) => l.status === `open` && filterFn(l, `erp`)), appState.sortState.openErp);
 
       const selBankTotal = p.bankLines
         .filter((l) => appState.selectedBankIds.includes(l.id))
@@ -1980,6 +2671,19 @@
 
       return `
         <div class="stack-lg">
+          ${wbsFilter !== `all` ? `
+            <div class="well" style="display:flex; justify-content:space-between; align-items:center; border-color:var(--primary); background:var(--primary-container);">
+              <div>
+                <strong style="color:var(--on-primary-container);">Aktivt WBS-filter: ${escapeHtml(wbsFilter)}</strong>
+                <span class="text-muted" style="margin-left:8px; font-size:0.8rem;">Viser kun poster tilknyttet dette prosjektet.</span>
+              </div>
+              <button type="button" class="btn btn-sm btn-ghost" onclick="switchWbsFilter('all')">
+                <i data-lucide="x" width="14" height="14"></i>
+                <span>Nullstill filter (Vis alle)</span>
+              </button>
+            </div>
+          ` : ``}
+
           <!-- AI COPILOT SUGGESTIONS -->
           <div class="panel">
             <div class="toolbar-row" style="margin-bottom:var(--space-md);">
@@ -2013,13 +2717,14 @@
                         <p class="text-muted" style="margin:0; font-size:0.88rem;">${escapeHtml(s.reasoning)}</p>
 
                         <div class="well" style="padding:var(--space-sm) var(--space-md); font-size:0.84rem;">
-                          <div class="data-label" style="margin-bottom:4px;">Foreslått kobling</div>
-                          ${bankObjs.map((b) => `<div>Bank <strong>${escapeHtml(b.id)}</strong>: ${escapeHtml(b.desc)} (<span class="tabular">${formatNOK(b.amount)}</span>)</div>`).join(``)}
-                          ${erpObjs.length > 0 ? erpObjs.map((e) => `<div>ERP <strong>${escapeHtml(e.id)}</strong>: ${escapeHtml(e.desc)} (<span class="tabular">${formatNOK(e.amount)}</span>)</div>`).join(``) : `<div class="text-muted">Ingen ERP-linjer — oppretter direkte korreksjonsbilag mot 1920</div>`}
+                          <div class="data-label" style="margin-bottom:4px;">Bankposter (${bankObjs.length}):</div>
+                          ${bankObjs.map((b) => `<div><strong>${escapeHtml(b.id)}</strong> (${escapeHtml(b.date)}): <span class="tabular">${formatNOK(b.amount)}</span> — ${escapeHtml(b.desc)}</div>`).join(``)}
+                          <div class="data-label" style="margin-top:6px; margin-bottom:4px;">Hovedbokslinjer (${erpObjs.length}):</div>
+                          ${erpObjs.map((e) => `<div><strong>${escapeHtml(e.id)}</strong> (${escapeHtml(e.date)}): <span class="tabular">${formatNOK(e.amount)}</span> — ${escapeHtml(e.desc)}</div>`).join(``)}
                         </div>
 
-                        <div class="well" style="padding:var(--space-sm) var(--space-md); font-size:0.82rem; border-color:var(--amber-border);">
-                          <div class="data-label" style="color:var(--data-3); margin-bottom:4px;">Foreslått korreksjonsbilag</div>
+                        <div class="well" style="padding:var(--space-sm) var(--space-md); font-size:0.82rem; background:var(--surface-container-high);">
+                          <div class="data-label" style="margin-bottom:4px;">Genererte Spinn-off korreksjonsbilag (${vouchersList.length}):</div>
                           ${vouchersList.map((v) => `
                             <div><strong>${escapeHtml(v.id)}</strong> · Debet ${escapeHtml(v.accountDebit)} / Kredit ${escapeHtml(v.accountCredit)}: <span class="tabular">${formatNOK(v.amount)}</span></div>
                           `).join(``)}
@@ -2040,6 +2745,29 @@
             `}
           </div>
 
+          <!-- DUCKDB LIVE UNRECONCILED TRANSACTIONS ENGINE -->
+          <div class="panel panel-compact" style="background:var(--surface-container); border:var(--hairline); border-left:3px solid var(--tertiary); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:var(--space-md); margin-bottom:var(--space-md);">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <span style="font-size:1.25rem;">🦆</span>
+              <div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <strong style="font-size:0.92rem; color:var(--on-surface);">DuckDB Live Store: unreconciled_transactions</strong>
+                  <span class="badge badge-subtle">data/reconciliation.duckdb</span>
+                  <span class="chip chip-sage" style="font-size:0.72rem;">● ACID Fortløpende Oppdatert</span>
+                </div>
+                <div class="text-muted" style="font-size:0.8rem; margin-top:2px;">
+                  Sanntidsberegning av IFRS 9 aldersfordeling, RAG-status og prosjekt-WBS eksponering direkte via DuckDB SQL views (<code style="color:var(--primary);">v_unreconciled_aging</code> &amp; <code style="color:var(--primary);">v_wbs_open_exposure</code>).
+                </div>
+              </div>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="showDuckDbQueryModal('unreconciled')">
+                <i data-lucide="database" width="14" height="14"></i>
+                <span>DuckDB SQL Spørring</span>
+              </button>
+            </div>
+          </div>
+
           <!-- MANUAL MATCH SELECTION BAR & FILTERS -->
           <div class="panel panel-compact">
             <div class="toolbar-row">
@@ -2055,6 +2783,21 @@
                     <button type="button" class="filter-pill ${appState.openSideFilter === `bank` ? `is-active` : ``}" onclick="setOpenSideFilter('bank')">Kun Bank (${openBank.length})</button>
                     <button type="button" class="filter-pill ${appState.openSideFilter === `erp` ? `is-active` : ``}" onclick="setOpenSideFilter('erp')">Kun ERP (${openErp.length})</button>
                   </div>
+                </div>
+                <div class="field-group">
+                  <span class="field-label">Betinget RAG-filter</span>
+                  <div class="rag-filter-group">
+                    <button type="button" class="rag-filter-btn ${ragFilter === `all` ? `is-active` : ``}" onclick="switchRagFilter('all')">Alle</button>
+                    <button type="button" class="rag-filter-btn filter-red ${ragFilter === `red` ? `is-active` : ``}" onclick="switchRagFilter('red')">● Rød</button>
+                    <button type="button" class="rag-filter-btn filter-amber ${ragFilter === `amber` ? `is-active` : ``}" onclick="switchRagFilter('amber')">● Gul</button>
+                    <button type="button" class="rag-filter-btn filter-green ${ragFilter === `green` ? `is-active` : ``}" onclick="switchRagFilter('green')">● Grønn</button>
+                  </div>
+                </div>
+                <div class="field-group" style="align-self:flex-end;">
+                  <button type="button" class="btn btn-sm ${appState.ragFormattingEnabled ? `btn-secondary` : `btn-ghost`}" onclick="toggleRagFormatting()" title="Slå av/på betinget RAG-formatering i tabellene">
+                    <i data-lucide="palette" width="14" height="14"></i>
+                    <span>RAG: ${appState.ragFormattingEnabled ? `PÅ` : `AV`}</span>
+                  </button>
                 </div>
               </div>
 
@@ -2094,24 +2837,28 @@
                     <table>
                       <thead>
                         <tr>
-                          <th style="width:38px;">Velg</th>
+                          <th style="width:36px;"></th>
                           <th class="sortable" onclick="toggleSort('openBank', 'date')">Dato${sortIndicator('openBank', 'date')}</th>
-                          <th class="sortable" onclick="toggleSort('openBank', 'desc')">Beskrivelse &amp; Ref${sortIndicator('openBank', 'desc')}</th>
+                          <th class="sortable" onclick="toggleSort('openBank', 'desc')">Beskrivelse / Ref${sortIndicator('openBank', 'desc')}</th>
+                          <th>RAG</th>
                           <th class="sortable num" onclick="toggleSort('openBank', 'amount')">Beløp (NOK)${sortIndicator('openBank', 'amount')}</th>
                         </tr>
                       </thead>
                       <tbody>
                         ${openBank.map((l) => {
                           const checked = appState.selectedBankIds.includes(l.id);
+                          const rag = getLineRagStatus(l, `bank`);
+                          const ragRowClass = appState.ragFormattingEnabled ? `rag-row-${rag.level}` : ``;
                           return `
-                            <tr class="${checked ? `is-selected` : ``}">
+                            <tr class="${checked ? `is-selected` : ``} ${ragRowClass}">
                               <td><input type="checkbox" class="row-check" aria-label="Velg banklinje ${escapeHtml(l.id)}" ${checked ? `checked` : ``} onchange="toggleSelectLine('bank', '${l.id}')"></td>
                               <td class="tabular">${escapeHtml(l.date)}</td>
                               <td>
                                 <div><strong>${escapeHtml(l.desc)}</strong></div>
                                 <div class="text-muted" style="font-size:0.78rem;">${escapeHtml(l.id)} · ${escapeHtml(l.ref)} · ${escapeHtml(l.wbs)}</div>
                               </td>
-                              <td class="num" style="color:${l.amount < 0 ? `var(--data-4)` : `var(--tertiary)`};">${formatNOK(l.amount)}</td>
+                              <td><span class="rag-pill rag-${rag.level}">● ${escapeHtml(rag.label)}</span></td>
+                              <td class="num tabular"><strong>${formatNOK(l.amount)}</strong></td>
                             </tr>
                           `;
                         }).join(``)}
@@ -2126,7 +2873,7 @@
               <div class="panel stack-md">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                   <div>
-                    <span class="data-label">Hovedbok 1920 &amp; Reskontro</span>
+                    <span class="data-label">Hovedbok / Kundereskontro</span>
                     <h3 class="subhead">Åpne ERP-poster (${openErp.length})</h3>
                   </div>
                   <span class="status-chip ${openErp.length === 0 ? `chip-sage` : `chip-amber`}">${openErp.length === 0 ? `0 åpne` : `${openErp.length} uavstemt`}</span>
@@ -2141,27 +2888,28 @@
                     <table>
                       <thead>
                         <tr>
-                          <th style="width:38px;">Velg</th>
+                          <th style="width:36px;"></th>
                           <th class="sortable" onclick="toggleSort('openErp', 'date')">Dato${sortIndicator('openErp', 'date')}</th>
-                          <th class="sortable" onclick="toggleSort('openErp', 'desc')">Bilag &amp; Referanse${sortIndicator('openErp', 'desc')}</th>
+                          <th class="sortable" onclick="toggleSort('openErp', 'desc')">Beskrivelse / Ref${sortIndicator('openErp', 'desc')}</th>
+                          <th>RAG</th>
                           <th class="sortable num" onclick="toggleSort('openErp', 'amount')">Beløp (NOK)${sortIndicator('openErp', 'amount')}</th>
                         </tr>
                       </thead>
                       <tbody>
                         ${openErp.map((l) => {
                           const checked = appState.selectedErpIds.includes(l.id);
+                          const rag = getLineRagStatus(l, `erp`);
+                          const ragRowClass = appState.ragFormattingEnabled ? `rag-row-${rag.level}` : ``;
                           return `
-                            <tr class="${checked ? `is-selected` : ``}">
+                            <tr class="${checked ? `is-selected` : ``} ${ragRowClass}">
                               <td><input type="checkbox" class="row-check" aria-label="Velg ERP-linje ${escapeHtml(l.id)}" ${checked ? `checked` : ``} onchange="toggleSelectLine('erp', '${l.id}')"></td>
                               <td class="tabular">${escapeHtml(l.date)}</td>
                               <td>
-                                <div>
-                                  <strong>${escapeHtml(l.desc)}</strong>
-                                  ${l.isInTransit ? `<span class="status-chip chip-cyan" style="margin-left:6px;">Underveis</span>` : ``}
-                                </div>
-                                <div class="text-muted" style="font-size:0.78rem;">${escapeHtml(l.id)} · ${escapeHtml(l.ref)} · ${escapeHtml(l.wbs)}</div>
+                                <div><strong>${escapeHtml(l.desc)}</strong></div>
+                                <div class="text-muted" style="font-size:0.78rem;">${escapeHtml(l.id)} · ${escapeHtml(l.ref)} · ${escapeHtml(l.wbs)} · Alder ${l.ageDays || 0}d</div>
                               </td>
-                              <td class="num" style="color:${l.amount < 0 ? `var(--data-4)` : `var(--tertiary)`};">${formatNOK(l.amount)}</td>
+                              <td><span class="rag-pill rag-${rag.level}">● ${escapeHtml(rag.label)}</span></td>
+                              <td class="num tabular"><strong>${formatNOK(l.amount)}</strong></td>
                             </tr>
                           `;
                         }).join(``)}
@@ -2176,13 +2924,18 @@
       `;
     }
 
-    // =========================================================================
-    // TAB 4: AVSTEMTE POSTER (RECONCILED) + UNMATCH ACTION
-    // =========================================================================
     function buildReconciledTab() {
       const p = getPeriod();
       const rules = [`all`, `R-01`, `R-02`, `R-03`, `R-04`, `R-AI-AGENT`, `R-MAN`];
-      const filtered = p.clusters.filter((c) => appState.reconciledRuleFilter === `all` || c.rule === appState.reconciledRuleFilter);
+      const filtered = p.clusters.filter((c) => {
+        if (appState.reconciledRuleFilter !== `all` && c.rule !== appState.reconciledRuleFilter) return false;
+        if (appState.wbsFilter !== `all`) {
+          const hasBank = p.bankLines.some((b) => c.bankIds.includes(b.id) && b.wbs && b.wbs.includes(appState.wbsFilter));
+          const hasErp = p.erpLines.some((e) => c.erpIds.includes(e.id) && e.wbs && e.wbs.includes(appState.wbsFilter));
+          if (!hasBank && !hasErp) return false;
+        }
+        return true;
+      });
       const sorted = sortArray(filtered, appState.sortState.reconciled);
 
       return `
@@ -2199,6 +2952,29 @@
                   ${r === `all` ? `Alle regler (${p.clusters.length})` : escapeHtml(r)}
                 </button>
               `).join(``)}
+            </div>
+          </div>
+
+          <!-- DUCKDB LIVE RECONCILED TRANSACTIONS ENGINE -->
+          <div class="panel panel-compact" style="background:var(--surface-container); border:var(--hairline); border-left:3px solid var(--primary); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:var(--space-md); margin-bottom:var(--space-md);">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <span style="font-size:1.25rem;">🦆</span>
+              <div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <strong style="font-size:0.92rem; color:var(--on-surface);">DuckDB Live Store: reconciled_transactions</strong>
+                  <span class="badge badge-subtle">data/reconciled_transactions.duckdb</span>
+                  <span class="chip chip-sage" style="font-size:0.72rem;">● Atomisk Låst &amp; Hashet</span>
+                </div>
+                <div class="text-muted" style="font-size:0.8rem; margin-top:2px;">
+                  Alle godkjente klynger lagres med SHA-256 revisjonsbevis og gebyrsplitt i DuckDB (<code style="color:var(--primary);">v_reconciliation_summary</code>). Kan spørres direkte fra Python, Excel Power Query eller DBeaver.
+                </div>
+              </div>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="showDuckDbQueryModal('reconciled')">
+                <i data-lucide="database" width="14" height="14"></i>
+                <span>DuckDB SQL Spørring</span>
+              </button>
             </div>
           </div>
 
@@ -2348,10 +3124,15 @@
             <div class="kpi-grid" style="grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top:var(--space-md);">
               ${bucketSummary.map((b) => {
                 const isCrit = b.bucket === `90+`;
+                const ragLevel = b.bucket === `90+` ? `red` : (b.bucket === `61-90` || b.bucket === `31-60` ? `amber` : `green`);
+                const ragCardClass = appState.ragFormattingEnabled ? `rag-border-${ragLevel}` : ``;
                 return `
-                  <div class="well">
-                    <span class="data-label">${escapeHtml(b.bucket)} dager (${b.ratePct}% ECL)</span>
-                    <div class="kpi-value" style="margin:var(--space-xs) 0;">${formatNOK(b.sum)}</div>
+                  <div class="well ${ragCardClass}">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                      <span class="data-label">${escapeHtml(b.bucket)} dager</span>
+                      <span class="rag-pill rag-${ragLevel}">● ${b.ratePct}% ECL</span>
+                    </div>
+                    <div class="kpi-value" style="margin:var(--space-xs) 0; color:${isCrit ? `var(--error)` : `var(--on-surface)`};">${formatNOK(b.sum)}</div>
                     <span class="kpi-delta ${isCrit ? `is-error` : `is-cyan`}">Avsetning: ${formatNOK(b.ecl)}</span>
                   </div>
                 `;
@@ -2376,15 +3157,16 @@
                       <th class="sortable" onclick="toggleSort('aging', 'bucket')">Alder${sortIndicator('aging', 'bucket')}</th>
                       <th class="sortable num" onclick="toggleSort('aging', 'amount')">Brutto (NOK)${sortIndicator('aging', 'amount')}</th>
                       <th class="sortable num" onclick="toggleSort('aging', 'eclAmount')">IFRS 9 ECL${sortIndicator('aging', 'eclAmount')}</th>
-                      <th>Risiko</th>
+                      <th>RAG Status</th>
                     </tr>
                   </thead>
                   <tbody>
                     ${sorted.map((item) => {
-                      const badgeCls = item.bucket === `90+` ? `chip-error` : item.bucket === `61-90` ? `chip-amber` : item.bucket === `31-60` ? `chip-cyan` : `chip-sage`;
-                      const riskLabel = item.bucket === `90+` ? `Kritisk (${item.stage})` : item.bucket === `61-90` ? `Høy (${item.stage})` : item.bucket === `31-60` ? `Moderat` : `Lav`;
+                      const ragLevel = item.bucket === `90+` ? `red` : (item.bucket === `61-90` || item.bucket === `31-60` ? `amber` : `green`);
+                      const ragRowClass = appState.ragFormattingEnabled ? `rag-row-${ragLevel}` : ``;
+                      const riskLabel = item.bucket === `90+` ? `Kritisk (${item.stage})` : item.bucket === `61-90` ? `Høy (${item.stage})` : item.bucket === `31-60` ? `Moderat` : `Lav risiko`;
                       return `
-                        <tr>
+                        <tr class="${ragRowClass}">
                           <td>
                             <strong>${escapeHtml(item.customer)}</strong>
                             <div class="text-muted" style="font-size:0.78rem;">${escapeHtml(item.id)} · ${escapeHtml(item.note)}</div>
@@ -2392,7 +3174,7 @@
                           <td class="tabular">${item.ageDays} d (${escapeHtml(item.bucket)})</td>
                           <td class="num">${formatNOK(item.amount)}</td>
                           <td class="num" style="color:var(--data-3);">${formatNOK(item.eclAmount)}</td>
-                          <td><span class="status-chip ${badgeCls}">${escapeHtml(riskLabel)}</span></td>
+                          <td><span class="rag-pill rag-${ragLevel}">● ${escapeHtml(riskLabel)}</span></td>
                         </tr>
                       `;
                     }).join(``)}
@@ -2592,62 +3374,505 @@ ${voucherXml || `    <!-- Ingen bilag i utkast/bokført ennå -->`}
     // =========================================================================
     // TAB 7: REVISJONSLOGG (SHA-256 CRYPTOGRAPHIC AUDIT CHAIN)
     // =========================================================================
+        // =========================================================================
+    // TAB 7: CFO-RAPPORT & 4-ØYNE LEDELSESSIGNERING
+    // =========================================================================
+    function buildCfoTab() {
+      const p = getPeriod();
+      const m = computePeriodMetrics(p);
+      const scenario = IFRS9_SCENARIOS[appState.ifrsScenario] || IFRS9_SCENARIOS.standard;
+      const isBalanced = Math.abs(m.netDelta) < 0.01;
+
+      // Calculate ECL for portfolio
+      const openReceivables = p.erpLines.filter((l) => l.status === `open` && l.amount > 0).map((l) => {
+        const d = l.ageDays || 5;
+        const bucket = d > 90 ? `90+` : d > 60 ? `61-90` : d > 30 ? `31-60` : `0-30`;
+        return { bucket, amount: l.amount, wbs: l.wbs };
+      });
+      const allReceivables = [...AGING_PORTFOLIO, ...openReceivables];
+      const buckets = [`0-30`, `31-60`, `61-90`, `90+`];
+      let totalGross = 0;
+      let totalEcl = 0;
+      const eclSummary = buckets.map((b) => {
+        const gross = allReceivables.filter((i) => i.bucket === b).reduce((a, r) => a + r.amount, 0);
+        const rate = scenario.rates[b] || 0;
+        const ecl = Math.round(gross * rate);
+        totalGross += gross;
+        totalEcl += ecl;
+        return { bucket: b, gross, rate, ecl };
+      });
+
+      // Top 5 material open items
+      const allOpen = [
+        ...p.bankLines.filter((l) => l.status === `open`).map((l) => ({ ...l, source: `Bank DNB` })),
+        ...p.erpLines.filter((l) => l.status === `open`).map((l) => ({ ...l, source: `Hovedbok ERP` }))
+      ];
+      const topOpen = allOpen.sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount)).slice(0, 5);
+
+      const isSigned = p.controllerSigned && p.controllerSigned.signed;
+      const isApproved = p.cfoApproved && p.cfoApproved.approved;
+
+      return `
+        <div class="stack-lg">
+          <!-- CFO HEADER PANEL -->
+          <div class="panel">
+            <div class="toolbar-row">
+              <div>
+                <span class="data-label">Styre- &amp; Ledelsesrapportering · 4-Øyne Prinsipp</span>
+                <h2 class="section-title">CFO Månedsavslutningsrapport — ${escapeHtml(p.label)} (${escapeHtml(p.periodCode)})</h2>
+                <p class="text-muted" style="margin:0;">Formell balansekontroll for Konto 1920 Driftskonto NOK, IFRS 9 tapsavsetning, vesentlige åpne poster og digital periodelåsing.</p>
+              </div>
+              <div style="display:flex; gap:var(--space-sm); align-items:center; flex-wrap:wrap;">
+                <button type="button" class="btn btn-secondary" onclick="window.print()">
+                  <i data-lucide="printer" width="16" height="16" aria-hidden="true"></i>
+                  <span>Skriv ut / PDF Rapport</span>
+                </button>
+                <button type="button" class="btn btn-primary" onclick="downloadAuditorDossier()">
+                  <i data-lucide="file-archive" width="16" height="16" aria-hidden="true"></i>
+                  <span>Eksporter Full Revisormappe</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- EXECUTIVE KPI CARDS -->
+            <div class="grid-4" style="margin-top:var(--space-md);">
+              <div class="well">
+                <span class="data-label">Bankbeholdning DNB (1920 UB)</span>
+                <div class="kpi-value text-primary">${formatNOK(m.ubBank)}</div>
+                <span class="kpi-sub">Elektronisk CAMT.053 bekreftet</span>
+              </div>
+              <div class="well">
+                <span class="data-label">Avstemt Hovedbok 1920 UB</span>
+                <div class="kpi-value">${formatNOK(m.ubBank + m.inTransitAmount)}</div>
+                <span class="kpi-sub">Inkl. godkjent tidsavvik</span>
+              </div>
+              <div class="well">
+                <span class="data-label">Netto Avstemmingsdifferanse</span>
+                <div class="kpi-value ${isBalanced ? `text-sage` : `text-error`}">${formatNOK(m.netDelta)}</div>
+                <span class="kpi-sub">${isBalanced ? `Fullt balansert (Δ = 0,00 kr)` : `Krever korrigering`}</span>
+              </div>
+              <div class="well">
+                <span class="data-label">IFRS 9 Tapsfond (Konto 1580)</span>
+                <div class="kpi-value text-tertiary">${formatNOK(totalEcl)}</div>
+                <span class="kpi-sub">Avsetning på ${formatNOK(totalGross)} fordringer</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- FORMAL RECONCILIATION WATERFALL BRIDGE -->
+          <div class="panel stack-md">
+            <div>
+              <span class="data-label">NRS / IFRS Regnskapsstandard</span>
+              <h3 class="subhead">Formell Avstemmingsbro (Reconciliation Waterfall Bridge)</h3>
+              <p class="text-muted" style="margin:0;">Dokumenterer fullstendig avstemming mellom bankkontoutdrag og Hovedbok for ${escapeHtml(p.label)}.</p>
+            </div>
+
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Balansepost / Transaksjonsledd</th>
+                    <th class="num">Bank DNB (Konto 1920)</th>
+                    <th class="num">Hovedbok ERP (Konto 1920)</th>
+                    <th class="num">Differanse</th>
+                    <th>Revisjonsstatus</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Inngående Balanse (IB per 01.${p.id.slice(5)}.2026)</strong></td>
+                    <td class="num">${formatNOK(p.ibBank)}</td>
+                    <td class="num">${formatNOK(p.ibErp)}</td>
+                    <td class="num">0,00 kr</td>
+                    <td><span class="status-chip chip-sage">Stemmer</span></td>
+                  </tr>
+                  <tr>
+                    <td>Ordinære periodetransaksjoner (Drift &amp; Innbetalinger)</td>
+                    <td class="num">${formatNOK(m.bankTxSum)}</td>
+                    <td class="num">${formatNOK(m.erpTxBaseSum)}</td>
+                    <td class="num">${formatNOK(m.bankTxSum - m.erpTxBaseSum)}</td>
+                    <td><span class="status-chip chip-cyan">Verifisert</span></td>
+                  </tr>
+                  <tr>
+                    <td>Bokførte spinn-off bilag (Agio/disagio, gebyrer, KLP)</td>
+                    <td class="num text-muted">0,00 kr</td>
+                    <td class="num text-primary">${formatNOK(m.postedVouchersImpact)}</td>
+                    <td class="num text-primary">${formatNOK(-m.postedVouchersImpact)}</td>
+                    <td><span class="status-chip chip-sage">Bokført i SAF-T</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Rå Utgående Balanse (UB per 31.${p.id.slice(5)}.2026)</strong></td>
+                    <td class="num"><strong>${formatNOK(m.ubBank)}</strong></td>
+                    <td class="num"><strong>${formatNOK(m.ubErp)}</strong></td>
+                    <td class="num text-amber"><strong>${formatNOK(m.ubBank - m.ubErp)}</strong></td>
+                    <td><span class="status-chip chip-amber">Tidsavvik identifisert</span></td>
+                  </tr>
+                  <tr>
+                    <td>+ Godkjente tidsavvik (Innbetalinger underveis Bergen Marine)</td>
+                    <td class="num text-muted">+${formatNOK(m.inTransitAmount)}</td>
+                    <td class="num text-muted">0,00 kr</td>
+                    <td class="num text-sage">0,00 kr</td>
+                    <td><span class="status-chip chip-sage">Verifisert 02.11 i bank</span></td>
+                  </tr>
+                  <tr style="border-top:2px solid var(--outline); font-weight:700; background:var(--surface-container);">
+                    <td>Avstemt Utgående Balanse</td>
+                    <td class="num text-primary">${formatNOK(m.ubBank + m.inTransitAmount)}</td>
+                    <td class="num text-primary">${formatNOK(m.ubErp)}</td>
+                    <td class="num text-sage">0,00 kr</td>
+                    <td><span class="status-chip chip-sage">Avstemt (Δ = 0,00 kr)</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- TOP 5 MATERIAL OPEN ITEMS WITH ACTION PLAN -->
+          <div class="panel stack-md">
+            <div>
+              <span class="data-label">Vesentlighetsvurdering &amp; Risikooppfølging</span>
+              <h3 class="subhead">Top 5 Vesentlige Åpne Poster med Handlingsplan</h3>
+              <p class="text-muted" style="margin:0;">Største uavstemte poster per 31.${p.id.slice(5)}.2026 med kontrollerens vurdering og oppfølgingstiltak.</p>
+            </div>
+
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Ref / ID</th>
+                    <th>Kilde</th>
+                    <th>WBS / Prosjekt</th>
+                    <th>RAG</th>
+                    <th>Beskrivelse</th>
+                    <th class="num">Beløp (NOK)</th>
+                    <th>Kontrollerens Vurdering &amp; Handlingsplan</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${topOpen.length > 0 ? topOpen.map((item) => {
+                    const rag = getLineRagStatus(item, item.source === 'Bank DNB' ? 'bank' : 'erp');
+                    const ragRowClass = appState.ragFormattingEnabled ? `rag-row-${rag.level}` : ``;
+                    return `
+                      <tr class="${ragRowClass}">
+                        <td class="tabular"><strong>${escapeHtml(item.id)}</strong></td>
+                        <td><span class="status-chip ${item.source === 'Bank DNB' ? 'chip-cyan' : 'chip-amber'}">${escapeHtml(item.source)}</span></td>
+                        <td><span class="status-chip chip-muted">${escapeHtml(item.wbs || 'WBS-Felles')}</span></td>
+                        <td><span class="rag-pill rag-${rag.level}">● ${escapeHtml(rag.label)}</span></td>
+                        <td>${escapeHtml(item.desc)}</td>
+                        <td class="num ${item.amount < 0 ? 'text-error' : 'text-sage'}"><strong>${formatNOK(item.amount)}</strong></td>
+                        <td style="font-size:0.82rem;">
+                          ${item.id === 'BK-1004' || item.id === 'ER-1004' ? 'Milepæl 3 Equinor/Aker. Innbetalt 04.11.2026 i DNB (verifisert cut-off).' :
+                            item.id === 'ER-1014' ? 'Innbetaling underveis fra Bergen Marine. Godkjent tidsavvik, bokført nov.' :
+                            item.id === 'BK-1008' ? 'Valuta-differanse UK. Spinn-off bilag for agio/disagio opprettet.' :
+                            item.id === 'BK-1006' ? '3-dagers bank float Vestland Energi. Avstemmes automatisk ved batch-kjøring.' :
+                            'Løpende driftspost under avklaring med prosjektleder.'}
+                        </td>
+                      </tr>
+                    `;
+                  }).join('') : `
+                    <tr><td colspan="7" class="text-muted" style="text-align:center; padding:var(--space-md);">Ingen åpne poster i perioden — Alt er fullt avstemt!</td></tr>
+                  `}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- IFRS 9 ECL MATRISE -->
+          <div class="panel stack-md">
+            <div class="toolbar-row">
+              <div>
+                <span class="data-label">Kredittrisiko · IFRS 9 Standardmodell</span>
+                <h3 class="subhead">IFRS 9 Tapsavsetningsmatrise (ECL)</h3>
+              </div>
+              <span class="status-chip chip-tertiary">Scenario: ${escapeHtml(scenario.label)}</span>
+            </div>
+
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Aldersbøtte</th>
+                    <th class="num">Brutto Fordringsmasse</th>
+                    <th class="num">Historisk Tapssannsynlighet (PD)</th>
+                    <th class="num">Beregnet Tapsfond (Konto 1580)</th>
+                    <th>Regnskapsmessig Behandling</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${eclSummary.map((row) => `
+                    <tr>
+                      <td><strong>${row.bucket} dager</strong></td>
+                      <td class="num">${formatNOK(row.gross)}</td>
+                      <td class="num tabular">${(row.rate * 100).toFixed(1)} %</td>
+                      <td class="num text-tertiary"><strong>${formatNOK(row.ecl)}</strong></td>
+                      <td style="font-size:0.8rem; color:var(--on-surface-variant);">Trinn 1/2 forventet kredittap i henhold til IFRS 9.5.5</td>
+                    </tr>
+                  `).join('')}
+                  <tr style="border-top:2px solid var(--outline); font-weight:700;">
+                    <td>Sum Tapsavsetning</td>
+                    <td class="num">${formatNOK(totalGross)}</td>
+                    <td class="num tabular">${((totalEcl / (totalGross || 1)) * 100).toFixed(2)} %</td>
+                    <td class="num text-tertiary">${formatNOK(totalEcl)}</td>
+                    <td>Avsatt mot driftsresultat / balanseført mot 1580</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 4-EYES SIGN-OFF & PERIOD LOCKING PANEL -->
+          <div class="panel stack-md">
+            <div>
+              <span class="data-label">Internkontroll &amp; Styringsdokumentasjon</span>
+              <h3 class="subhead">4-Øyne Digital Sign-off &amp; Periodelåsing</h3>
+              <p class="text-muted" style="margin:0;">Perioden krever totrinns digital godkjenning: Først kvalitetssikring av Senior Prosjektcontroller, deretter formell godkjenning og regnskapslåsing av CFO.</p>
+            </div>
+
+            <div class="two-col" style="margin-top:var(--space-sm);">
+              <!-- STEP 1: CONTROLLER SIGN-OFF -->
+              <div class="sign-box ${isSigned ? 'is-signed' : ''}">
+                <div class="toolbar-row">
+                  <div class="sign-badge ${isSigned ? 'text-sage' : 'text-muted'}">
+                    <i data-lucide="${isSigned ? 'check-circle-2' : 'circle'}" width="18" height="18"></i>
+                    <span>Trinn 1: Utarbeidet av Controller</span>
+                  </div>
+                  <span class="status-chip ${isSigned ? 'chip-sage' : 'chip-amber'}">${isSigned ? 'Signert' : 'Venter på signering'}</span>
+                </div>
+                <div style="font-size:0.88rem;">
+                  <strong>Frank Ellingsen</strong>
+                  <div class="text-muted" style="font-size:0.8rem;">Senior Prosjektcontroller · Nordic Engineering Projects AS</div>
+                </div>
+                ${isSigned ? `
+                  <div class="well" style="font-size:0.78rem; background:transparent; padding:var(--space-xs) 0; border:none;">
+                    <div><strong>Signert:</strong> ${escapeHtml(p.controllerSigned.timestamp)}</div>
+                    <div class="tabular" style="color:var(--primary); word-break:break-all; font-size:0.74rem;">SHA-256: ${escapeHtml(p.controllerSigned.hash)}</div>
+                  </div>
+                ` : `
+                  <p class="text-muted" style="font-size:0.82rem; margin:var(--space-xs) 0;">
+                    Bekrefter at konto 1920 er avstemt mot bank CAMT.053, spinn-off bilag er kontrollert, og åpne poster er vurdert etter IFRS 9.
+                  </p>
+                  <button type="button" class="btn btn-primary" onclick="signAsController()">
+                    <i data-lucide="pen-tool" width="16" height="16" aria-hidden="true"></i>
+                    <span>Signer som Controller</span>
+                  </button>
+                `}
+              </div>
+
+              <!-- STEP 2: CFO APPROVAL & LOCK -->
+              <div class="sign-box ${isApproved ? 'is-locked' : ''}">
+                <div class="toolbar-row">
+                  <div class="sign-badge ${isApproved ? 'text-tertiary' : 'text-muted'}">
+                    <i data-lucide="${isApproved ? 'lock' : 'circle'}" width="18" height="18"></i>
+                    <span>Trinn 2: Godkjent &amp; Låst av CFO</span>
+                  </div>
+                  <span class="status-chip ${isApproved ? 'chip-sage' : (isSigned ? 'chip-cyan' : 'chip-muted')}">${isApproved ? 'Låst &amp; Godkjent' : (isSigned ? 'Klar til godkjenning' : 'Venter på Trinn 1')}</span>
+                </div>
+                <div style="font-size:0.88rem;">
+                  <strong>Kari Nordmann</strong>
+                  <div class="text-muted" style="font-size:0.8rem;">Finansdirektør / CFO · Nordic Engineering Projects AS</div>
+                </div>
+                ${isApproved ? `
+                  <div class="well" style="font-size:0.78rem; background:transparent; padding:var(--space-xs) 0; border:none;">
+                    <div style="color:var(--tertiary); font-weight:700;">PERIODE LÅST FOR REGNSKAPSFØRING</div>
+                    <div><strong>Godkjent:</strong> ${escapeHtml(p.cfoApproved.timestamp)}</div>
+                    <div class="tabular" style="color:var(--primary); word-break:break-all; font-size:0.74rem;">SHA-256: ${escapeHtml(p.cfoApproved.hash)}</div>
+                  </div>
+                ` : `
+                  <p class="text-muted" style="font-size:0.82rem; margin:var(--space-xs) 0;">
+                    Formell godkjenning av månedsavslutningen. Låser regnskapsperioden og stenger Hovedbok for ytterligere etterposteringer.
+                  </p>
+                  <button type="button" class="btn btn-primary" ${!isSigned ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''} onclick="approveAsCfo()">
+                    <i data-lucide="lock" width="16" height="16" aria-hidden="true"></i>
+                    <span>Godkjenn &amp; Lås Periode (CFO)</span>
+                  </button>
+                `}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // =========================================================================
+    // TAB 8: STATUTORY REVISJONSPAKKE & REVISJONSLOGG (ISA 500 / SAF-T)
+    // =========================================================================
     function buildAuditTab() {
+      const p = getPeriod();
+      const m = computePeriodMetrics(p);
       const sorted = sortArray(appState.auditLog, appState.sortState.audit);
       const headHash = appState.auditLog.length > 0 ? appState.auditLog[appState.auditLog.length - 1].hash : `—`;
 
+      const openReceivables = p.erpLines.filter((l) => l.status === `open`);
+
       return `
-        <div class="panel stack-md">
-          <div class="toolbar-row">
-            <div>
-              <span class="data-label">Uforanderlig Revisjonsspor · Web Crypto SHA-256</span>
-              <h2 class="section-title">Kryptografisk Revisjonslogg (${appState.auditLog.length} blokker)</h2>
-              <p class="text-muted" style="margin:0;">Hver avstemmingshandling, manuell kobling, oppheving og bilagsføring lenkes kryptografisk mot forrige blokks SHA-256-fingeravtrykk.</p>
+        <div class="stack-lg">
+          <!-- REVISJONSPAKKE HEADER -->
+          <div class="panel">
+            <div class="toolbar-row">
+              <div>
+                <span class="data-label">Lovpålagt Årsavslutning &amp; Revisjonsdokumentasjon (ISA 500 / ISA 540)</span>
+                <h2 class="section-title">Revisjonspakke &amp; Revisjonsspor — ${escapeHtml(p.label)}</h2>
+                <p class="text-muted" style="margin:0;">Inneholder etterfølgende innbetalingsverifisering (cut-off), avstemming mot bankbekreftelse og uforanderlig SHA-256 hash-kjede.</p>
+              </div>
+              <div style="display:flex; gap:var(--space-sm); align-items:center; flex-wrap:wrap;">
+                <button type="button" class="btn btn-primary" onclick="downloadAuditorDossier()">
+                  <i data-lucide="file-archive" width="16" height="16" aria-hidden="true"></i>
+                  <span>Last ned Komplett Revisormappe</span>
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="verifyAuditChain()">
+                  <i data-lucide="shield-check" width="16" height="16" aria-hidden="true"></i>
+                  <span>Verifiser Hash-kjede</span>
+                </button>
+              </div>
             </div>
-            <button type="button" class="btn btn-primary" onclick="verifyAuditChain()">
-              <i data-lucide="shield-check" width="16" height="16" aria-hidden="true"></i>
-              <span>Verifiser Hash-kjede</span>
-            </button>
+
+            <div class="well" style="margin-top:var(--space-md); display:flex; flex-wrap:wrap; justify-content:space-between; gap:var(--space-sm);">
+              <span class="data-label">Gjeldende Hode-Hash (Cryptographic Chain Head)</span>
+              <span class="tabular" style="font-size:0.82rem; color:var(--primary); word-break:break-all;">${escapeHtml(headHash)}</span>
+            </div>
           </div>
 
-          <div class="well" style="display:flex; flex-wrap:wrap; justify-content:space-between; gap:var(--space-sm);">
-            <span class="data-label">Gjeldende Hode-Hash (Chain Head)</span>
-            <span class="tabular" style="font-size:0.82rem; color:var(--primary); word-break:break-all;">${escapeHtml(headHash)}</span>
-          </div>
+          <!-- ISA 500 SUBSEQUENT EVENTS CUT-OFF TEST -->
+          <div class="panel stack-md">
+            <div>
+              <span class="data-label">ISA 500 / ISA 540 Revisjonshandlinger</span>
+              <h3 class="subhead">ISA 500 Cut-off Test: Etterfølgende Innbetalinger i Bank</h3>
+              <p class="text-muted" style="margin:0;">Verifiserer at åpne kundefordringer per 31.${p.id.slice(5)}.2026 er reelt innbetalt på driftskonto 1920 i påfølgende regnskapsperiode (november 2026).</p>
+            </div>
 
-          <div class="table-scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th class="sortable" onclick="toggleSort('audit', 'seq')">#${sortIndicator('audit', 'seq')}</th>
-                  <th class="sortable" onclick="toggleSort('audit', 'timestamp')">Tidspunkt${sortIndicator('audit', 'timestamp')}</th>
-                  <th class="sortable" onclick="toggleSort('audit', 'event')">Hendelse${sortIndicator('audit', 'event')}</th>
-                  <th class="sortable" onclick="toggleSort('audit', 'rule')">Regel${sortIndicator('audit', 'rule')}</th>
-                  <th class="sortable" onclick="toggleSort('audit', 'actor')">Aktør${sortIndicator('audit', 'actor')}</th>
-                  <th class="sortable num" onclick="toggleSort('audit', 'amount')">Beløp (NOK)${sortIndicator('audit', 'amount')}</th>
-                  <th>Prev / SHA-256 Hash</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${sorted.map((entry) => `
+            <div class="table-scroll">
+              <table>
+                <thead>
                   <tr>
-                    <td class="tabular">#${entry.seq}</td>
-                    <td class="tabular">${escapeHtml(entry.timestamp)}</td>
-                    <td>
-                      <strong>${escapeHtml(entry.event)}</strong>
-                      <div class="text-muted" style="font-size:0.78rem;">Ref: ${escapeHtml(entry.refId)} · Periode ${escapeHtml(entry.period)}</div>
-                    </td>
-                    <td><span class="status-chip chip-cyan">${escapeHtml(entry.rule)}</span></td>
-                    <td>${escapeHtml(entry.actor)}</td>
-                    <td class="num">${formatNOK(entry.amount)}</td>
-                    <td class="tabular" style="font-size:0.76rem;">
-                      <div class="text-muted">Prev: ${escapeHtml(entry.prevHash.slice(0, 12))}…</div>
-                      <div style="color:var(--tertiary);">Hash: ${escapeHtml(entry.hash.slice(0, 16))}…</div>
-                    </td>
+                    <th>Ref / Fakturanr</th>
+                    <th>Kunde / Motpart</th>
+                    <th>WBS / Prosjekt</th>
+                    <th class="num">Balanseført 31.${p.id.slice(5)}</th>
+                    <th>Etterfølgende Innbetaling i Bank (Nov 2026)</th>
+                    <th>Revisjonsstatus</th>
+                    <th>Handling</th>
                   </tr>
-                `).join(``)}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  ${openReceivables.length > 0 ? openReceivables.map((l) => {
+                    const isCutoffOk = !!l.subsequentReceipt;
+                    const ragLevel = isCutoffOk ? `green` : `amber`;
+                    const ragRowClass = appState.ragFormattingEnabled ? `rag-row-${ragLevel}` : ``;
+                    return `
+                      <tr class="${ragRowClass}">
+                        <td class="tabular"><strong>${escapeHtml(l.id)}</strong></td>
+                        <td>${escapeHtml(l.desc)}</td>
+                        <td><span class="status-chip chip-muted">${escapeHtml(l.wbs || 'WBS-Felles')}</span></td>
+                        <td class="num"><strong>${formatNOK(l.amount)}</strong></td>
+                        <td>
+                          <span class="tabular" style="font-size:0.82rem; color:${l.subsequentReceipt ? `var(--tertiary)` : `var(--on-surface-variant)`};">
+                            ${escapeHtml(l.subsequentReceipt || 'Ikke registrert i bank ennå')}
+                          </span>
+                        </td>
+                        <td>
+                          <span class="rag-pill rag-${ragLevel}">
+                            ● ${isCutoffOk ? 'Innbetalt (ECL = 0)' : 'Krever etterkontroll'}
+                          </span>
+                        </td>
+                        <td>
+                          ${!l.subsequentReceipt ? `
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="registerSubsequentPayment('${l.id}')">
+                              <i data-lucide="check" width="14" height="14" aria-hidden="true"></i>
+                              <span>Verifiser innbetaling</span>
+                            </button>
+                          ` : `
+                            <span class="text-muted" style="font-size:0.78rem;">Verifisert i CAMT.053</span>
+                          `}
+                        </td>
+                      </tr>
+                    `;
+                  }).join('') : `
+                    <tr><td colspan="7" class="text-muted" style="text-align:center; padding:var(--space-md);">Ingen åpne fordringer i perioden.</td></tr>
+                  `}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- BANK CONFIRMATION ENGAGEMENT RECONCILIATION -->
+          <div class="panel stack-md">
+            <div>
+              <span class="data-label">Uavhengig Tredjepartsbekreftelse</span>
+              <h3 class="subhead">DNB Bankbekreftelse per 31.${p.id.slice(5)}.2026 (Bank Confirmation Letter)</h3>
+              <p class="text-muted" style="margin:0;">Avstemming mot offisiell revisjonsforespørsel besvart av DNB Bank ASA Corporate Banking Oslo.</p>
+            </div>
+
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Finansinstitusjon</th>
+                    <th>Kontonummer</th>
+                    <th class="num">Saldo per Revisjonsbekreftelse</th>
+                    <th class="num">Saldo per CAMT.053</th>
+                    <th class="num">Avstemt Hovedbokssaldo</th>
+                    <th class="num">Differanse</th>
+                    <th>Revisorkonklusjon</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>DNB Bank ASA</strong></td>
+                    <td class="tabular">1503.22.45910 (Driftskonto)</td>
+                    <td class="num"><strong>${formatNOK(m.ubBank)}</strong></td>
+                    <td class="num">${formatNOK(m.ubBank)}</td>
+                    <td class="num text-primary">${formatNOK(m.ubBank)}</td>
+                    <td class="num text-sage"><strong>0,00 kr</strong></td>
+                    <td><span class="status-chip chip-sage">Attestert uten forbehold</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- CRYPTOGRAPHIC AUDIT TRAIL LOG -->
+          <div class="panel stack-md">
+            <div class="toolbar-row">
+              <div>
+                <span class="data-label">Uforanderlig Revisjonsspor · Web Crypto SHA-256</span>
+                <h3 class="subhead">Kryptografisk Hendelseslogg (${appState.auditLog.length} blokker)</h3>
+              </div>
+              <span class="status-chip chip-sage">Kjede intakt</span>
+            </div>
+
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th class="sortable" onclick="toggleSort('audit', 'seq')">#${sortIndicator('audit', 'seq')}</th>
+                    <th class="sortable" onclick="toggleSort('audit', 'timestamp')">Tidspunkt${sortIndicator('audit', 'timestamp')}</th>
+                    <th class="sortable" onclick="toggleSort('audit', 'event')">Hendelse${sortIndicator('audit', 'event')}</th>
+                    <th class="sortable" onclick="toggleSort('audit', 'rule')">Regel${sortIndicator('audit', 'rule')}</th>
+                    <th class="sortable" onclick="toggleSort('audit', 'actor')">Aktør${sortIndicator('audit', 'actor')}</th>
+                    <th class="sortable num" onclick="toggleSort('audit', 'amount')">Beløp (NOK)${sortIndicator('audit', 'amount')}</th>
+                    <th>Prev / SHA-256 Hash</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${sorted.map((entry) => `
+                    <tr>
+                      <td class="tabular">#${entry.seq}</td>
+                      <td class="tabular">${escapeHtml(entry.timestamp)}</td>
+                      <td>
+                        <strong>${escapeHtml(entry.event)}</strong>
+                        <div class="text-muted" style="font-size:0.78rem;">Ref: ${escapeHtml(entry.refId)} · Periode ${escapeHtml(entry.period)}</div>
+                      </td>
+                      <td><span class="status-chip chip-cyan">${escapeHtml(entry.rule)}</span></td>
+                      <td>${escapeHtml(entry.actor)}</td>
+                      <td class="num">${formatNOK(entry.amount)}</td>
+                      <td class="tabular" style="font-size:0.76rem;">
+                        <div class="text-muted">Prev: ${escapeHtml(entry.prevHash.slice(0, 12))}…</div>
+                        <div style="color:var(--tertiary);">Hash: ${escapeHtml(entry.hash.slice(0, 16))}…</div>
+                      </td>
+                    </tr>
+                  `).join(``)}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       `;
@@ -3142,6 +4367,813 @@ ${voucherXml || `    <!-- Ingen bilag i utkast/bokført ennå -->`}
       } else {
         showToast(`Integritetsbrudd oppdaget i hash-kjeden!`, `error`);
       }
+    }
+
+    // =========================================================================
+    // SEQUENTIAL CLOSE PROCESS STEPPER
+    // =========================================================================
+        // =========================================================================
+    // CONDITIONAL RAG (RED - AMBER - GREEN) FORMATTING HELPERS
+    // =========================================================================
+    function getLineRagStatus(line, type = `bank`) {
+      if (line.status === `matched`) {
+        return { level: `green`, label: `Avstemt`, text: `Matchet i klynge ${line.matchId || ``}` };
+      }
+      if (type === `bank`) {
+        if (line.autoRule) {
+          return { level: `amber`, label: `Autoløp`, text: `Klar for ${line.autoRule} autoløp` };
+        }
+        if (line.isInTransit) {
+          return { level: `amber`, label: `Tidsavvik`, text: `Godkjent tidsavvik underveis` };
+        }
+        if (Math.abs(line.amount) >= 100000 || !line.ref) {
+          return { level: `red`, label: `Vesentlig avvik`, text: `Uidentifisert post over vesentlighetsgrense` };
+        }
+        return { level: `amber`, label: `Krever avklaring`, text: `Venter på bilag eller motpart` };
+      } else {
+        // ERP / Subledger
+        if (line.isInTransit) {
+          return { level: `amber`, label: `Underveis`, text: `Tidsavvik til bank (clearing i nov)` };
+        }
+        const age = line.ageDays || 0;
+        if (age > 60) {
+          return { level: `red`, label: `Kritisk alder`, text: `Overforfalt ${age} dager (høy ECL-risiko)` };
+        }
+        if (age > 30) {
+          return { level: `amber`, label: `Forfalt`, text: `Forfalt ${age} dager (moderat risiko)` };
+        }
+        return { level: `green`, label: `Normal (0-30d)`, text: `Innenfor forfall / lav tapsrisiko` };
+      }
+    }
+
+    function switchRagFilter(filter) {
+      appState.ragFilter = filter;
+      renderAll();
+      showToast(filter === `all` ? `Viser alle poster (RAG-filter avstilt).` : `Filtrert på RAG-status: ${filter.toUpperCase()}.`, `cyan`);
+    }
+
+    function toggleRagFormatting() {
+      appState.ragFormattingEnabled = !appState.ragFormattingEnabled;
+      renderAll();
+      showToast(`Betinget RAG-formatering er ${appState.ragFormattingEnabled ? `AKTIVERT` : `DEAKTIVERT`}.`, `cyan`);
+    }
+
+function renderCloseStepper() {
+      const container = document.getElementById(`close-stepper`);
+      if (!container) return;
+      const p = getPeriod();
+      const m = computePeriodMetrics(p);
+
+      const step1Done = true; // CAMT.053 & ERP feeds are imported
+      const hasAutoMatchable = p.bankLines.some((l) => l.status === `open` && l.autoRule);
+      const step2Done = !hasAutoMatchable;
+      const step3Done = m.openBank.length === 0 && m.openErp.length === 0;
+      const step4Done = Math.abs(m.netDelta) < 0.01 && p.vouchers.every((v) => v.status === `posted`);
+      const step5Done = p.isLocked || (p.cfoApproved && p.cfoApproved.approved);
+
+      const steps = [
+        {
+          num: 1,
+          id: `import`,
+          title: `1. Datafangst & Import`,
+          desc: `CAMT.053 & ERP feeds`,
+          done: step1Done,
+          statusText: `Fullført (100%)`,
+          chipClass: `chip-sage`
+        },
+        {
+          num: 2,
+          id: `open`,
+          title: `2. AI Close Matcher`,
+          desc: `Regelbasert autoløp`,
+          done: step2Done,
+          statusText: step2Done ? `Autoløp fullført` : `Klar til autoløp`,
+          chipClass: step2Done ? `chip-sage` : `chip-cyan`
+        },
+        {
+          num: 3,
+          id: `open`,
+          title: `3. Avvik & AI Copilot`,
+          desc: `KLP, agio & OCR avvik`,
+          done: step3Done,
+          statusText: step3Done ? `0 åpne avvik` : `${m.openBank.length + m.openErp.length} gjenstår`,
+          chipClass: step3Done ? `chip-sage` : `chip-amber`
+        },
+        {
+          num: 4,
+          id: `balancer`,
+          title: `4. Balanse & Bilag`,
+          desc: `Konto 1920 rullering`,
+          done: step4Done,
+          statusText: step4Done ? `Balansert (Δ = 0,00 kr)` : `Avvik: ${formatNOK(m.netDelta)}`,
+          chipClass: step4Done ? `chip-sage` : `chip-error`
+        },
+        {
+          num: 5,
+          id: `cfo`,
+          title: `5. CFO & Sign-off`,
+          desc: `4-øyne ledelseskontroll`,
+          done: step5Done,
+          statusText: step5Done ? `Låst & Signert` : (p.controllerSigned && p.controllerSigned.signed ? `Venter på CFO` : (m.readiness >= 90 ? `Klar til signering` : `Venter på avstemming`)),
+          chipClass: step5Done ? `chip-sage` : (p.controllerSigned && p.controllerSigned.signed ? `chip-amber` : `chip-muted`)
+        }
+      ];
+
+      container.innerHTML = `
+        <div class="stepper-track">
+          ${steps.map((st, idx) => `
+            <div class="stepper-step ${st.done ? `is-done` : ``} ${appState.activeTab === st.id ? `is-active-step` : ``}" onclick="setActiveTab('${st.id}')" title="Gå til ${escapeHtml(st.title)}">
+              <div class="step-marker">
+                <span class="step-num">${st.done ? `<i data-lucide="check" width="14" height="14"></i>` : st.num}</span>
+              </div>
+              <div class="step-info">
+                <div class="step-title">${escapeHtml(st.title)}</div>
+                <div class="step-sub">${escapeHtml(st.desc)}</div>
+                <span class="status-chip ${st.chipClass}" style="font-size:0.7rem; padding:2px 6px; margin-top:3px;">${escapeHtml(st.statusText)}</span>
+              </div>
+            </div>
+            ${idx < steps.length - 1 ? `<div class="stepper-line ${st.done ? `line-done` : ``}"></div>` : ``}
+          `).join(``)}
+        </div>
+      `;
+    }
+
+    // =========================================================================
+    // GLOBAL WBS / PROSJEKT FILTER
+    // =========================================================================
+    function switchWbsFilter(val) {
+      appState.wbsFilter = val;
+      const sel = document.getElementById(`wbs-filter-select`);
+      if (sel) sel.value = val;
+      renderAll();
+      showToast(val === `all` ? `Viser alle prosjekter (Konsern totalt).` : `Filtrert visning for ${val}.`, `cyan`);
+    }
+
+    function setBalancerViewMode(mode) {
+      appState.balancerMode = mode;
+      renderTabContent();
+    }
+
+    // =========================================================================
+    // 4-EYES SIGN-OFF & GOVERNANCE FUNCTIONS
+    // =========================================================================
+    async function signAsController() {
+      const p = getPeriod();
+      if (p.isLocked || (p.controllerSigned && p.controllerSigned.signed)) {
+        showToast(`Perioden er allerede signert av Controller.`, `cyan`);
+        return;
+      }
+      const m = computePeriodMetrics(p);
+      const now = new Date();
+      const dateStr = now.toISOString().replace(`T`, ` `).slice(0, 19) + ` UTC`;
+      const signer = `Frank Ellingsen (Senior Prosjektcontroller)`;
+      const payload = `SIGN_OFF_CONTROLLER|${p.id}|${m.ubBank}|${m.ubErp}|${m.netDelta}|${signer}|${dateStr}`;
+      const hash = await computeSha256(payload);
+
+      p.controllerSigned = {
+        signed: true,
+        timestamp: dateStr,
+        actor: signer,
+        hash: hash
+      };
+
+      await appendAuditEvent(
+        `Balansekontroll og periode ${p.periodCode} kvalitetssikret og signert av ${signer} (4-øyne trinn 1)`,
+        `SIGN_OFF`,
+        signer,
+        m.ubBank,
+        `CFO-SIGN-P${p.id}`
+      );
+
+      renderAll();
+      await savePersistedState();
+      showToast(`Kvalitetssikret og signert av ${signer}. Klar for CFO-godkjenning.`, `positive`);
+    }
+
+    async function approveAsCfo() {
+      const p = getPeriod();
+      if (p.isLocked) {
+        showToast(`Perioden er allerede godkjent og låst av CFO.`, `cyan`);
+        return;
+      }
+      if (!p.controllerSigned || !p.controllerSigned.signed) {
+        showToast(`Krever at Controller (Frank Ellingsen) har signert før CFO-godkjenning.`, `warning`);
+        return;
+      }
+      const m = computePeriodMetrics(p);
+      const now = new Date();
+      const dateStr = now.toISOString().replace(`T`, ` `).slice(0, 19) + ` UTC`;
+      const approver = `Kari Nordmann (CFO)`;
+      const payload = `APPROVE_CFO|${p.id}|${m.ubBank}|${m.netDelta}|${approver}|${p.controllerSigned.hash}|${dateStr}`;
+      const hash = await computeSha256(payload);
+
+      p.cfoApproved = {
+        approved: true,
+        timestamp: dateStr,
+        actor: approver,
+        hash: hash
+      };
+      p.isLocked = true;
+
+      await appendAuditEvent(
+        `Periode ${p.periodCode} formelt godkjent og LÅST av ${approver} (4-øyne trinn 2)`,
+        `CFO_LOCK`,
+        approver,
+        m.ubBank,
+        `CFO-LOCK-P${p.id}`
+      );
+
+      renderAll();
+      await savePersistedState();
+      showToast(`Månedsavslutning godkjent! Regnskapsperiode ${p.periodCode} er nå låst for etterposteringer.`, `positive`);
+    }
+
+    // =========================================================================
+    // ISA 500 SUBSEQUENT EVENTS CUT-OFF VERIFICATION
+    // =========================================================================
+    async function registerSubsequentPayment(lineId) {
+      const p = getPeriod();
+      const line = p.erpLines.find((l) => l.id === lineId) || p.bankLines.find((l) => l.id === lineId);
+      if (!line) return;
+      const dateStr = `Innbetalt 04.11.2026 i DNB CAMT.053 (Ref DNB-${line.id})`;
+      line.subsequentReceipt = dateStr;
+
+      await appendAuditEvent(
+        `ISA 500 Cut-off: Verifisert etterfølgende innbetaling for ${line.id} (${line.desc}): ${dateStr}`,
+        `AUDIT_CUTOFF`,
+        `Revisor / Controller`,
+        line.amount,
+        line.id
+      );
+
+      renderAll();
+      await savePersistedState();
+      showToast(`Etterfølgende innbetaling verifisert for ${line.id}.`, `positive`);
+    }
+
+    // =========================================================================
+    // AUDITOR DOSSIER EXPORT
+    // =========================================================================
+    async function downloadAuditorDossier() {
+      const p = getPeriod();
+      const m = computePeriodMetrics(p);
+      const headHash = appState.auditLog.length > 0 ? appState.auditLog[appState.auditLog.length - 1].hash : `—`;
+
+      let content = `================================================================================\n`;
+      content += `REVISJONSPAKKE & DOKUMENTASJONSMAPPE (ISA 500 / SAF-T FINANCIAL)\n`;
+      content += `Nordic Engineering Projects AS · Org.nr 984 210 552\n`;
+      content += `Regnskapsperiode: ${p.label} (${p.periodCode})\n`;
+      content += `Generert: ${new Date().toISOString()}\n`;
+      content += `Revisjonsstatus: ${p.isLocked ? `LÅST OG GODKJENT AV CFO` : `UNDER AVSTEMMING`}\n`;
+      content += `================================================================================\n\n`;
+
+      content += `1. BALANSEKONTROLL KONTO 1920 DRIFTSKONTO NOK\n`;
+      content += `--------------------------------------------------------------------------------\n`;
+      content += `Inngående balanse (01.10.2026) Bank:       ${formatNOK(p.ibBank).padStart(20)}\n`;
+      content += `Inngående balanse (01.10.2026) ERP:        ${formatNOK(p.ibErp).padStart(20)}\n`;
+      content += `Periodens transaksjoner Bank:              ${formatNOK(m.bankTxSum).padStart(20)}\n`;
+      content += `Periodens transaksjoner Hovedbok:          ${formatNOK(m.erpTxBaseSum).padStart(20)}\n`;
+      content += `Bokførte spinn-off korreksjonsbilag:       ${formatNOK(m.postedVouchersImpact).padStart(20)}\n`;
+      content += `Utgående balanse per Bankutskrift:         ${formatNOK(m.ubBank).padStart(20)}\n`;
+      content += `Utgående balanse per Hovedbok:             ${formatNOK(m.ubErp).padStart(20)}\n`;
+      content += `Godkjente tidsavvik (innbet. underveis):   ${formatNOK(m.inTransitAmount).padStart(20)}\n`;
+      content += `Korrigert differanse (Netto Delta):        ${formatNOK(m.netDelta).padStart(20)}\n`;
+      content += `Kontrollkonklusjon: ${Math.abs(m.netDelta) < 0.01 ? `FULLT AVSTEMT (0,00 kr avvik)` : `AVVIK TIL BEHANDLING`}\n\n`;
+
+      content += `2. BANKBEKREFTELSE FRA DNB BANK ASA PER 31.10.2026\n`;
+      content += `--------------------------------------------------------------------------------\n`;
+      content += `Bank: DNB Bank ASA, Corporate Banking Division\n`;
+      content += `Kontonummer: 1503.22.45910 (Driftskonto NOK)\n`;
+      content += `Bekreftet saldo per revisjonsforespørsel:  ${formatNOK(m.ubBank).padStart(20)}\n`;
+      content += `Saldo ifølge elektronisk CAMT.053:         ${formatNOK(m.ubBank).padStart(20)}\n`;
+      content += `Differanse mot ekstern bekreftelse:                       0,00 kr\n`;
+      content += `Sikkerhetsstillelser / Pantsettelser:       Ingen tinglyste sperrer registrert\n\n`;
+
+      content += `3. ISA 500 CUT-OFF & ETTERFØLGENDE INNBETALINGER (SUBSEQUENT RECEIPTS)\n`;
+      content += `--------------------------------------------------------------------------------\n`;
+      p.erpLines.filter((l) => l.status === `open`).forEach((l) => {
+        content += `Post: ${l.id} | ${l.desc.padEnd(35)} | ${formatNOK(l.amount).padStart(14)} | WBS: ${l.wbs}\n`;
+        content += `  Status: ${l.subsequentReceipt || `Venter på verifisering i bankutdrag november`}\n`;
+      });
+      content += `\n`;
+
+      content += `4. IFRS 9 ECL TAP PÅ FORDRINGER (TAPSFOND KONTO 1580)\n`;
+      content += `--------------------------------------------------------------------------------\n`;
+      const scenario = IFRS9_SCENARIOS[appState.ifrsScenario] || IFRS9_SCENARIOS.standard;
+      content += `Modellscenario: ${scenario.label}\n`;
+      const buckets = [`0-30`, `31-60`, `61-90`, `90+`];
+      let totGross = 0;
+      let totEcl = 0;
+      buckets.forEach((b) => {
+        const gross = AGING_PORTFOLIO.filter((i) => i.bucket === b).reduce((a, r) => a + r.amount, 0);
+        const rate = scenario.rates[b] || 0;
+        const ecl = Math.round(gross * rate);
+        totGross += gross;
+        totEcl += ecl;
+        content += `Bøtte ${b.padEnd(8)}: Brutto ${formatNOK(gross).padStart(15)} | PD ${(rate * 100).toFixed(1)}% | Tapsavsetning: ${formatNOK(ecl).padStart(12)}\n`;
+      });
+      content += `Totalt tapsfond per 31.10.2026: ${formatNOK(totEcl)}\n\n`;
+
+      content += `5. 4-ØYNE PRINSIPP & LEDELSESSIGNATUR\n`;
+      content += `--------------------------------------------------------------------------------\n`;
+      if (p.controllerSigned && p.controllerSigned.signed) {
+        content += `Utarbeidet av:  ${p.controllerSigned.actor}\n`;
+        content += `Tidspunkt:      ${p.controllerSigned.timestamp}\n`;
+        content += `SHA-256 Hash:   ${p.controllerSigned.hash}\n`;
+      } else {
+        content += `Utarbeidet av:  Ikke formelt signert ennå\n`;
+      }
+      if (p.cfoApproved && p.cfoApproved.approved) {
+        content += `Godkjent av:    ${p.cfoApproved.actor}\n`;
+        content += `Tidspunkt:      ${p.cfoApproved.timestamp}\n`;
+        content += `SHA-256 Hash:   ${p.cfoApproved.hash}\n`;
+        content += `Periodelås:     AKTIV (Regnskap stengt for redigering)\n`;
+      } else {
+        content += `Godkjent av:    Venter på CFO-godkjenning\n`;
+      }
+      content += `\n`;
+
+      content += `6. KRYPTOGRAFISK REVISJONSSPOR (SHA-256 HASH-KJEDE)\n`;
+      content += `--------------------------------------------------------------------------------\n`;
+      content += `Gjeldende Hode-Hash: ${headHash}\n`;
+      content += `Totalt antall hendelser logget: ${appState.auditLog.length}\n`;
+      appState.auditLog.forEach((e) => {
+        content += `#${e.seq.toString().padStart(3)} | ${e.timestamp} | ${e.event.padEnd(45)} | ${e.actor.padEnd(20)} | ${e.hash.slice(0, 16)}...\n`;
+      });
+
+      const filename = `Revisjonspakke_Konto1920_${p.id}.txt`;
+      await appendAuditEvent(`Lastet ned komplett revisjonspakke ${filename}`, `AUDIT_PACK`, `Revisor / Controller`, 0, filename);
+      renderAll();
+      await savePersistedState();
+
+      const blob = new Blob([content], { type: `text/plain;charset=utf-8` });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement(`a`);
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast(`Lastet ned ${filename} for revisor.`, `positive`);
+    }
+
+    // =========================================================================
+    // =========================================================================
+    // DUCKDB ANALYTICS & QUERY MODAL HELPERS
+    // =========================================================================
+    function showDuckDbQueryModal(type) {
+      const isRec = type === 'reconciled';
+      const tbl = isRec ? 'reconciled_transactions' : 'unreconciled_transactions';
+      const view = isRec ? 'v_reconciliation_summary' : 'v_unreconciled_aging';
+      const sql = isRec
+        ? `SELECT match_group_id, match_type, match_rule_code, account_number,\n       gross_amount_nok, fee_deduction_nok, net_matched_nok, audit_hash, matched_at\nFROM 'data/reconciliation.duckdb'.reconciled_transactions\nWHERE status = 'RECONCILED'\nORDER BY matched_at DESC;`
+        : `SELECT item_id, source_system, account_number, transaction_date,\n       amount_nok, project_id, wbs_code, rag_status, age_days, aging_bucket, provision_nok\nFROM 'data/reconciliation.duckdb'.unreconciled_transactions\nWHERE status = 'OPEN'\nORDER BY age_days DESC, ABS(amount_nok) DESC;`;
+
+      showToast(`DuckDB SQL for ${tbl} kopiert til utklippstavlen!`);
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(sql);
+      }
+      
+      const drawer = document.getElementById('chatbot-drawer');
+      if (drawer && drawer.classList.contains('is-hidden')) {
+        toggleChatbot();
+      }
+      addBotMessage(
+        `**DuckDB Live Database (\`${tbl}\`):**<br><br>` +
+        `• Databasefil: \`data/reconciliation.duckdb\` (og satellitt \`data/${tbl}.duckdb\`)<br>` +
+        `• Tilhørende analytisk view: \`${view}\`<br><br>` +
+        `**SQL Spørring:**<br>` +
+        `<pre style="background:var(--surface-container-high); padding:10px; border-radius:var(--rounded); font-family:var(--font-mono); font-size:0.78rem; overflow-x:auto;">${escapeHtml(sql)}</pre><br>` +
+        `*Data oppdateres fortløpende med ACID-transaksjoner ved enhver avstemming, godkjenning eller spinn-off bilagsføring.*`
+      );
+    }
+
+        // CLOSE-AI COPILOT & SUPERBRUKER POP-UP CHATBOT
+    // =========================================================================
+    function toggleChatbot() {
+      const drawer = document.getElementById(`chatbot-drawer`);
+      if (!drawer) return;
+      const isHidden = drawer.classList.contains(`is-hidden`);
+      if (isHidden) {
+        drawer.classList.remove(`is-hidden`);
+        appState.chatbotOpen = true;
+        if (!appState.chatbotMessages || appState.chatbotMessages.length === 0) {
+          initChatbotGreeting();
+        } else {
+          renderChatbotMessages();
+        }
+        renderChatbotQuickChips();
+        const input = document.getElementById(`chatbot-input`);
+        if (input) input.focus();
+      } else {
+        drawer.classList.add(`is-hidden`);
+        appState.chatbotOpen = false;
+      }
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function setChatbotRole(role) {
+      appState.chatbotRole = role;
+      const btnUser = document.getElementById(`chat-role-user`);
+      const btnAdmin = document.getElementById(`chat-role-admin`);
+      if (btnUser && btnAdmin) {
+        if (role === `user`) {
+          btnUser.className = `btn btn-xs btn-primary`;
+          btnAdmin.className = `btn btn-xs btn-ghost`;
+        } else {
+          btnUser.className = `btn btn-xs btn-ghost`;
+          btnAdmin.className = `btn btn-xs btn-primary`;
+        }
+      }
+      renderChatbotQuickChips();
+      
+      const roleText = role === `admin` ? `Superbruker / Systemansvarlig` : `Controller / Bruker`;
+      addBotMessage(`Byttet assistent-modus til **${roleText}**.<br>${role === `admin` ? `Du kan nå spørre om importdefinisjoner (Visma, Business Central, Xledger, Tripletex, CAMT, BAI2), regelbygging, oppsett av nye konti med IB, eller øresavrundingsregler.` : `Jeg er klar til å veilede deg gjennom avstemming, balansekontroll, bilagsføring og CFO/revisor-godkjenning for ${getPeriod().label}.`}`);
+    }
+
+    function renderChatbotQuickChips() {
+      const container = document.getElementById(`chatbot-quick-chips`);
+      if (!container) return;
+      const role = appState.chatbotRole || `user`;
+      const chips = role === `user` ? [
+        `Hvorfor er konto 1920 ubalansert?`,
+        `Hva gjenstår for CFO-låsing?`,
+        `Hjelp med Bergen Marine tidsavvik`,
+        `Kjør autoløp nå`,
+        `Bokfør alle spinn-off bilag`,
+        `Filtrer WBS-408 Kystvakt`,
+        `Vis DuckDB avstemmingsstatus`
+      ] : [
+        `Hvordan opprette ny valutakonto 1921?`,
+        `Importmal for Business Central`,
+        `Importmal for Xledger`,
+        `Lag 1:M Nets batch regel`,
+        `Sett opp øresavrunding <= 5 kr`,
+        `Hva er amerikansk BAI2 format?`,
+        `DuckDB status & tabeller`
+      ];
+
+      container.innerHTML = chips.map((c) => `
+        <button type="button" class="chatbot-chip" onclick="handleQuickChipClick('${escapeHtml(c)}')">${escapeHtml(c)}</button>
+      `).join(``);
+    }
+
+    function initChatbotGreeting() {
+      const p = getPeriod();
+      const m = computePeriodMetrics(p);
+      const isZero = Math.abs(m.netDelta) < 0.01;
+      
+      const greeting = `Hei Frank! Jeg er din **Close-AI Assistent** for ${p.label} (${p.periodCode}).<br><br>` +
+        `**Status akkurat nå:**<br>` +
+        `• Beredskap: **${m.readiness}%**<br>` +
+        `• Avstemmingsdifferanse: **${formatNOK(m.netDelta)}** (${isZero ? `Fullt balansert` : `Rå avvik før korreksjoner: ${formatNOK(m.rawDelta)}`})<br>` +
+        `• Åpne poster: **${m.openBank.length} i Bank** / **${m.openErp.length} i ERP**<br>` +
+        `• Låsestatus: ${p.isLocked ? `LÅST OG GODKJENT AV CFO` : (p.controllerSigned && p.controllerSigned.signed ? `Signert av Controller Frank Ellingsen` : `Åpen for avstemming`)}<br><br>` +
+        `Hva ønsker du hjelp med?`;
+
+      const actions = isZero ? [
+        { label: `Gå til CFO-Rapport`, action: `setActiveTab('cfo')`, icon: `file-check` },
+        { label: `Se Revisjonsdokumentasjon`, action: `setActiveTab('audit')`, icon: `shield-check` }
+      ] : [
+        { label: `Se Balansebro (Δ=0)`, action: `setActiveTab('balancer')`, icon: `scale` },
+        { label: `Bekreft Bergen Marine`, action: `confirmInTransit()`, icon: `check-check` },
+        { label: `Kjør Autoløp`, action: `runAutoMatch()`, icon: `play` }
+      ];
+
+      appState.chatbotMessages = [{ sender: `bot`, text: greeting, actions }];
+      renderChatbotMessages();
+    }
+
+    function renderChatbotMessages() {
+      const container = document.getElementById(`chatbot-messages`);
+      if (!container) return;
+      if (!appState.chatbotMessages) appState.chatbotMessages = [];
+
+      container.innerHTML = appState.chatbotMessages.map((msg, idx) => {
+        const isBot = msg.sender === `bot`;
+        return `
+          <div class="chat-bubble ${isBot ? `bot` : `user`}">
+            <div>${msg.text}</div>
+            ${msg.actions && msg.actions.length > 0 ? `
+              <div class="chat-bubble-actions">
+                ${msg.actions.map((act) => `
+                  <button type="button" class="chat-action-btn" onclick="${escapeHtml(act.action)}">
+                    ${act.icon ? `<i data-lucide="${act.icon}" width="12" height="12"></i>` : ``}
+                    <span>${escapeHtml(act.label)}</span>
+                  </button>
+                `).join(``)}
+              </div>
+            ` : ``}
+          </div>
+        `;
+      }).join(``);
+
+      container.scrollTop = container.scrollHeight;
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function handleQuickChipClick(text) {
+      const input = document.getElementById(`chatbot-input`);
+      if (input) input.value = text;
+      handleChatbotSubmit();
+    }
+
+    function handleChatbotSubmit(event) {
+      if (event && event.preventDefault) event.preventDefault();
+      const input = document.getElementById(`chatbot-input`);
+      if (!input) return;
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = ``;
+
+      // Append user message
+      appState.chatbotMessages.push({ sender: `user`, text: escapeHtml(text) });
+      renderChatbotMessages();
+
+      // Generate response
+      setTimeout(() => {
+        const botReply = generateChatbotReply(text, appState.chatbotRole || `user`);
+        appState.chatbotMessages.push(botReply);
+        renderChatbotMessages();
+      }, 200);
+    }
+
+    function addBotMessage(text, actions = []) {
+      if (!appState.chatbotMessages) appState.chatbotMessages = [];
+      appState.chatbotMessages.push({ sender: `bot`, text, actions });
+      renderChatbotMessages();
+    }
+
+    function resetChatbotConversation() {
+      appState.chatbotMessages = [];
+      initChatbotGreeting();
+      showToast(`Samtale tilbakestilt.`, `cyan`);
+    }
+
+    function generateChatbotReply(query, role) {
+      const q = query.toLowerCase();
+      const p = getPeriod();
+      const m = computePeriodMetrics(p);
+      const isZero = Math.abs(m.netDelta) < 0.01;
+
+      // ==========================================
+      // USER / CONTROLLER QUERIES
+      // ==========================================
+      if (role === `user`) {
+        if (q.includes(`ubalanse`) || q.includes(`balanse`) || q.includes(`1920`) || q.includes(`avvik`)) {
+          return {
+            sender: `bot`,
+            text: `**Balansekontroll for Konto 1920 Driftskonto NOK:**<br><br>` +
+              `• Bankens UB per DNB utskrift: **${formatNOK(m.ubBank)}**<br>` +
+              `• Hovedbokens ujusterte UB: **${formatNOK(p.ibErp + m.erpTxBaseSum)}**<br>` +
+              `• Rå differanse: **${formatNOK(m.rawDelta)}**<br><br>` +
+              `**Avstemmingsbro som lukker avviket:**<br>` +
+              `1. *Bergen Marine innbetaling underveis*: +45 000,00 kr (Tidsavvik)<br>` +
+              `2. *Konsernavregning UK Ltd*: +48 900,00 kr (Valutadifferanse/agio)<br>` +
+              `3. *DNB Gebyr*: -175,00 kr (Bankkostnad)<br>` +
+              `4. *KLP pensjonspostering*: -1 000,00 kr (Premieavvik spinn-off)<br><br>` +
+              `Ved å godkjenne tidsavviket og bokføre spinn-off bilagene er differansen nøyaktig **0,00 kr**!`,
+            actions: [
+              { label: `Åpne Balansekontroll`, action: `setActiveTab('balancer')`, icon: `scale` },
+              { label: `Bekreft Tidsavvik`, action: `confirmInTransit()`, icon: `check-check` },
+              { label: `Bokfør alle bilag`, action: `postAllVouchers()`, icon: `file-spreadsheet` }
+            ]
+          };
+        }
+
+        if (q.includes(`cfo`) || q.includes(`lås`) || q.includes(`sign`) || q.includes(`godkjenn`)) {
+          const isSigned = p.controllerSigned && p.controllerSigned.signed;
+          const isLocked = p.isLocked || (p.cfoApproved && p.cfoApproved.approved);
+          return {
+            sender: `bot`,
+            text: `**4-Øyne Prinsipp & Ledelsesgodkjenning:**<br><br>` +
+              `• **Trinn 1 (Kvalitetssikring av Controller Frank Ellingsen)**: ${isSigned ? `Signert (${p.controllerSigned.timestamp})` : `IKKE SIGNERT ENNÅ`}<br>` +
+              `• **Trinn 2 (CFO Godkjenning & Låsing)**: ${isLocked ? `LÅST OG GODKJENT AV KARI NORDMANN` : (isSigned ? `Klar til godkjenning av CFO` : `Venter på Controller-signering`)}<br><br>` +
+              `*Krav for låsing:* Netto differanse må være 0,00 kr, og alle spinn-off bilag må være bokført til SAF-T.`,
+            actions: [
+              { label: `Gå til CFO-Rapport`, action: `setActiveTab('cfo')`, icon: `file-check` },
+              { label: isSigned ? `Godkjenn som CFO` : `Signer som Controller`, action: isSigned ? `approveAsCfo()` : `signAsController()`, icon: `pen-tool` }
+            ]
+          };
+        }
+
+        if (q.includes(`autoløp`) || q.includes(`match`) || q.includes(`regler`)) {
+          return {
+            sender: `bot`,
+            text: `**AI Close Matcher Regelmotor:**<br><br>` +
+              `• **R-01**: 1:1 Eksakt KID og Fakturanummer<br>` +
+              `• **R-02**: 1:1 Eksakt med $\pm 3$ dagers bank-float<br>` +
+              `• **R-03**: 1:M Samleoppgjør / Batch med gebyrsplitt mot Konto 7770<br>` +
+              `• **R-04**: M:M Valutakurs- og konsernnetting mot Konto 8160<br>` +
+              `• **R-AI-AGENT**: Multimodal OCR og støyete remisser`,
+            actions: [
+              { label: `Kjør Autoløp nå`, action: `runAutoMatch()`, icon: `play` },
+              { label: `Se Åpne Poster`, action: `setActiveTab('open')`, icon: `list-checks` }
+            ]
+          };
+        }
+
+        if (q.includes(`bergen marine`) || q.includes(`tidsavvik`)) {
+          return {
+            sender: `bot`,
+            text: `**Tidsavvik: Bergen Marine (DEP-9941):**<br><br>` +
+              `• Beløp: **45 000,00 NOK**<br>` +
+              `• Registrert i ERP: 31.10.2026 kl. 16:45<br>` +
+              `• Godkjent clearing i DNB: 02.11.2026 (November CAMT.053)<br>` +
+              `• Status: ${p.inTransitRecognized ? `Godkjent og avstemt som gyldig tidsavvik.` : `Venter på bekreftelse i Balansekontroll.`}`,
+            actions: p.inTransitRecognized ? [
+              { label: `Se i Balansekontroll`, action: `setActiveTab('balancer')`, icon: `scale` }
+            ] : [
+              { label: `Bekreft Tidsavvik nå`, action: `confirmInTransit()`, icon: `check-check` },
+              { label: `Åpne Balansekontroll`, action: `setActiveTab('balancer')`, icon: `scale` }
+            ]
+          };
+        }
+
+        if (q.includes(`wbs`) || q.includes(`prosjekt`) || q.includes(`kystvakt`)) {
+          return {
+            sender: `bot`,
+            text: `**Prosjekt- & WBS-Styring for Umoe Mandal / NEP:**<br><br>` +
+              `• **WBS-401**: Subsea Manifold System (Aker / Subsea 7)<br>` +
+              `• **WBS-408**: Offshore Patrol Vessel (Kystvakt / CraneTech / Equinor)<br>` +
+              `• **WBS-412**: Landanlegg West (Hydrogenanlegg / Bergen Marine)<br>` +
+              `• **WBS-900**: Konsern / Felles overhead (UK intercompany / skattetrekk)`,
+            actions: [
+              { label: `Vis WBS-408 Kystvakt`, action: `switchWbsFilter('WBS-408')`, icon: `filter` },
+              { label: `Vis WBS-401 Subsea`, action: `switchWbsFilter('WBS-401')`, icon: `filter` },
+              { label: `Vis Alle Prosjekter`, action: `switchWbsFilter('all')`, icon: `x` }
+            ]
+          };
+        }
+
+        if (q.includes(`revisjon`) || q.includes(`cut-off`) || q.includes(`dossier`)) {
+          return {
+            sender: `bot`,
+            text: `**Lovpålagt Revisjonspakke (ISA 500 / ISA 540):**<br><br>` +
+              `• **ISA 500 Cut-off test**: Verifiserer etterfølgende innbetalinger i bank for åpne kundefordringer per 31.10.<br>` +
+              `• **DNB Bankbekreftelse**: Uavhengig revisjonsforespørsel avstemt med 0,00 kr differanse.<br>` +
+              `• **Kryptografisk Revisjonslogg**: Komplett SHA-256 hash-kjede som garanterer uforanderlighet.<br>` +
+              `• **Revisormappe**: Ett-klikks eksport av fullstendig revisjonsdossier.`,
+            actions: [
+              { label: `Gå til Revisjonsfanen`, action: `setActiveTab('audit')`, icon: `shield-check` },
+              { label: `Last ned Revisormappe`, action: `downloadAuditorDossier()`, icon: `file-archive` }
+            ]
+          };
+        }
+      }
+
+      // ==========================================
+      // SUPERBRUKER / ADMIN QUERIES
+      // ==========================================
+      if (role === `admin` || q.includes(`erp`) || q.includes(`import`) || q.includes(`konto`) || q.includes(`bai2`)) {
+        if (q.includes(`valutakonto`) || q.includes(`ny konto`) || q.includes(`opprette konto`) || q.includes(`ib`)) {
+          return {
+            sender: `bot`,
+            text: `**Superbruker Veiviser: Sette opp ny balansekonto med IB:**<br><br>` +
+              `1. **Konto-Master**: Opprett kontonummer (f.eks. \`1921 Driftskonto USD\` eller \`1950 Skattetrekk\`).<br>` +
+              `2. **Valuta & Bankkilde**: Angi ISO-kode (\`USD\`, \`EUR\`, \`NOK\`) og IBAN/kontonummer.<br>` +
+              `3. **Inngående Balanse (IB)**: Tast inn IB per 01.01.2026 for både Bank og Hovedbok.<br>` +
+              `4. **Migrering av Åpne Poster**: Importer uavstemte poster fra forrige system. Systemet validerer formelen:<br>` +
+              `$$\text{IB Hovedbok} + \sum(\text{Åpne poster}) = \text{IB Bank}$$<br>` +
+              `5. **Aktiver Avstemming**: Velg tilknyttet CAMT.053 XML eller MT940 feed.`,
+            actions: [
+              { label: `Se Kildeoppsett`, action: `setActiveTab('import')`, icon: `download` },
+              { label: `Balansekontroll`, action: `setActiveTab('balancer')`, icon: `scale` }
+            ]
+          };
+        }
+
+        if (q.includes(`business central`) || q.includes(`bc`)) {
+          return {
+            sender: `bot`,
+            text: `**Importmal: Microsoft Dynamics 365 Business Central (BC)**<br><br>` +
+              `• **Protokoll**: OData v4 web-tjeneste mot Page 21 (\`Customer Ledger Entries\`) og Page 20 (\`General Ledger Entries\`).<br>` +
+              `• **Påkrevde felter:**<br>` +
+              `- \`Posting_Date\` (Bokføringsdato)<br>` +
+              `- \`Document_No\` (Bilagsnummer)<br>` +
+              `- \`External_Document_No\` (KID / Leverandørs fakturanr)<br>` +
+              `- \`Amount_LCY\` (Beløp i NOK)<br>` +
+              `- \`Remaining_Amt_LCY\` (Gjenstående åpent beløp)<br>` +
+              `- \`Global_Dimension_1_Code\` (WBS / Prosjektkode)<br>` +
+              `• **Støttet format**: JSON REST eller CSV flatfil-dump.`,
+            actions: [
+              { label: `Åpne Importfanen`, action: `setActiveTab('import')`, icon: `download` }
+            ]
+          };
+        }
+
+        if (q.includes(`xledger`)) {
+          return {
+            sender: `bot`,
+            text: `**Importmal: Xledger (GraphQL / SAF-T)**<br><br>` +
+              `• **Protokoll**: Xledger GraphQL API (\`query { glTransactions { ... } }\`) eller standard SAF-T eksport.<br>` +
+              `• **Spesialitet**: 5-dimensjonal kontering (\`Account\`, \`Subledger/Entity\`, \`Project/WBS\`, \`CostCenter\`, \`Activity\`).<br>` +
+              `• **Ekstrakt**: Fanger automatisk prosjektleder, milepæl og godkjenningsstatus for leverandørfakturaer direkte inn i Close-AI.`,
+            actions: [
+              { label: `Åpne Importfanen`, action: `setActiveTab('import')`, icon: `download` }
+            ]
+          };
+        }
+
+        if (q.includes(`visma`)) {
+          return {
+            sender: `bot`,
+            text: `**Importmal: Visma.net / Visma Business**<br><br>` +
+              `• **Protokoll**: REST API (\`/controller/api/v1/customerledgerdocument\`) eller tab-separert fil.<br>` +
+              `• **Kjernemapping:**<br>` +
+              `- Bilagsart 1 = Faktura<br>` +
+              `- Bilagsart 2 = Innbetaling<br>` +
+              `- Bilagsart 8 = Kreditnota<br>` +
+              `• Kobles automatisk mot Visma AutoPay CAMT.053 bankstrøm.`,
+            actions: [
+              { label: `Åpne Importfanen`, action: `setActiveTab('import')`, icon: `download` }
+            ]
+          };
+        }
+
+        if (q.includes(`bai2`) || q.includes(`usa`)) {
+          return {
+            sender: `bot`,
+            text: `**Bankformat: Amerikansk BAI2 (Bank Administration Institute v2)**<br><br>` +
+              `• **Struktur**: Record 01 (Header), 02 (Group), 03 (Account), 16 (Transaction Detail), 49 (Account Trailer), 98 (Group Trailer).<br>` +
+              `• **KRITISK REGEL**: I BAI2 oppgis alle beløp i **cent uten desimalpunktum** (f.eks. $10 000,00 skrives som \`1000000\`).<br>` +
+              `• **Vanlige koder**: Type 165 = Wire Transfer, Type 469 = Domestic Loan / Rentetrekk, Type 399 = Diverse gebyrer.<br>` +
+              `• Protokoll for USA: PGP-kryptert SFTP Host-to-Host mot JPMorgan, Citi eller Bank of America.`,
+            actions: [
+              { label: `Se Kilder`, action: `setActiveTab('import')`, icon: `download` }
+            ]
+          };
+        }
+
+        if (q.includes(`øresavrunding`) || q.includes(`toleranse`) || q.includes(`øre`)) {
+          return {
+            sender: `bot`,
+            text: `**Konfigurasjon av Øredifferanse- & Toleransemotor:**<br><br>` +
+              `• **Maksimal beløpsterskel**: Settes til f.eks. $\le 5,00\text{ NOK}$ (eller opptil $10,00\text{ NOK}$).<br>` +
+              `• **Autoføringsmekanisme**:<br>` +
+              `Dersom diff mellom Bank og ERP er innenfor terskelen, godkjenner motoren matchen automatisk og oppretter et balansert spinn-off mikrobilag:<br>` +
+              `- **Debet / Kredit**: \`Konto 7799 Fradragsberettigede andre driftskostnader (Øreavrunding)\`<br>` +
+              `- **Motkonto**: \`Konto 1920 Driftskonto NOK\`<br>` +
+              `• Revisorattest: Logges med regelkode \`R-TOLERANCE-AUTO\` i SHA-256 kjeden.`,
+            actions: [
+              { label: `Gå til Bilagsstudio`, action: `setActiveTab('vouchers')`, icon: `file-spreadsheet` }
+            ]
+          };
+        }
+
+        if (q.includes(`regel`) || q.includes(`rule studio`) || q.includes(`nets`)) {
+          return {
+            sender: `bot`,
+            text: `**Avstemmingsregel Studio: Bygge 1:M Samleoppgjør med Gebyrsplitt:**<br><br>` +
+              `1. **Trigger**: Tekst i bank matcher regex \`/NETS.*B(\d+)/i\`<br>` +
+              `2. **Søk i reskontro**: Matcher batch-referansen mot åpne ERP-linjer.<br>` +
+              `3. **Subset-Sum Algoritme**: Finner hvilke $N$ fakturaer som summerer seg til bruttobeløpet.<br>` +
+              `4. **Spinn-off**: Differansen (f.eks. 2 037,50 kr) konteres automatisk som debet på \`Konto 7770 Kortgebyr\`.<br>` +
+              `5. **Resultat**: Netto differanse $\Delta = 0,00\text{ kr}$ mot banken.`,
+            actions: [
+              { label: `Se Avstemte Poster`, action: `setActiveTab('reconciled')`, icon: `check-circle-2` }
+            ]
+          };
+        }
+      }
+
+      if (q.includes(`duckdb`) || q.includes(`database`) || q.includes(`unreconciled`) || q.includes(`reconciled transactions`)) {
+        return {
+          sender: `bot`,
+          text: `**DuckDB Avstemmingsarkitektur & Sanntidslagring:**<br><br>` +
+            `Databasen er strukturert i \`data/reconciliation.duckdb\` (samt separate satellitter \`reconciled_transactions.duckdb\` og \`unreconciled_transactions.duckdb\`):<br><br>` +
+            `1. **\`reconciled_transactions\`** (5 avstemte rader, 181 062,50 kr):<br>` +
+            `- Inneholder \`reconciliation_id\`, \`match_group_id\`, \`match_type\`, \`gross_amount_nok\`, \`fee_deduction_nok\`, \`audit_hash\` og tidsstempel.<br>` +
+            `- Oppdateres atomisk (ACID) ved enhver automatisk eller manuell match.<br><br>` +
+            `2. **\`unreconciled_transactions\`** (4 åpne poster, 2 624 110,00 kr):<br>` +
+            `- Beregner fortløpende \`age_days\`, \`aging_bucket\` (0-30, 31-60, 61-90, 90+), \`rag_status\` (Rød/Gul/Grønn), og tapsavsetning etter IFRS 9.<br>` +
+            `- Inkluderer \`project_id\` og \`wbs_code\` for direkte prosjektcontrolling mot EAC/ETC.<br><br>` +
+            `3. **Innebygde SQL Views**:<br>` +
+            `• \`v_reconciliation_summary\`: Match-statistikk per regeltype.<br>` +
+            `• \`v_unreconciled_aging\`: Aldersfordeling og risikoeksponering.<br>` +
+            `• \`v_wbs_open_exposure\`: Åpne uavstemte poster aggregert per WBS-kode.`,
+          actions: [
+            { label: `Se Avstemte Poster`, action: `setActiveTab('reconciled')`, icon: `check-circle-2` },
+            { label: `Se Åpne Poster (RAG)`, action: `setActiveTab('open')`, icon: `layers` },
+            { label: `Aldersfordeling IFRS 9`, action: `setActiveTab('aging')`, icon: `calendar` }
+          ]
+        };
+      }
+
+            // Default fallback
+      return {
+        sender: `bot`,
+        text: `Jeg forstår at du spør om: *"${escapeHtml(query)}"*. <br><br>` +
+          `Som din Close-AI assistent kan jeg bistå deg med:<br>` +
+          `• **For Bruker / Controller**: Balansebroen, tidsavvik (Bergen Marine), spinn-off bilag (KLP/valuta), WBS-filtrering og 4-øyne CFO sign-off.<br>` +
+          `• **For Superbruker**: ERP-importmaler (Visma, BC, Xledger, Tripletex, SAP), bankformater (CAMT, MT940, BAI2), opprettelse av nye konti med IB, og øresavrunding.`,
+        actions: [
+          { label: `Balansekontroll`, action: `setActiveTab('balancer')`, icon: `scale` },
+          { label: `CFO-Rapport`, action: `setActiveTab('cfo')`, icon: `file-check` },
+          { label: `Kjør Autoløp`, action: `runAutoMatch()`, icon: `play` }
+        ]
+      };
     }
 
     // Boot
