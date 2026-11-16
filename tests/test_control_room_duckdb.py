@@ -11,7 +11,20 @@ Validates:
 import os
 import unittest
 import duckdb
+from contextlib import contextmanager
 from fastapi.testclient import TestClient
+
+@contextmanager
+def get_db(db_path: str, read_only: bool = False):
+    con = duckdb.connect(db_path, read_only=read_only)
+    try:
+        yield con
+    finally:
+        try:
+            con.close()
+        except Exception:
+            pass
+
 
 from setup_duckdb import setup_databases
 from src.data_generator.nordea_generator import generate_nordea_dataset
@@ -39,7 +52,7 @@ class TestControlRoomDuckDB(unittest.TestCase):
 
     def test_02_account_nordea_setup(self):
         """Verifies account 1925 parameters in DuckDB."""
-        with duckdb.connect(MAIN_DB) as con:
+        with get_db(MAIN_DB, read_only=True) as con:
             acc = con.execute("SELECT account_id, ib_bank, ib_erp, rounding_tolerance FROM accounts WHERE account_id = '1925'").fetchone()
             self.assertIsNotNone(acc, "Konto 1925 må være opprettet")
             self.assertEqual(acc[1], 4850000.00, "IB Bank må være 4 850 000,00 NOK")
@@ -56,7 +69,7 @@ class TestControlRoomDuckDB(unittest.TestCase):
 
     def test_04_spinoff_items_present(self):
         """Verifies October bank fees and interest items exist in open items."""
-        with duckdb.connect(UNRECON_DB) as con:
+        with get_db(UNRECON_DB, read_only=False) as con:
             fees = con.execute("SELECT count(*) FROM open_bank_items WHERE tx_id IN ('BNK-2026-10-FEE', 'BNK-2026-10-INT')").fetchone()[0]
             self.assertEqual(fees, 2, "Begge spin-off poster for oktober (gebyr og rente) må ligge i uavstemte")
 
@@ -106,7 +119,7 @@ class TestControlRoomDuckDB(unittest.TestCase):
         self.assertEqual(m_res.json()["status"], "matched")
 
         # Verify item removed from open items
-        with duckdb.connect(UNRECON_DB) as con:
+        with get_db(UNRECON_DB, read_only=True) as con:
             cnt = con.execute("SELECT count(*) FROM open_bank_items WHERE tx_id = 'BNK-2025-998'").fetchone()[0]
             self.assertEqual(cnt, 0)
 
@@ -116,7 +129,7 @@ class TestControlRoomDuckDB(unittest.TestCase):
         self.assertEqual(u_res.json()["status"], "unmatched")
 
         # Verify item restored
-        with duckdb.connect(UNRECON_DB) as con:
+        with get_db(UNRECON_DB, read_only=True) as con:
             cnt = con.execute("SELECT count(*) FROM open_bank_items WHERE tx_id = 'BNK-2025-998'").fetchone()[0]
             self.assertEqual(cnt, 1)
 

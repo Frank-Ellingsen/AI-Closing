@@ -15,6 +15,19 @@ from fastapi.responses import JSONResponse, Response, FileResponse
 from pydantic import BaseModel
 import duckdb
 import pandas as pd
+from contextlib import contextmanager
+
+@contextmanager
+def get_db(db_path: str, read_only: bool = False):
+    con = duckdb.connect(db_path, read_only=read_only)
+    try:
+        yield con
+    finally:
+        try:
+            con.close()
+        except Exception:
+            pass
+
 
 app = FastAPI(
     title="CLOSE-AI & Financial Close Control Room API",
@@ -117,12 +130,12 @@ def serve_nordea_ui():
 def get_system_status():
     """Henter nøkkeltall og status på tvers av databasene"""
     try:
-        with duckdb.connect(MAIN_DB) as con:
+        with get_db(MAIN_DB) as con:
             acc_count = con.execute("SELECT count(*) FROM accounts").fetchone()[0]
-        with duckdb.connect(RECONCILED_DB) as con:
+        with get_db(RECONCILED_DB) as con:
             rec_count = con.execute("SELECT count(*) FROM reconciled").fetchone()[0]
             rec_sum = con.execute("SELECT coalesce(sum(amount), 0) FROM reconciled").fetchone()[0]
-        with duckdb.connect(UNRECONCILED_DB) as con:
+        with get_db(UNRECONCILED_DB) as con:
             open_bank_count = con.execute("SELECT count(*) FROM open_bank_items").fetchone()[0]
             open_erp_count = con.execute("SELECT count(*) FROM open_erp_items").fetchone()[0]
     except Exception as e:
@@ -143,14 +156,14 @@ def get_system_status():
 @app.get("/api/accounts")
 def list_accounts():
     """Henter alle konfigurerte avstemmingskonti"""
-    with duckdb.connect(MAIN_DB) as con:
+    with get_db(MAIN_DB) as con:
         df = con.execute("SELECT * FROM accounts").df()
     return df.to_dict(orient="records")
 
 
 @app.post("/api/accounts")
 def create_account(account: AccountCreate):
-    with duckdb.connect(MAIN_DB) as con:
+    with get_db(MAIN_DB) as con:
         con.execute("""
             INSERT OR REPLACE INTO accounts 
             (account_id, account_name, bank_iban, swift_bic, currency, ib_bank, ib_erp, rounding_tolerance)
@@ -162,8 +175,8 @@ def create_account(account: AccountCreate):
 
 @app.get("/api/reconciliation/balance-control")
 def get_balance_control(account_id: str = "1925", period: str = "2026-10"):
-    """Klassisk 4-delt Adra Balancer revisjonsmatrise med matematisk bro"""
-    with duckdb.connect(MAIN_DB) as con:
+    """Klassisk 4-delt AI Close Balancer revisjonsmatrise med matematisk bro"""
+    with get_db(MAIN_DB) as con:
         acc = con.execute("SELECT * FROM accounts WHERE account_id = ?", [account_id]).fetchone()
     
     if not acc:
@@ -172,7 +185,7 @@ def get_balance_control(account_id: str = "1925", period: str = "2026-10"):
     ib_bank = acc[5]
     ib_erp = acc[6]
 
-    with duckdb.connect(UNRECONCILED_DB) as con:
+    with get_db(UNRECONCILED_DB) as con:
         box1_sum = con.execute("""
             SELECT coalesce(sum(amount), 0) FROM open_bank_items 
             WHERE account_id = ? AND amount > 0
@@ -193,7 +206,7 @@ def get_balance_control(account_id: str = "1925", period: str = "2026-10"):
             WHERE account_id = ? AND amount < 0
         """, [account_id]).fetchone()[0]
 
-    with duckdb.connect(MAIN_DB) as con:
+    with get_db(MAIN_DB) as con:
         bank_moves = con.execute("SELECT coalesce(sum(amount), 0) FROM staging_bank WHERE account_id = ?", [account_id]).fetchone()[0]
         erp_moves = con.execute("SELECT coalesce(sum(amount), 0) FROM staging_erp WHERE account_id = ?", [account_id]).fetchone()[0]
 
@@ -224,7 +237,7 @@ def get_balance_control(account_id: str = "1925", period: str = "2026-10"):
 
 @app.get("/api/reconciliation/open-items")
 def get_open_items(account_id: str = "1925"):
-    with duckdb.connect(UNRECONCILED_DB) as con:
+    with get_db(UNRECONCILED_DB) as con:
         bank_items = con.execute("SELECT * FROM open_bank_items WHERE account_id = ?", [account_id]).df()
         erp_items = con.execute("SELECT * FROM open_erp_items WHERE account_id = ?", [account_id]).df()
     
@@ -236,14 +249,14 @@ def get_open_items(account_id: str = "1925"):
 
 @app.post("/api/reconciliation/match")
 def commit_match(match: MatchCommit):
-    with duckdb.connect(RECONCILED_DB) as con:
+    with get_db(RECONCILED_DB) as con:
         con.execute("""
             INSERT OR REPLACE INTO reconciled (match_id, account_id, bank_tx_id, erp_voucher_no, amount, rule_applied, difference, notes)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """, [match.match_id, match.account_id, match.bank_tx_id, match.erp_voucher_no,
               match.amount, match.rule_code, match.difference, match.notes])
     
-    with duckdb.connect(UNRECONCILED_DB) as con:
+    with get_db(UNRECONCILED_DB) as con:
         if match.bank_tx_id:
             con.execute("DELETE FROM open_bank_items WHERE tx_id = ?", [match.bank_tx_id])
         if match.erp_voucher_no:
@@ -254,7 +267,7 @@ def commit_match(match: MatchCommit):
 
 @app.post("/api/reconciliation/unmatch")
 def unmatch(match_id: str = Form(...)):
-    with duckdb.connect(RECONCILED_DB) as con:
+    with get_db(RECONCILED_DB) as con:
         row = con.execute("SELECT * FROM reconciled WHERE match_id = ?", [match_id]).fetchone()
         if not row:
             raise HTTPException(status_code=404, detail="Match ID ikke funnet")
@@ -265,7 +278,7 @@ def unmatch(match_id: str = Form(...)):
     amt = row[4]
     acc_id = row[1]
 
-    with duckdb.connect(UNRECONCILED_DB) as con:
+    with get_db(UNRECONCILED_DB) as con:
         if bank_tx_id:
             con.execute("""
                 INSERT OR IGNORE INTO open_bank_items (tx_id, account_id, tx_date, amount, text)
@@ -282,7 +295,7 @@ def unmatch(match_id: str = Form(...)):
 
 @app.get("/api/spinoff/proposals")
 def get_spinoff_proposals(account_id: str = "1925"):
-    with duckdb.connect(UNRECONCILED_DB) as con:
+    with get_db(UNRECONCILED_DB) as con:
         df = con.execute("""
             SELECT tx_id, tx_date, amount, text FROM open_bank_items
             WHERE account_id = ? AND (
@@ -318,16 +331,16 @@ def get_spinoff_proposals(account_id: str = "1925"):
 
 @app.post("/api/spinoff/commit")
 def commit_spinoff(voucher: SpinoffVoucher, bank_tx_id: str = Query(...)):
-    with duckdb.connect(RECONCILED_DB) as con:
+    with get_db(RECONCILED_DB) as con:
         con.execute("""
             INSERT OR REPLACE INTO reconciled (match_id, account_id, bank_tx_id, erp_voucher_no, amount, rule_applied, notes)
             VALUES (?, ?, ?, ?, ?, 'R-SPINOFF', ?)
         """, [voucher.voucher_id, voucher.account_id, bank_tx_id, voucher.voucher_id, -voucher.amount, voucher.description])
 
-    with duckdb.connect(UNRECONCILED_DB) as con:
+    with get_db(UNRECONCILED_DB) as con:
         con.execute("DELETE FROM open_bank_items WHERE tx_id = ?", [bank_tx_id])
 
-    with duckdb.connect(MAIN_DB) as con:
+    with get_db(MAIN_DB) as con:
         con.execute("""
             INSERT OR REPLACE INTO staging_erp (voucher_no, account_id, post_date, amount, text, invoice_no)
             VALUES (?, ?, CURRENT_DATE, ?, ?, 'AUTO-SPINOFF')
@@ -338,7 +351,7 @@ def commit_spinoff(voucher: SpinoffVoucher, bank_tx_id: str = Query(...)):
 
 @app.get("/api/export/erp-journal")
 def export_erp_journal(account_id: str = "1925"):
-    with duckdb.connect(RECONCILED_DB) as con:
+    with get_db(RECONCILED_DB) as con:
         df = con.execute("""
             SELECT match_id AS Bilagsnr, CURRENT_DATE AS Dato, 
                    '7770' AS DebetKonto, account_id AS KreditKonto, 
