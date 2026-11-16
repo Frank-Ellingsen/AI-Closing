@@ -133,7 +133,9 @@ if "posted_journals" not in st.session_state:
 if "period_locked" not in st.session_state:
     st.session_state.period_locked = initial_state.get("period_locked", False)
 if "audit_mgr" not in st.session_state:
-    st.session_state.audit_mgr = AuditManager(base_dir="data/audit_logs")
+    st.session_state.audit_mgr = AuditManager(
+        log_file=os.path.join("data", "audit_logs", "audit_log_2026_10.json")
+    )
 
 # Ensure base datasets exist
 if not os.path.exists(ERP_DIR):
@@ -517,12 +519,15 @@ def render_financial_controls_module():
                             "hash": hashlib.sha256(json.dumps(jv, sort_keys=True).encode()).hexdigest()[:16]
                         }
                         st.session_state.posted_journals.append(jv_entry)
-                        st.session_state.audit_mgr.log_action(
+                        st.session_state.audit_mgr.log_event(
                             event_type="JOURNAL_APPROVAL",
-                            operator={"name": controller_name, "role": controller_role},
+                            operator_name=controller_name,
+                            operator_role=controller_role,
+                            journal_id=jv_entry["journal_id"],
                             action_taken=f"Approved corrective journal {jv_entry['journal_id']} for {rule_id}",
-                            entity_ref=rule_id,
-                            evidence_payload=jv,
+                            investigation_id=dossier.get("investigation_id"),
+                            triggering_control=rule_id,
+                            financial_lines=jv.get("lines"),
                             justification_memo=f"Controller approved proposed adjustment for {rule_id}"
                         )
                         persist_workflow_state()
@@ -532,12 +537,14 @@ def render_financial_controls_module():
                 with col_btn2:
                     if st.button(f"🚩 Route to Dispute / Vendor Query ({rule_id})", key=f"disp_{rule_id}"):
                         st.session_state.disputed_items.add(rule_id)
-                        st.session_state.audit_mgr.log_action(
+                        st.session_state.audit_mgr.log_event(
                             event_type="DISPUTE_RAISED",
-                            operator={"name": controller_name, "role": controller_role},
+                            operator_name=controller_name,
+                            operator_role=controller_role,
                             action_taken=f"Routed {rule_id} to procurement inquiry",
-                            entity_ref=rule_id,
-                            evidence_payload=dossier,
+                            investigation_id=dossier.get("investigation_id"),
+                            triggering_control=rule_id,
+                            financial_lines=jv.get("lines") if jv else None,
                             justification_memo="Variance exceeds tolerance without valid subcontract change order."
                         )
                         persist_workflow_state()
