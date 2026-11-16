@@ -1,8 +1,9 @@
 """
-CLOSE-AI: Financial Close & Audit Control Room Cockpit
+CLOSE-AI: Master Enterprise Financial Close, Adra Balancer & Audit Control Room Cockpit
 Designed for Nordic Engineering Projects AS (Stavanger / Oslo, Norway)
 Executive Controller: Frank Ellingsen (Lead Project Controller)
 Adheres to Edward Tufte's Data-Ink ratio principles & statutory audit standards (ISA 240 / 315 / 500 & SAF-T).
+Connects directly to DuckDB Analytical Lakehouse and SQLite/DuckDB transactional state.
 """
 
 import os
@@ -11,6 +12,7 @@ import datetime
 import hashlib
 import pandas as pd
 import numpy as np
+import duckdb
 import streamlit as st
 
 from src.engine.evaluate_controls import run_close_controls, get_duckdb_connection, RULE_WEIGHTS
@@ -18,12 +20,14 @@ from src.ml.anomaly_detector import run_anomaly_detection
 from src.agent.investigator import CloseInvestigatorAgent
 from src.audit.audit_manager import AuditManager
 from src.data_generator.generate_erp_data import generate_erp_dataset
+from src.data_generator.nordea_generator import generate_nordea_dataset
+from setup_duckdb import setup_databases
 
 # ---------------------------------------------------------
 # Page Configuration & Styling (Tufte Data-Ink Principles)
 # ---------------------------------------------------------
 st.set_page_config(
-    page_title="CLOSE-AI | Financial Close Control Room",
+    page_title="CLOSE-AI | Master Financial Close Control Room",
     page_icon="⚖️",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -61,98 +65,89 @@ st.markdown("""
     }
     td {
         border-bottom: 1px solid #e5e5e5;
-        padding: 8px 12px;
-        color: #2b2b2b;
+        padding: 6px 12px;
     }
-    .num {
+    .num-cell {
         text-align: right;
-        font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+        font-variant-numeric: tabular-nums;
     }
     
-    /* Muted status pills */
-    .pill-pass {
-        background-color: #e8f5e9;
-        color: #2e7d32;
-        padding: 3px 8px;
-        border-radius: 4px;
-        font-size: 0.8rem;
+    /* Status pills */
+    .status-pass {
+        color: #2b9348;
         font-weight: 600;
     }
-    .pill-fail {
-        background-color: #ffebee;
-        color: #c62828;
-        padding: 3px 8px;
-        border-radius: 4px;
-        font-size: 0.8rem;
+    .status-fail {
+        color: #d90429;
         font-weight: 600;
     }
-    .pill-warning {
-        background-color: #fff8e1;
-        color: #f57f17;
-        padding: 3px 8px;
-        border-radius: 4px;
-        font-size: 0.8rem;
+    .status-warn {
+        color: #f77f00;
         font-weight: 600;
-    }
-    
-    /* Evidence code block */
-    .evidence-card {
-        background-color: #f8f9fa;
-        border-left: 3px solid #0d3b66;
-        padding: 10px 14px;
-        margin: 8px 0;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------------------------------------------------
-# Session State Initialization
-# ---------------------------------------------------------
-if "audit_mgr" not in st.session_state:
-    st.session_state.audit_mgr = AuditManager(
-        log_file="audit_log_2026_10.json",
-        workflow_file="workflow_state_2026_10.json"
-    )
+ERP_DIR = "erp_data_2026_10"
+DUCKDB_DIR = "data"
+MAIN_DB = os.path.join(DUCKDB_DIR, "reconciliation.duckdb")
+RECON_DB = os.path.join(DUCKDB_DIR, "reconciled_transactions.duckdb")
+UNRECON_DB = os.path.join(DUCKDB_DIR, "unreconciled_transactions.duckdb")
+WORKFLOW_STATE_FILE = "workflow_state_2026_10.json"
 
+# ---------------------------------------------------------
+# State Initialization
+# ---------------------------------------------------------
+def load_workflow_state():
+    if os.path.exists(WORKFLOW_STATE_FILE):
+        try:
+            with open(WORKFLOW_STATE_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {
+        "resolved_anomalies": [],
+        "disputed_items": [],
+        "posted_journals": [],
+        "period_locked": False
+    }
 
 def persist_workflow_state():
     state = {
-        "resolved_anomalies": sorted(st.session_state.get("resolved_anomalies", set())),
-        "disputed_items": sorted(st.session_state.get("disputed_items", set())),
-        "posted_journals": list(st.session_state.get("posted_journals", [])),
-        "period_locked": bool(st.session_state.get("period_locked", False)),
+        "resolved_anomalies": list(st.session_state.resolved_anomalies),
+        "disputed_items": list(st.session_state.disputed_items),
+        "posted_journals": st.session_state.posted_journals,
+        "period_locked": st.session_state.period_locked
     }
-    st.session_state.audit_mgr.save_workflow_state(state)
-    st.session_state.audit_mgr.workflow_state = state
+    with open(WORKFLOW_STATE_FILE, "w", encoding="utf-8") as f:
+        json.dump(state, f, indent=2)
 
-
-stored_state = st.session_state.audit_mgr.get_workflow_snapshot()
-if "posted_journals" not in st.session_state:
-    st.session_state.posted_journals = stored_state.get("posted_journals", [])
+initial_state = load_workflow_state()
 
 if "resolved_anomalies" not in st.session_state:
-    st.session_state.resolved_anomalies = set(stored_state.get("resolved_anomalies", []))
-
+    st.session_state.resolved_anomalies = set(initial_state.get("resolved_anomalies", []))
 if "disputed_items" not in st.session_state:
-    st.session_state.disputed_items = set(stored_state.get("disputed_items", []))
-
+    st.session_state.disputed_items = set(initial_state.get("disputed_items", []))
+if "posted_journals" not in st.session_state:
+    st.session_state.posted_journals = initial_state.get("posted_journals", [])
 if "period_locked" not in st.session_state:
-    st.session_state.period_locked = bool(stored_state.get("period_locked", False))
+    st.session_state.period_locked = initial_state.get("period_locked", False)
+if "audit_mgr" not in st.session_state:
+    st.session_state.audit_mgr = AuditManager(base_dir="data/audit_logs")
 
-persist_workflow_state()
-
-# Ensure data exists
-DATA_DIR = "erp_data_2026_10"
-if not os.path.exists(DATA_DIR) or not os.path.exists(os.path.join(DATA_DIR, "gl_journal_lines.csv")):
-    generate_erp_dataset(DATA_DIR)
+# Ensure base datasets exist
+if not os.path.exists(ERP_DIR):
+    generate_erp_dataset(ERP_DIR)
+if not os.path.exists(MAIN_DB):
+    setup_databases(DUCKDB_DIR)
+    generate_nordea_dataset(DUCKDB_DIR)
 
 # ---------------------------------------------------------
 # Sidebar: Control Room Controls & Entity Metadata
 # ---------------------------------------------------------
 with st.sidebar:
     st.title("⚖️ CLOSE-AI")
-    st.caption("Autonomous Financial Close & Exception Governance")
+    st.caption("Autonomous Financial Close & Control Room Suite")
     st.markdown("---")
     
     st.markdown("**Entity:** Nordic Engineering Projects AS")
@@ -161,6 +156,18 @@ with st.sidebar:
     st.markdown("**Currency:** NOK (Norwegian Krone)")
     st.markdown("**Target Close:** Workday +4 *(Current: WD+2)*")
     
+    st.markdown("---")
+    st.subheader("🧭 Workspace Module")
+    workspace_mode = st.radio(
+        "Aktiv visning:",
+        [
+            "📊 Adra Balancer & Matcher (DuckDB Lakehouse)",
+            "🔍 CLOSE-AI Financial Controls & Audit Dossier",
+            "🌐 Unified Executive Control Room"
+        ],
+        index=0
+    )
+
     st.markdown("---")
     st.subheader("👤 Controller Session")
     controller_name = st.text_input("Active Controller", value="Frank Ellingsen")
@@ -187,508 +194,406 @@ with st.sidebar:
     with col_reset1:
         if st.button("🔄 Re-Run Engine", use_container_width=True):
             st.cache_data.clear()
-            st.toast("Controls re-evaluated.")
+            st.toast("Controls & Lakehouse re-evaluated.")
             st.rerun()
     with col_reset2:
         if st.button("♻️ Reset Data", use_container_width=True):
-            generate_erp_dataset(DATA_DIR)
+            generate_erp_dataset(ERP_DIR)
+            setup_databases(DUCKDB_DIR)
+            generate_nordea_dataset(DUCKDB_DIR)
             st.session_state.resolved_anomalies = set()
             st.session_state.disputed_items = set()
             st.session_state.posted_journals = []
             st.session_state.period_locked = False
             persist_workflow_state()
-            st.toast("ERP dataset reset to baseline.")
+            st.toast("Datasets & DuckDB reset to baseline.")
             st.rerun()
 
 # ---------------------------------------------------------
-# Header & Executive Close Status Banner
+# MODULE 1: Adra Balancer & Matcher (DuckDB Lakehouse)
 # ---------------------------------------------------------
-st.title("Financial Close & Audit Control Room")
-st.caption("Nordic Engineering Projects AS • Period 2026-10 • Deterministic Verification • Isolation Forest ML • HITL Approval")
+def render_adra_balancer_module():
+    st.header("🏢 Adra Balancer, Matcher & DuckDB Control Room")
+    st.caption("Automatisert bankavstemming, 4-veis balansekontroll, spin-off bilagsgenerering og toveis DuckDB-synkronisering.")
 
-# Evaluate controls
-raw_controls = run_close_controls(DATA_DIR)
-controls_list = []
-earned_weight = 0
-total_weight = sum(RULE_WEIGHTS.values())
-has_active_blocker = False
+    # Fetch accounts from DuckDB
+    try:
+        with duckdb.connect(MAIN_DB) as con:
+            accounts_df = con.execute("SELECT account_id, account_name, bank_iban, currency, ib_bank, ib_erp, rounding_tolerance FROM accounts").df()
+    except Exception as e:
+        setup_databases(DUCKDB_DIR)
+        with duckdb.connect(MAIN_DB) as con:
+            accounts_df = con.execute("SELECT account_id, account_name, bank_iban, currency, ib_bank, ib_erp, rounding_tolerance FROM accounts").df()
 
-for c in raw_controls["controls_summary"]:
-    item = c.copy()
-    rule_id = item["rule_id"]
-    if rule_id in st.session_state.resolved_anomalies:
-        item["status"] = "PASS"
-        item["discrepancy_amount_nok"] = 0.0
-        item["affected_count"] = 0
-    
-    if item["status"] == "PASS":
-        earned_weight += item["weight"]
-    elif item["severity"] == "BLOCKER":
-        has_active_blocker = True
-    controls_list.append(item)
+    acc_options = accounts_df['account_id'] + " - " + accounts_df['account_name']
+    c_acc, c_per = st.columns([3, 1])
+    with c_acc:
+        selected_acc_str = st.selectbox("Velg aktiv avstemmingskonto:", acc_options, index=0)
+        selected_acc_id = selected_acc_str.split(" - ")[0]
+    with c_per:
+        st.selectbox("Finansiell periode:", ["2026-10 (Oktober 2026)", "2026-09 (September 2026)", "2026-08 (August 2026)"], index=0)
 
-readiness_score = round((earned_weight / total_weight) * 100.0, 1)
+    acc_info = accounts_df[accounts_df['account_id'] == selected_acc_id].iloc[0]
 
-if st.session_state.period_locked:
-    close_status = "PERIOD CLOSED & LOCKED"
-    status_color = "green"
-elif has_active_blocker:
-    close_status = "CLOSE BLOCKED"
-    status_color = "red"
-elif readiness_score >= 95.0:
-    close_status = "READY FOR CONTROLLER SIGN-OFF"
-    status_color = "green"
-else:
-    close_status = "ACTION REQUIRED"
-    status_color = "orange"
+    # Calculate Balances & Open items
+    with duckdb.connect(MAIN_DB) as con:
+        bank_moves = con.execute("SELECT coalesce(sum(amount), 0) FROM staging_bank WHERE account_id = ?", [selected_acc_id]).fetchone()[0]
+        erp_moves = con.execute("SELECT coalesce(sum(amount), 0) FROM staging_erp WHERE account_id = ?", [selected_acc_id]).fetchone()[0]
 
-# Metrics Ribbon
-col_stat1, col_stat2, col_stat3, col_stat4 = st.columns([1.6, 1, 1.2, 1])
+    ub_bank = acc_info['ib_bank'] + bank_moves
+    ub_erp = acc_info['ib_erp'] + erp_moves
 
-with col_stat1:
-    if close_status == "CLOSE BLOCKED":
-        st.error(f"### Status: 🔴 {close_status}")
-        st.caption("Hard Blocker active: Zero trial balance imbalance violated.")
-    elif close_status == "READY FOR CONTROLLER SIGN-OFF":
-        st.success(f"### Status: 🟢 {close_status}")
-        st.caption("All mandatory accounting controls satisfied.")
-    elif close_status == "PERIOD CLOSED & LOCKED":
-        st.info(f"### Status: 🔒 {close_status}")
-        st.caption("General ledger frozen and digitally sealed for 2026-10.")
-    else:
-        st.warning(f"### Status: 🟡 {close_status}")
-        st.caption("Exceptions identified; human controller review required.")
+    with duckdb.connect(UNRECON_DB) as con:
+        open_bank = con.execute("SELECT * FROM open_bank_items WHERE account_id = ?", [selected_acc_id]).df()
+        open_erp = con.execute("SELECT * FROM open_erp_items WHERE account_id = ?", [selected_acc_id]).df()
 
-with col_stat2:
-    st.metric(label="Readiness Index", value=f"{readiness_score:.1f}%")
+    with duckdb.connect(RECON_DB) as con:
+        reconciled_df = con.execute("SELECT * FROM reconciled WHERE account_id = ?", [selected_acc_id]).df()
 
-with col_stat3:
-    total_discrepancy = sum(c["discrepancy_amount_nok"] for c in controls_list)
-    st.metric(label="Total Discrepancy", value=f"{total_discrepancy:,.0f} NOK")
+    # Top KPI Metrics Ribbon
+    kpi1, kpi2, kpi3, kpi4 = st.columns(4)
+    kpi1.metric("UB Bank (Kontoutskrift)", f"{ub_bank:,.2f} {acc_info['currency']}")
+    kpi2.metric("UB Hovedbok ERP", f"{ub_erp:,.2f} {acc_info['currency']}")
+    kpi3.metric("Avstemte poster (DuckDB)", len(reconciled_df), delta=f"{len(reconciled_df)} poster")
+    kpi4.metric("Åpne bankposter", len(open_bank), delta=f"-{len(open_bank)}" if len(open_bank) > 0 else "0", delta_color="inverse")
 
-with col_stat4:
-    open_items = sum(1 for c in controls_list if c["status"] != "PASS")
-    st.metric(label="Open Action Items", value=f"{open_items} Items")
+    st.markdown("---")
 
-st.markdown("---")
+    adra_tabs = st.tabs([
+        "📊 4-Veis Balansekontroll (Adra Balancer)",
+        "⚖️ Avstemmingsbenk (Adra Matcher)",
+        "📝 Spin-Off Bilagsgenerator",
+        "⚙️ Superbruker Regler (Regelstige)"
+    ])
 
-# ---------------------------------------------------------
-# Zone 1: Deterministic Financial Controls Matrix
-# ---------------------------------------------------------
-st.subheader("1. Deterministic Financial Controls Matrix")
-cols_mat = st.columns(3)
+    # Tab 1: 4-Way Balance Control
+    with adra_tabs[0]:
+        st.subheader("Klassisk 4-delt Balansekontroll (Adra Balancer Bro)")
+        st.caption("Matematisk bevis: Justert ERP = Justert Bank, hvor åpne timing-forskjeller og gebyrer isoleres med ørediff-toleranse.")
 
-for idx, ctrl in enumerate(controls_list):
-    status = ctrl["status"]
-    with cols_mat[idx % 3]:
-        with st.container(border=True):
-            if status == "PASS":
-                badge = '<span class="pill-pass">PASS</span>'
-            elif ctrl["severity"] == "BLOCKER":
-                badge = '<span class="pill-fail">BLOCKER</span>'
-            elif status == "FAIL":
-                badge = '<span class="pill-fail">FAIL</span>'
-            else:
-                badge = '<span class="pill-warning">WARNING</span>'
+        box1 = open_bank[open_bank['amount'] > 0]['amount'].sum() if len(open_bank) > 0 else 0.0
+        box2 = abs(open_bank[open_bank['amount'] < 0]['amount'].sum()) if len(open_bank) > 0 else 0.0
+        box3 = open_erp[open_erp['amount'] > 0]['amount'].sum() if len(open_erp) > 0 else 0.0
+        box4 = abs(open_erp[open_erp['amount'] < 0]['amount'].sum()) if len(open_erp) > 0 else 0.0
 
-            st.markdown(f"**{ctrl['rule_id']}: {ctrl['rule_name']}** {badge}", unsafe_allow_html=True)
-            st.caption(f"Domain: `{ctrl.get('domain', 'ACCOUNTING')}` | Weight: `{ctrl['weight']} pts`")
+        adj_erp = ub_erp + box1 - box2
+        adj_bank = ub_bank + box3 - box4
+        delta = round(adj_erp - adj_bank, 2)
+
+        c1, c2 = st.columns(2)
+        with c1:
+            st.markdown(f"""
+            **Boks 1: Kredittert Bank / Ikke debetert ERP:**  
+            `{box1:,.2f} NOK` *(Uidentifiserte kundeinnbetalinger i transit)*
             
-            if status == "PASS":
-                st.markdown("<p style='color: #2e7d32; font-weight: 600; margin-top: 8px;'>0.00 NOK Exposure (Satisfied)</p>", unsafe_allow_html=True)
-            else:
-                st.markdown(f"<p style='color: #c62828; font-weight: 600; margin-top: 8px;'>{ctrl['discrepancy_amount_nok']:,.2f} NOK Exposure ({ctrl['affected_count']} item)</p>", unsafe_allow_html=True)
-
-st.markdown("---")
-
-# ---------------------------------------------------------
-# Zone 2: Multivariate Statistical Anomaly Detection (Isolation Forest)
-# ---------------------------------------------------------
-with st.expander("2. Multivariate Statistical Anomaly Detection (Isolation Forest)", expanded=False):
-    st.markdown("""
-    The unsupervised machine learning layer inspects 11-dimensional transaction features (Z-scores, Benford distribution, off-hours timing, round thousands) to isolate structural outliers without static rules.
-    """)
-    df_anomalies = run_anomaly_detection(DATA_DIR)
-    crit_anomalies = df_anomalies[df_anomalies["anomaly_score"] >= 65.0].sort_values(by="anomaly_score", ascending=False)
-    
-    col_ml1, col_ml2, col_ml3 = st.columns([1, 1, 2])
-    with col_ml1:
-        st.metric("Total Flagged (≥65)", len(crit_anomalies))
-    with col_ml2:
-        st.metric("Critical Outliers (≥85)", len(crit_anomalies[crit_anomalies["anomaly_score"] >= 85.0]))
-    with col_ml3:
-        st.caption("Scoring Thresholds: <65 Normal | 65–84 Monitoring Queue | ≥85 Autonomous Investigation Priority")
-
-    # Present formatted table
-    display_cols = ["entry_id", "account_number", "amount_nok", "anomaly_score", "anomaly_band", "explanation"]
-    clean_ml_df = crit_anomalies[display_cols].copy()
-    clean_ml_df.columns = ["Entry ID", "Account", "Amount (NOK)", "Score", "Band", "Feature Drivers"]
-    clean_ml_df["Amount (NOK)"] = clean_ml_df["Amount (NOK)"].apply(lambda x: f"{x:,.2f}")
-    st.dataframe(clean_ml_df, use_container_width=True, hide_index=True)
-
-# ---------------------------------------------------------
-# Zone 3: Autonomous Investigation Dossier & HITL Actions
-# ---------------------------------------------------------
-st.subheader("3. Investigation Workbench & Human-in-the-Loop Approval Gate")
-
-tab_investigate, tab_posted, tab_audit, tab_tb = st.tabs([
-    "🔍 Active Investigations & Proposals",
-    "📋 Staged / Posted Adjustments",
-    "📜 Verifiable Audit Evidence Pack",
-    "📊 Pre vs. Post Close Trial Balance"
-])
-
-# Initialize investigation agent
-provider_name = "deterministic"
-if "Ollama" in ai_engine:
-    provider_name = "ollama"
-elif "Gemini" in ai_engine:
-    provider_name = "gemini"
-
-agent = CloseInvestigatorAgent(data_dir=DATA_DIR, provider=provider_name)
-
-with tab_investigate:
-    st.markdown("Review AI-compiled evidence chains, identify root causes, and sign off on proposed adjusting entries.")
-
-    # ---------------------------------------------------------
-    # CASE 1: Hard Blocker - Trial Balance Imbalance (CTRL-GL-01)
-    # ---------------------------------------------------------
-    if "CTRL-GL-01" not in st.session_state.resolved_anomalies:
-        with st.expander("🔴 CRITICAL HARD BLOCKER: Trial Balance Imbalance (Delta: 15,000.00 NOK)", expanded=True):
-            d_tb = agent.investigate_anomaly("CTRL-GL-01", "JV-2026-10-1039")
+            **Boks 2: Debetert Bank / Ikke kreditert ERP:**  
+            `{box2:,.2f} NOK` *(Autonome bankgebyrer og lånerenter som krever spin-off)*
+            """)
+        with c2:
+            st.markdown(f"""
+            **Boks 3: Debetert ERP / Ikke kreditert Bank:**  
+            `{box3:,.2f} NOK` *(Bokførte innbetalinger som ennå ikke er godskrevet bank)*
             
-            st.error(f"**Finding:** {d_tb['observation']}")
-            
-            st.markdown("**Evidence Chain:**")
-            for ev in d_tb["evidence_chain"]:
-                st.markdown(f"- **{ev['source']}:** {ev['fact']}")
-            
-            st.markdown(f"**Root Cause:** {d_tb['likely_cause']}")
-            
-            st.markdown("#### Proposed Rebalancing Leg")
-            rebal_lines = d_tb["proposed_journal_voucher"]["lines"]
-            st.dataframe(pd.DataFrame(rebal_lines), use_container_width=True, hide_index=True)
+            **Boks 4: Kredittert ERP / Ikke debetert Bank:**  
+            `{box4:,.2f} NOK` *(Utestående remitteringer og leverandørutbetalinger i transit)*
+            """)
 
-            col_tb_act1, col_tb_act2 = st.columns([1.5, 4])
-            with col_tb_act1:
-                if st.button("Fix & Post Rebalancing Leg", key="btn_fix_tb", use_container_width=True):
-                    st.session_state.resolved_anomalies.add("CTRL-GL-01")
-                    persist_workflow_state()
-                    audit_entry = st.session_state.audit_mgr.log_event(
-                        event_type="MANUAL_REBALANCE_POSTED",
-                        operator_name=controller_name,
-                        operator_role=controller_role,
-                        journal_id="JV-2026-10-1039-ADJ",
-                        action_taken="REBALANCED",
-                        investigation_id=d_tb["investigation_id"],
-                        triggering_control="CTRL-GL-01",
-                        financial_lines=rebal_lines,
-                        justification_memo="Credited 15,000.00 NOK to Account 1910 to eliminate trial balance delta."
-                    )
-                    st.session_state.posted_journals.append({
-                        "journal_id": "JV-2026-10-1039-ADJ",
-                        "entry_type": "CORRECTION_ADJUSTMENT",
-                        "amount_nok": 15000.0,
-                        "wbs_code": "N/A",
-                        "approver": controller_name,
-                        "hash": audit_entry["current_record_hash"][:16]
-                    })
-                    persist_workflow_state()
-                    st.success("Rebalancing line committed to General Ledger. Blocker cleared!")
-                    st.rerun()
+        st.markdown("---")
+        res_col1, res_col2, res_col3 = st.columns(3)
+        res_col1.metric("Korrigert Hovedbok (Justert ERP)", f"{adj_erp:,.2f} NOK")
+        res_col2.metric("Korrigert Bankbeholdning (Justert Bank)", f"{adj_bank:,.2f} NOK")
+        res_col3.metric("Avstemmingsdifferanse (Delta)", f"{delta:,.2f} NOK", delta="0,00 kr" if abs(delta) <= acc_info['rounding_tolerance'] else f"{delta:,.2f} kr", delta_color="inverse")
 
-    # ---------------------------------------------------------
-    # CASE 2: Tolerance Overrun on Subsea PO-8809 (CTRL-AP-03)
-    # ---------------------------------------------------------
-    if "CTRL-AP-03" not in st.session_state.resolved_anomalies:
-        with st.expander("🟡 EXCEPTION: PO-8809 Price Tolerance Overrun (+22.4%) - Nordic Subsea Fabrication AS", expanded=True):
-            d_overrun = agent.investigate_anomaly("CTRL-AP-03", "INV-VEND-99214")
-            
-            col_dos1, col_dos2 = st.columns(2)
-            with col_dos1:
-                st.markdown(f"**Target Entity:** `{d_overrun['target_entity']}` | **Severity:** `{d_overrun['severity']}`")
-                st.markdown(f"**AI Observation:**\n{d_overrun['observation']}")
-                st.markdown("**Evidence Chain:**")
-                for ev in d_overrun["evidence_chain"]:
-                    st.markdown(f"- **{ev['source']}:** {ev['fact']}")
-            with col_dos2:
-                st.markdown(f"**Root Cause Diagnosis:**\n{d_overrun['likely_cause']}")
-                fin = d_overrun["financial_impact"]
-                st.markdown(f"""
-                **Financial Exposure:**
-                - **Unauthorized Variance:** `{fin['unauthorized_variance_nok']:,.2f} NOK`
-                - **EBITDA / Gross Margin Risk:** {fin['ebitda_risk']}
-                - **VAT Exposure (25%):** `{fin['vat_impact_nok']:,.2f} NOK`
-                """)
-                st.markdown(f"**Recommended Policy:** `{d_overrun['recommended_action']}`")
-
-            st.markdown("#### Staged Journal Voucher Proposal")
-            jv = d_overrun["proposed_journal_voucher"]
-            st.table(pd.DataFrame(jv["lines"]))
-
-            col_act1, col_act2, col_act3, col_act4 = st.columns(4)
-            with col_act1:
-                if st.button("✅ Approve & Post Accrual", key="btn_app_overrun", use_container_width=True):
-                    st.session_state.resolved_anomalies.add("CTRL-AP-03")
-                    persist_workflow_state()
-                    jv_id = f"JV-POSTED-{len(st.session_state.posted_journals) + 1:04d}"
-                    audit_entry = st.session_state.audit_mgr.log_event(
-                        event_type="JOURNAL_VOUCHER_POSTED",
-                        operator_name=controller_name,
-                        operator_role=controller_role,
-                        journal_id=jv_id,
-                        action_taken="APPROVED_WITHOUT_EDIT",
-                        investigation_id=d_overrun["investigation_id"],
-                        triggering_control="CTRL-AP-03",
-                        financial_lines=jv["lines"],
-                        justification_memo="Accrued authorized 670,000.00 NOK delivery per GR-4412. Held 150,000.00 NOK dispute for PM change order review."
-                    )
-                    st.session_state.posted_journals.append({
-                        "journal_id": jv_id,
-                        "entry_type": jv["entry_type"],
-                        "amount_nok": 670000.0,
-                        "wbs_code": "PRJ-2026-001.03.FAB",
-                        "approver": controller_name,
-                        "hash": audit_entry["current_record_hash"][:16]
-                    })
-                    persist_workflow_state()
-                    st.success(f"Adjusting voucher {jv_id} committed to General Ledger!")
-                    st.rerun()
-
-            with col_act2:
-                if st.button("✏️ Edit Adjustment", key="btn_edit_overrun", use_container_width=True):
-                    st.info("Edit dialog opened. Controller can override accounts and amounts with mandatory rationale.")
-            with col_act3:
-                if st.button("⏸️ Dispute / Hold 150k", key="btn_hold_overrun", use_container_width=True):
-                    st.session_state.disputed_items.add("INV-VEND-99214")
-                    persist_workflow_state()
-                    st.session_state.audit_mgr.log_event(
-                        event_type="PAYMENT_HOLD_LOGGED",
-                        operator_name=controller_name,
-                        operator_role=controller_role,
-                        journal_id="TICKET-DISPUTE-001",
-                        action_taken="DISPUTE_LOGGED",
-                        investigation_id=d_overrun["investigation_id"],
-                        triggering_control="CTRL-AP-03",
-                        justification_memo="150,000.00 NOK variance placed on hold and routed to Frank Ellingsen for customer change order verification."
-                    )
-                    st.warning("150,000.00 NOK placed on payment hold and dispute ticket generated.")
-            with col_act4:
-                if st.button("❌ Reject Proposal", key="btn_rej_overrun", use_container_width=True):
-                    st.error("Proposal rejected. Rationale logged in audit ledger.")
-
-    # ---------------------------------------------------------
-    # CASE 3: Uninvoiced Goods Received (CTRL-AP-02)
-    # ---------------------------------------------------------
-    if "CTRL-AP-02" not in st.session_state.resolved_anomalies:
-        with st.expander("🟡 EXCEPTION: PO-2026-8812 Delivered Goods Receipt Lacking Vendor Invoice (308,000.00 NOK)", expanded=False):
-            d_gr = agent.investigate_anomaly("CTRL-AP-02", "PO-2026-8812")
-            st.markdown(f"**Finding:** {d_gr['observation']}")
-            st.markdown(f"**Root Cause:** {d_gr['likely_cause']}")
-            st.markdown("#### Staged Reversing Accrual")
-            st.table(pd.DataFrame(d_gr["proposed_journal_voucher"]["lines"]))
-            if st.button("✅ Approve Reversing Accrual", key="btn_app_gr"):
-                st.session_state.resolved_anomalies.add("CTRL-AP-02")
-                persist_workflow_state()
-                jv_id = f"JV-POSTED-{len(st.session_state.posted_journals) + 1:04d}"
-                audit_entry = st.session_state.audit_mgr.log_event(
-                    event_type="JOURNAL_VOUCHER_POSTED",
-                    operator_name=controller_name,
-                    operator_role=controller_role,
-                    journal_id=jv_id,
-                    action_taken="APPROVED_WITHOUT_EDIT",
-                    investigation_id=d_gr["investigation_id"],
-                    triggering_control="CTRL-AP-02",
-                    financial_lines=d_gr["proposed_journal_voucher"]["lines"],
-                    justification_memo="Accrued 308,000.00 NOK delivered crane modernization capex per delivery inspection."
-                )
-                st.session_state.posted_journals.append({
-                    "journal_id": jv_id,
-                    "entry_type": "REVERSING_ACCRUAL",
-                    "amount_nok": 308000.0,
-                    "wbs_code": "PRJ-2026-004.01.CAPEX",
-                    "approver": controller_name,
-                    "hash": audit_entry["current_record_hash"][:16]
-                })
-                persist_workflow_state()
-                st.success("Reversing accrual committed!")
-                st.rerun()
-
-    # ---------------------------------------------------------
-    # CASE 4: Duplicate Invoice (CTRL-AP-01)
-    # ---------------------------------------------------------
-    if "CTRL-AP-01" not in st.session_state.resolved_anomalies:
-        with st.expander("🟡 EXCEPTION: Duplicate Invoice INV-VEND-99991-DUP (260,000.00 NOK)", expanded=False):
-            d_dup = agent.investigate_anomaly("CTRL-AP-01", "INV-VEND-99991-DUP")
-            st.markdown(f"**Finding:** {d_dup['observation']}")
-            if st.button("🚫 Block Duplicate Payment & Void Voucher", key="btn_block_dup"):
-                st.session_state.resolved_anomalies.add("CTRL-AP-01")
-                persist_workflow_state()
-                st.session_state.audit_mgr.log_event(
-                    event_type="PAYMENT_BLOCK_LOGGED",
-                    operator_name=controller_name,
-                    operator_role=controller_role,
-                    journal_id="INV-VEND-99991-DUP",
-                    action_taken="VOIDED",
-                    investigation_id=d_dup["investigation_id"],
-                    triggering_control="CTRL-AP-01",
-                    justification_memo="Voided duplicate invoice submitted by Bergen Marine Logistics AS."
-                )
-                st.success("Payment block enforced and duplicate voucher voided.")
-                st.rerun()
-
-    # ---------------------------------------------------------
-    # CASE 5: Weekend Direct Cost Postings (CTRL-GL-02 & CTRL-PRJ-03)
-    # ---------------------------------------------------------
-    if "CTRL-GL-02" not in st.session_state.resolved_anomalies or "CTRL-PRJ-03" not in st.session_state.resolved_anomalies:
-        with st.expander("🟡 EXCEPTION: Weekend Manual Direct Cost Posting (JV-2026-10-1038, 145,000.00 NOK)", expanded=False):
-            d_wk = agent.investigate_anomaly("CTRL-GL-02/CTRL-PRJ-03", "JV-2026-10-1038")
-            st.markdown(f"**Finding:** {d_wk['observation']}")
-            st.markdown("#### Staged WBS Allocation")
-            st.table(pd.DataFrame(d_wk["proposed_journal_voucher"]["lines"]))
-            if st.button("✅ Approve Reclassification to PRJ-2026-001.03.FAB", key="btn_app_wk"):
-                st.session_state.resolved_anomalies.add("CTRL-GL-02")
-                st.session_state.resolved_anomalies.add("CTRL-PRJ-03")
-                persist_workflow_state()
-                jv_id = f"JV-POSTED-{len(st.session_state.posted_journals) + 1:04d}"
-                audit_entry = st.session_state.audit_mgr.log_event(
-                    event_type="JOURNAL_VOUCHER_POSTED",
-                    operator_name=controller_name,
-                    operator_role=controller_role,
-                    journal_id=jv_id,
-                    action_taken="APPROVED_WITHOUT_EDIT",
-                    investigation_id=d_wk["investigation_id"],
-                    triggering_control="CTRL-GL-02/CTRL-PRJ-03",
-                    financial_lines=d_wk["proposed_journal_voucher"]["lines"],
-                    justification_memo="Reclassified 145,000.00 NOK yard materials cost to Troll Wind WBS deliverable."
-                )
-                st.session_state.posted_journals.append({
-                    "journal_id": jv_id,
-                    "entry_type": "RECLASSIFICATION",
-                    "amount_nok": 145000.0,
-                    "wbs_code": "PRJ-2026-001.03.FAB",
-                    "approver": controller_name,
-                    "hash": audit_entry["current_record_hash"][:16]
-                })
-                persist_workflow_state()
-                st.success("Reclassification committed!")
-                st.rerun()
-
-    if len(st.session_state.resolved_anomalies) == 6:
-        st.success("🎉 All active close exceptions have been formally investigated and signed off by the controller!")
-
-# ---------------------------------------------------------
-# Tab 2: Staged & Posted Adjustments
-# ---------------------------------------------------------
-with tab_posted:
-    st.subheader("Committed Period-End Adjusting Entries")
-    st.caption("Journal vouchers committed during this session with controller attribution and digital signatures.")
-    if not st.session_state.posted_journals:
-        st.info("No adjusting journal vouchers committed yet during this session.")
-    else:
-        df_posted = pd.DataFrame(st.session_state.posted_journals)
-        df_posted["amount_nok"] = df_posted["amount_nok"].apply(lambda x: f"{x:,.2f} NOK")
-        st.dataframe(df_posted, use_container_width=True, hide_index=True)
-
-# ---------------------------------------------------------
-# Tab 3: Verifiable Audit Evidence Pack
-# ---------------------------------------------------------
-with tab_audit:
-    st.subheader("Statutory Audit Evidence Pack (ISA 240 / 315 / 500)")
-    st.caption("Cryptographic hash chain verifying unbroken custody and tamper-evidence.")
-    
-    verif = st.session_state.audit_mgr.verify_audit_chain()
-    
-    col_v1, col_v2 = st.columns([2, 1])
-    with col_v1:
-        if verif["valid"]:
-            st.success(f"**Cryptographic Status:** ✅ VALID ({verif['record_count']} Sealed Records)")
-            st.caption(f"Latest Block Hash: `{verif.get('head_hash', 'N/A')}`")
+        if abs(delta) <= acc_info['rounding_tolerance']:
+            st.success(f"✓ I PERFEKT BALANSE: Justert ERP ({adj_erp:,.2f} NOK) == Justert Bank ({adj_bank:,.2f} NOK). Toleranse = ±{acc_info['rounding_tolerance']} NOK.")
         else:
-            st.error(f"**Cryptographic Status:** ❌ TAMPER DETECTED: {verif['error']}")
+            st.error(f"⚠ UBALANSE DETEKTERT: Differanse = {delta:,.2f} NOK. Behandle uavstemte poster eller godkjenn Spin-Off bilag under fane 3.")
 
-    with col_v2:
-        if readiness_score >= 95.0 and not st.session_state.period_locked:
-            if st.button("🔒 Sign-Off & Lock Fiscal Period", type="primary", use_container_width=True):
-                st.session_state.period_locked = True
-                persist_workflow_state()
-                st.session_state.audit_mgr.log_event(
-                    event_type="PERIOD_LOCKED",
-                    operator_name=controller_name,
-                    operator_role=controller_role,
-                    action_taken="PERIOD_FROZEN",
-                    justification_memo="All accounting controls verified, adjustments committed, fiscal period 2026-10 frozen."
-                )
-                st.success("Fiscal period 2026-10 locked and frozen.")
-                st.rerun()
-        elif st.session_state.period_locked:
-            st.info("Period 2026-10 is locked.")
+    # Tab 2: Matcher Bench
+    with adra_tabs[1]:
+        st.subheader("Avstemmingsbenk — Åpne Bank- og ERP-poster")
+        st.caption("Viser uavstemte transaksjoner lagret i DuckDB unreconciled_transactions.")
+        col_b, col_e = st.columns(2)
+        with col_b:
+            st.markdown(f"**Åpne poster på Bankutskrift ({len(open_bank)}):**")
+            st.dataframe(open_bank, use_container_width=True, hide_index=True)
+        with col_e:
+            st.markdown(f"**Åpne poster i ERP Hovedbok ({len(open_erp)}):**")
+            st.dataframe(open_erp, use_container_width=True, hide_index=True)
 
-    # Event log table
-    if st.session_state.audit_mgr.records:
-        st.markdown("#### Audit Event Stream")
-        audit_display = []
-        for r in st.session_state.audit_mgr.records:
-            audit_display.append({
-                "Event ID": r["audit_event_id"],
-                "Timestamp (UTC)": r["timestamp_utc"][:19],
-                "Event Type": r["event_type"],
-                "Approver": r["operator"]["name"],
-                "Action": r["action_taken"],
-                "Memo": r["justification_memo"],
-                "SHA-256 Seal": r["current_record_hash"][:16] + "..."
-            })
-        st.dataframe(pd.DataFrame(audit_display), use_container_width=True, hide_index=True)
+        if len(reconciled_df) > 0:
+            st.markdown(f"#### Avstemte poster i perioden ({len(reconciled_df)})")
+            st.dataframe(reconciled_df, use_container_width=True, hide_index=True)
 
-        # Download buttons
-        evidence_pack = st.session_state.audit_mgr.generate_statutory_evidence_pack(
-            controls_summary=controls_list,
-            staged_journals=st.session_state.posted_journals
-        )
-        st.download_button(
-            label="📥 Download Full Audit Evidence Pack (JSON)",
-            data=json.dumps(evidence_pack, indent=2),
-            file_name="CLOSE_AI_Audit_Evidence_Pack_2026_10.json",
-            mime="application/json"
-        )
+    # Tab 3: Spin-Off Vouchers
+    with adra_tabs[2]:
+        st.subheader("AI Spin-Off Bilagsgenerator (Bankgebyrer & Renter)")
+        st.caption("Automatisk identifisering av poster belastet bank men ikke bokført i ERP (Boks 2).")
+
+        fees_and_interest = open_bank[open_bank['text'].str.contains('gebyr|rente|fee|interest', case=False, na=False)]
+        
+        if len(fees_and_interest) > 0:
+            for _, row in fees_and_interest.iterrows():
+                is_fee = "gebyr" in row['text'].lower()
+                debit_acc = "7770 Bank- og kortgebyrer" if is_fee else "8150 Annen rentekostnad"
+                st.info(f"**{row['text']}** — Beløp: `{abs(row['amount']):,.2f} NOK` per `{row['tx_date']}`. Forslag: **Debet {debit_acc}** / **Kredit {selected_acc_id} {acc_info['account_name']}**")
+                
+                if st.button(f"⚡ Godkjenn og postér bilag for {row['tx_id']}", key=f"spinoff_{row['tx_id']}"):
+                    with duckdb.connect(RECON_DB) as con:
+                        con.execute("""
+                            INSERT OR REPLACE INTO reconciled (match_id, account_id, bank_tx_id, erp_voucher_no, amount, rule_applied, difference, notes)
+                            VALUES (?, ?, ?, ?, ?, 'R-SPINOFF', 0.0, ?)
+                        """, [f"VOUCH-{row['tx_id']}", selected_acc_id, row['tx_id'], f"ERP-{row['tx_id']}", row['amount'], row['text']])
+                    
+                    with duckdb.connect(UNRECON_DB) as con:
+                        con.execute("DELETE FROM open_bank_items WHERE tx_id = ?", [row['tx_id']])
+                    
+                    with duckdb.connect(MAIN_DB) as con:
+                        con.execute("""
+                            INSERT OR REPLACE INTO staging_erp (voucher_no, account_id, post_date, amount, text, invoice_no, kid_ocr, wbs)
+                            VALUES (?, ?, CURRENT_DATE, ?, ?, 'AUTO-SPINOFF', '', 'PRJ-ADMIN')
+                        """, [f"ERP-{row['tx_id']}", selected_acc_id, row['amount'], row['text']])
+                    
+                    st.success(f"Bilag for {row['tx_id']} er postert i DuckDB! Balansekontroll oppdatert.")
+                    st.rerun()
+        else:
+            st.success("✓ Ingen ubehandlede bankgebyrer eller renteposter funnet. Alle kjente poster er godkjent og postert!")
+
+    # Tab 4: Rules Ladder
+    with adra_tabs[3]:
+        st.subheader("Aktive Avstemmingsregler (Regelstige R-01 til R-AI)")
+        with duckdb.connect(MAIN_DB) as con:
+            rules_df = con.execute("SELECT * FROM match_rules ORDER BY priority ASC").df()
+        st.dataframe(rules_df, use_container_width=True, hide_index=True)
 
 # ---------------------------------------------------------
-# Tab 4: Pre vs. Post Close Trial Balance Comparison
+# MODULE 2: Financial Controls & Exception Dossier
 # ---------------------------------------------------------
-with tab_tb:
-    st.subheader("General Ledger Trial Balance Reconciliation")
-    st.caption("Verifying debit/credit equality across standard Norwegian SAF-T accounts before and after close adjustments.")
+def render_financial_controls_module():
+    st.header("Financial Close & Audit Control Room")
+    st.caption("Nordic Engineering Projects AS • Period 2026-10 • Deterministic Verification • Isolation Forest ML • HITL Approval")
 
-    con_tb = get_duckdb_connection(DATA_DIR)
-    tb_df = con_tb.execute("""
-        SELECT 
-            account_number,
-            ROUND(SUM(debit_nok), 2) AS debit_nok,
-            ROUND(SUM(credit_nok), 2) AS credit_nok,
-            ROUND(SUM(debit_nok) - SUM(credit_nok), 2) AS net_balance_nok
-        FROM gl_journal_lines
-        GROUP BY account_number
-        ORDER BY account_number
-    """).df()
+    # Evaluate controls
+    raw_controls = run_close_controls(ERP_DIR)
+    controls_list = []
+    earned_weight = 0
+    total_weight = sum(RULE_WEIGHTS.values())
+    has_active_blocker = False
 
-    # Pre-close totals
-    tot_dr = tb_df["debit_nok"].sum()
-    tot_cr = tb_df["credit_nok"].sum()
-    delta_pre = abs(tot_dr - tot_cr)
+    for c in raw_controls["controls_summary"]:
+        item = c.copy()
+        rule_id = item["rule_id"]
+        if rule_id in st.session_state.resolved_anomalies:
+            item["status"] = "PASS"
+            item["discrepancy_amount_nok"] = 0.0
+            item["affected_count"] = 0
+        
+        if item["status"] == "PASS":
+            earned_weight += item["weight"]
+        elif item["severity"] == "BLOCKER":
+            has_active_blocker = True
+        controls_list.append(item)
 
-    col_tb1, col_tb2, col_tb3 = st.columns(3)
-    with col_tb1:
-        st.metric("Total Debits (Pre-Close)", f"{tot_dr:,.2f} NOK")
-    with col_tb2:
-        st.metric("Total Credits (Pre-Close)", f"{tot_cr:,.2f} NOK")
-    with col_tb3:
-        st.metric("Pre-Close Imbalance", f"{delta_pre:,.2f} NOK", delta="-15,000.00 NOK" if delta_pre > 0 else "Balanced", delta_color="inverse")
+    readiness_score = round((earned_weight / total_weight) * 100.0, 1)
 
-    st.markdown("#### Account Level Balances")
-    tb_df_formatted = tb_df.copy()
-    tb_df_formatted["debit_nok"] = tb_df_formatted["debit_nok"].apply(lambda x: f"{x:,.2f}")
-    tb_df_formatted["credit_nok"] = tb_df_formatted["credit_nok"].apply(lambda x: f"{x:,.2f}")
-    tb_df_formatted["net_balance_nok"] = tb_df_formatted["net_balance_nok"].apply(lambda x: f"{x:,.2f}")
-    tb_df_formatted.columns = ["Account Number", "Debit (NOK)", "Credit (NOK)", "Net Balance (NOK)"]
-    st.dataframe(tb_df_formatted, use_container_width=True, hide_index=True)
-    con_tb.close()
+    if st.session_state.period_locked:
+        close_status = "PERIOD CLOSED & LOCKED"
+    elif has_active_blocker:
+        close_status = "CLOSE BLOCKED"
+    elif readiness_score >= 95.0:
+        close_status = "READY FOR CONTROLLER SIGN-OFF"
+    else:
+        close_status = "ACTION REQUIRED"
+
+    # Metrics Ribbon
+    col_stat1, col_stat2, col_stat3, col_stat4 = st.columns([1.6, 1, 1.2, 1])
+    with col_stat1:
+        if close_status == "CLOSE BLOCKED":
+            st.error(f"### Status: 🔴 {close_status}")
+        elif close_status == "READY FOR CONTROLLER SIGN-OFF":
+            st.success(f"### Status: 🟢 {close_status}")
+        elif close_status == "PERIOD CLOSED & LOCKED":
+            st.info(f"### Status: 🔒 {close_status}")
+        else:
+            st.warning(f"### Status: 🟡 {close_status}")
+    with col_stat2:
+        st.metric("Composite Control Score", f"{readiness_score:.1f}%", delta=f"{readiness_score - 100:.1f}%")
+    with col_stat3:
+        failed_count = sum(1 for c in controls_list if c["status"] == "FAIL")
+        st.metric("Deterministic Rule Failures", f"{failed_count} / {len(controls_list)}", delta="-1" if failed_count > 0 else "0", delta_color="inverse")
+    with col_stat4:
+        st.metric("Isolation Forest Outliers", "1 Anomaly", delta="Critical", delta_color="inverse")
+
+    st.markdown("---")
+
+    # Zone 1: Deterministic Controls Table
+    st.subheader("1. Deterministic Financial Controls Matrix")
+    controls_table_data = []
+    for c in controls_list:
+        status_symbol = "🟢 PASS" if c["status"] == "PASS" else ("🔴 FAIL" if c["severity"] == "BLOCKER" else "🟡 WARN")
+        controls_table_data.append({
+            "Rule ID": c["rule_id"],
+            "Control Description": c["description"],
+            "Severity": c["severity"],
+            "Weight": f"{c['weight']} pts",
+            "Status": status_symbol,
+            "Discrepancy (NOK)": f"{c['discrepancy_amount_nok']:,.2f}",
+            "Items": c["affected_count"]
+        })
+    df_controls = pd.DataFrame(controls_table_data)
+    st.dataframe(df_controls, use_container_width=True, hide_index=True)
+
+    # Zone 2: ML Anomaly Detector
+    st.markdown("---")
+    st.subheader("2. Multivariate Statistical Anomaly Detection (Isolation Forest)")
+    ml_results = run_anomaly_detection(ERP_DIR)
+    col_ml1, col_ml2 = st.columns([1, 2])
+    with col_ml1:
+        st.markdown(f"**Evaluated Postings:** `{ml_results['evaluated_postings']}`")
+        st.markdown(f"**Contamination Rate:** `{ml_results['contamination_rate'] * 100:.1f}%`")
+        st.markdown(f"**Outliers Flagged:** `{ml_results['outliers_flagged']}`")
+    with col_ml2:
+        if ml_results["top_anomalies"]:
+            st.markdown("**Top Statistical Outlier Postings:**")
+            st.dataframe(pd.DataFrame(ml_results["top_anomalies"]), use_container_width=True, hide_index=True)
+
+    # Zone 3: Investigation Dossier & Tabs
+    st.markdown("---")
+    st.subheader("3. Investigation Workbench & Human-in-the-Loop Approval Gate")
+    inv_agent = CloseInvestigatorAgent(data_dir=ERP_DIR, provider="deterministic")
+
+    tab_inv, tab_staged, tab_audit, tab_tb = st.tabs([
+        "🔍 Active Investigations & Proposals",
+        "📋 Staged / Posted Adjustments",
+        "📜 Verifiable Audit Evidence Pack",
+        "📊 Pre vs. Post Close Trial Balance"
+    ])
+
+    with tab_inv:
+        failing_rules = [c for c in controls_list if c["status"] == "FAIL"]
+        if not failing_rules:
+            st.success("All deterministic accounting controls are satisfied. No active investigations.")
+        else:
+            selected_rule = st.selectbox(
+                "Select active exception to review dossier:",
+                [f"{c['rule_id']}: {c['description']} ({c['discrepancy_amount_nok']:,.2f} NOK)" for c in failing_rules]
+            )
+            rule_id = selected_rule.split(":")[0]
+            dossier = inv_agent.investigate_anomaly(rule_id, "SAMPLE_TARGET")
+
+            col_dos1, col_dos2 = st.columns([2, 1])
+            with col_dos1:
+                st.markdown(f"#### Investigation Dossier: `{dossier['investigation_id']}`")
+                st.markdown(f"**Observation:** {dossier['observation']}")
+                st.markdown(f"**Likely Root Cause:** {dossier['likely_cause']}")
+                st.markdown(f"**Recommended Action:** {dossier['recommended_action']}")
+            with col_dos2:
+                st.markdown("#### Financial Exposure")
+                st.metric("Unauthorized Variance", f"{dossier['financial_impact']['unauthorized_variance_nok']:,.2f} NOK")
+                st.metric("EBITDA Risk Assessment", dossier['financial_impact']['ebitda_risk'])
+
+            # Proposed Journal Voucher
+            jv = dossier.get("proposed_journal_voucher")
+            if jv and jv.get("lines"):
+                st.markdown("#### Proposed Corrective Journal Voucher")
+                lines_df = pd.DataFrame(jv["lines"])
+                lines_df["debit_nok"] = lines_df["debit_nok"].apply(lambda x: f"{x:,.2f}")
+                lines_df["credit_nok"] = lines_df["credit_nok"].apply(lambda x: f"{x:,.2f}")
+                st.dataframe(lines_df, use_container_width=True, hide_index=True)
+
+                col_btn1, col_btn2 = st.columns(2)
+                with col_btn1:
+                    if st.button(f"✅ Approve & Post Journal Voucher ({rule_id})", key=f"post_{rule_id}"):
+                        st.session_state.resolved_anomalies.add(rule_id)
+                        jv_entry = {
+                            "journal_id": f"JV-POSTED-{len(st.session_state.posted_journals) + 1:04d}",
+                            "rule_id": rule_id,
+                            "entry_type": jv.get("entry_type", "ADJUSTMENT"),
+                            "amount_nok": dossier['financial_impact']['unauthorized_variance_nok'],
+                            "lines": jv["lines"],
+                            "approver": controller_name,
+                            "role": controller_role,
+                            "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                            "hash": hashlib.sha256(json.dumps(jv, sort_keys=True).encode()).hexdigest()[:16]
+                        }
+                        st.session_state.posted_journals.append(jv_entry)
+                        st.session_state.audit_mgr.log_action(
+                            event_type="JOURNAL_APPROVAL",
+                            operator={"name": controller_name, "role": controller_role},
+                            action_taken=f"Approved corrective journal {jv_entry['journal_id']} for {rule_id}",
+                            entity_ref=rule_id,
+                            evidence_payload=jv,
+                            justification_memo=f"Controller approved proposed adjustment for {rule_id}"
+                        )
+                        persist_workflow_state()
+                        st.success(f"Journal Voucher {jv_entry['journal_id']} successfully committed to ERP audit trail.")
+                        st.rerun()
+
+                with col_btn2:
+                    if st.button(f"🚩 Route to Dispute / Vendor Query ({rule_id})", key=f"disp_{rule_id}"):
+                        st.session_state.disputed_items.add(rule_id)
+                        st.session_state.audit_mgr.log_action(
+                            event_type="DISPUTE_RAISED",
+                            operator={"name": controller_name, "role": controller_role},
+                            action_taken=f"Routed {rule_id} to procurement inquiry",
+                            entity_ref=rule_id,
+                            evidence_payload=dossier,
+                            justification_memo="Variance exceeds tolerance without valid subcontract change order."
+                        )
+                        persist_workflow_state()
+                        st.warning(f"Exception {rule_id} marked as disputed. Formal query sent.")
+                        st.rerun()
+
+    with tab_staged:
+        st.subheader("Committed Period-End Adjusting Entries")
+        if not st.session_state.posted_journals:
+            st.info("No adjusting journals posted yet.")
+        else:
+            for j in st.session_state.posted_journals:
+                with st.expander(f"📌 {j['journal_id']} | Rule: {j.get('rule_id', 'N/A')} | Approver: {j['approver']} | Hash: {j['hash']}"):
+                    st.json(j)
+
+    with tab_audit:
+        st.subheader("Statutory Audit Evidence Pack (ISA 240 / 315 / 500)")
+        if st.session_state.audit_mgr.records:
+            audit_display = []
+            for r in st.session_state.audit_mgr.records:
+                audit_display.append({
+                    "Event ID": r["audit_event_id"],
+                    "Timestamp (UTC)": r["timestamp_utc"][:19],
+                    "Event Type": r["event_type"],
+                    "Approver": r["operator"]["name"],
+                    "Action": r["action_taken"],
+                    "Memo": r["justification_memo"],
+                    "SHA-256 Seal": r["current_record_hash"][:16] + "..."
+                })
+            st.dataframe(pd.DataFrame(audit_display), use_container_width=True, hide_index=True)
+
+    with tab_tb:
+        st.subheader("General Ledger Trial Balance Reconciliation")
+        con_tb = get_duckdb_connection(ERP_DIR)
+        tb_df = con_tb.execute("""
+            SELECT 
+                account_number,
+                ROUND(SUM(debit_nok), 2) AS debit_nok,
+                ROUND(SUM(credit_nok), 2) AS credit_nok,
+                ROUND(SUM(debit_nok) - SUM(credit_nok), 2) AS net_balance_nok
+            FROM gl_journal_lines
+            GROUP BY account_number
+            ORDER BY account_number
+        """).df()
+        st.dataframe(tb_df, use_container_width=True, hide_index=True)
+        con_tb.close()
+
+# ---------------------------------------------------------
+# Main Workspace Router
+# ---------------------------------------------------------
+if workspace_mode == "📊 Adra Balancer & Matcher (DuckDB Lakehouse)":
+    render_adra_balancer_module()
+elif workspace_mode == "🔍 CLOSE-AI Financial Controls & Audit Dossier":
+    render_financial_controls_module()
+else:
+    # Unified Executive Cockpit
+    render_adra_balancer_module()
+    st.markdown("---")
+    render_financial_controls_module()

@@ -1,0 +1,17 @@
+{
+  "resolved_anomalies": [
+    "CTRL-AP-03"
+  ],
+  "disputed_items": [],
+  "posted_journals": [
+    {
+      "journal_id": "JV-POSTED-0001",
+      "entry_type": "PERIOD_END_ACCRUAL",
+      "amount_nok": 670000.0,
+      "wbs_code": "PRJ-2026-001.03.FAB",
+      "approver": "Frank Ellingsen",
+      "hash": "e66fc698e4831f69"
+    }
+  ],
+  "period_locked": false
+}

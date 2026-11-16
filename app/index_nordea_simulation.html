@@ -1,0 +1,3076 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="artifact-type" content="dashboard">
+  <meta name="design-style" content="carbon">
+  <title>AI Closer — Kontrollrom for 1925 Nordea Driftskonto NOK</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@1.43.0/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      color-scheme: light;
+
+      /* Carbon surfaces & ink */
+      --background: #ffffff;
+      --surface-container-low: #f4f4f4;
+      --surface-container: #f4f4f4;
+      --surface-container-high: #e0e0e0;
+
+      --on-surface: #161616;
+      --on-surface-variant: #525252;
+
+      /* Rules */
+      --outline: #8d8d8d;
+      --outline-variant: #e0e0e0;
+
+      /* Carbon primary & data series */
+      --primary: #0f62fe;
+      --primary-hover: #0353e9;
+      --on-primary: #ffffff;
+      --primary-container: #d0e2ff;
+      --on-primary-container: #161616;
+      --secondary: #6f6f6f;
+      --tertiary: #198038;
+      --error: #da1e28;
+      --on-error: #ffffff;
+
+      --data-1: #0f62fe;
+      --data-2: #6929c4;
+      --data-3: #005d5d;
+      --data-4: #9f1853;
+      --data-context: #8d8d8d;
+
+      /* Semantic */
+      --positive: #0d652d;
+      --warning: #8a4b00;
+      --focus: #0f62fe;
+
+      /* Soft RAG + Skiferblå (default mode, WCAG AA compliant) */
+      --rag-emerald-bg: #e6f4ea;
+      --rag-emerald-fg: #0d652d;
+      --rag-emerald-border: #1e8e3e;
+
+      --rag-amber-bg: #fef3dc;
+      --rag-amber-fg: #8a4b00;
+      --rag-amber-border: #c77700;
+
+      --rag-coral-bg: #fdeceb;
+      --rag-coral-fg: #a61b1b;
+      --rag-coral-border: #d9383a;
+
+      --rag-slate-bg: #e8f0fe;
+      --rag-slate-fg: #1b4b72;
+      --rag-slate-border: #2c6aa0;
+
+      /* Colorblind-safe Okabe-Ito tokens */
+      --cb-emerald-bg: #e0f2fe;
+      --cb-emerald-fg: #00507d;
+      --cb-emerald-border: #0072b2;
+
+      --cb-amber-bg: #fff4d6;
+      --cb-amber-fg: #7a4900;
+      --cb-amber-border: #b26b00;
+
+      --cb-coral-bg: #fce8f0;
+      --cb-coral-fg: #8f1d4b;
+      --cb-coral-border: #a02c5d;
+
+      --cb-slate-bg: #ececff;
+      --cb-slate-fg: #2b2b7a;
+      --cb-slate-border: #3b3b98;
+
+      /* Active RAG tokens (switched by data-cb-mode) */
+      --st-emerald-bg: var(--rag-emerald-bg);
+      --st-emerald-fg: var(--rag-emerald-fg);
+      --st-emerald-border: var(--rag-emerald-border);
+
+      --st-amber-bg: var(--rag-amber-bg);
+      --st-amber-fg: var(--rag-amber-fg);
+      --st-amber-border: var(--rag-amber-border);
+
+      --st-coral-bg: var(--rag-coral-bg);
+      --st-coral-fg: var(--rag-coral-fg);
+      --st-coral-border: var(--rag-coral-border);
+
+      --st-slate-bg: var(--rag-slate-bg);
+      --st-slate-fg: var(--rag-slate-fg);
+      --st-slate-border: var(--rag-slate-border);
+
+      /* Fonts */
+      --font-headline: 'IBM Plex Sans', sans-serif;
+      --font-body: 'IBM Plex Sans', sans-serif;
+      --font-label: 'IBM Plex Mono', monospace;
+
+      /* Type scale (Dashboard) */
+      --display-size: clamp(1.65rem, 1.3rem + 1.1vw, 2.15rem);
+      --headline-size: clamp(1.2rem, 1.05rem + 0.45vw, 1.45rem);
+      --subhead-size: clamp(1rem, 0.95rem + 0.25vw, 1.15rem);
+      --body-size: clamp(0.875rem, 0.85rem + 0.15vw, 0.95rem);
+      --label-size: 0.75rem;
+
+      /* Shape & effects */
+      --rounded: 0.125rem;
+      --rounded-lg: 0.25rem;
+      --rounded-full: 0.75rem;
+      --shadow-1: 0 2px 6px rgb(0 0 0 / 0.1);
+      --shadow-2: 0 4px 12px rgb(0 0 0 / 0.14);
+      --rule: 1px solid var(--outline-variant);
+      --field-rule: 1px solid var(--outline);
+      --indicator: 2px solid var(--primary);
+      --scrim: rgb(22 22 22 / 0.45);
+
+      /* Spacing scale (4pt base) */
+      --space-xs: 0.25rem;
+      --space-sm: 0.5rem;
+      --space-md: 1rem;
+      --space-lg: 1.5rem;
+      --space-xl: 2.5rem;
+      --space-2xl: 4rem;
+
+      /* Motion */
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+      --dur-micro: 120ms;
+      --dur-short: 220ms;
+    }
+
+    [data-cb-mode="true"] {
+      --st-emerald-bg: var(--cb-emerald-bg);
+      --st-emerald-fg: var(--cb-emerald-fg);
+      --st-emerald-border: var(--cb-emerald-border);
+
+      --st-amber-bg: var(--cb-amber-bg);
+      --st-amber-fg: var(--cb-amber-fg);
+      --st-amber-border: var(--cb-amber-border);
+
+      --st-coral-bg: var(--cb-coral-bg);
+      --st-coral-fg: var(--cb-coral-fg);
+      --st-coral-border: var(--cb-coral-border);
+
+      --st-slate-bg: var(--cb-slate-bg);
+      --st-slate-fg: var(--cb-slate-fg);
+      --st-slate-border: var(--cb-slate-border);
+    }
+
+    /* Base reset */
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+      overflow-x: clip;
+      margin: 0;
+      padding: 0;
+      background: var(--background);
+      color: var(--on-surface);
+      font-family: var(--font-body);
+      font-size: var(--body-size);
+      line-height: 1.5;
+    }
+    header { position: static !important; }
+    button, input, select, textarea { font-family: inherit; }
+
+    /* Focus rings */
+    :focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    /* Main shell */
+    .app-shell {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: var(--space-lg);
+      display: grid;
+      gap: var(--space-lg);
+    }
+    .app-shell * { min-width: 0; }
+
+    /* Typography */
+    .mono-label {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--on-surface-variant);
+      font-weight: 500;
+    }
+    .mono-num {
+      font-family: var(--font-label);
+      font-variant-numeric: tabular-nums;
+    }
+    .headline-display {
+      font-family: var(--font-headline);
+      font-size: var(--display-size);
+      font-weight: 300;
+      line-height: 1.15;
+      margin: 0;
+    }
+    .headline-display strong { font-weight: 600; }
+    .section-title {
+      font-family: var(--font-headline);
+      font-size: var(--headline-size);
+      font-weight: 300;
+      line-height: 1.25;
+      margin: 0;
+    }
+    .section-title strong { font-weight: 600; }
+    .subhead {
+      font-size: var(--subhead-size);
+      font-weight: 600;
+      margin: 0;
+    }
+    .helper-text {
+      font-size: var(--label-size);
+      color: var(--on-surface-variant);
+      margin: 0;
+    }
+
+    /* Header */
+    .topbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: var(--space-md);
+      padding-bottom: var(--space-md);
+      border-bottom: var(--rule);
+    }
+    .topbar-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm) var(--space-lg);
+      margin-top: var(--space-xs);
+      font-size: var(--label-size);
+      color: var(--on-surface-variant);
+      font-family: var(--font-label);
+    }
+    .topbar-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+      align-items: center;
+    }
+
+    /* Buttons (Carbon square corners, 44px touch target min) */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+      min-height: 44px;
+      padding: var(--space-xs) var(--space-md);
+      border: 1px solid transparent;
+      border-radius: 0;
+      font-size: var(--body-size);
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+      text-align: left;
+      white-space: nowrap;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: var(--on-primary);
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: var(--primary-hover);
+    }
+    .btn-secondary {
+      background: var(--background);
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+    .btn-secondary:hover:not(:disabled) {
+      background: var(--primary-container);
+      color: var(--on-primary-container);
+    }
+    .btn-ghost {
+      background: var(--surface-container);
+      color: var(--on-surface);
+      border-color: var(--outline-variant);
+    }
+    .btn-ghost:hover:not(:disabled) {
+      background: var(--surface-container-high);
+    }
+    .btn-danger {
+      background: var(--st-coral-bg);
+      color: var(--st-coral-fg);
+      border-color: var(--st-coral-border);
+    }
+    .btn-danger:hover:not(:disabled) {
+      background: var(--surface-container-high);
+    }
+    .btn-sm {
+      min-height: 36px;
+      padding: var(--space-xs) var(--space-sm);
+      font-size: var(--label-size);
+    }
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    /* Double-coded Soft RAG Status Badges */
+    .rag-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.18rem 0.55rem;
+      font-family: var(--font-label);
+      font-size: 0.75rem;
+      font-weight: 500;
+      border-radius: var(--rounded-full);
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+    .rag-emerald {
+      background: var(--st-emerald-bg);
+      color: var(--st-emerald-fg);
+      border-color: var(--st-emerald-border);
+    }
+    .rag-amber {
+      background: var(--st-amber-bg);
+      color: var(--st-amber-fg);
+      border-color: var(--st-amber-border);
+    }
+    .rag-coral {
+      background: var(--st-coral-bg);
+      color: var(--st-coral-fg);
+      border-color: var(--st-coral-border);
+    }
+    .rag-slate {
+      background: var(--st-slate-bg);
+      color: var(--st-slate-fg);
+      border-color: var(--st-slate-border);
+    }
+    [data-cb-mode="true"] .rag-amber { border-style: dashed; }
+    [data-cb-mode="true"] .rag-coral { border-width: 2px; }
+    [data-cb-mode="true"] .rag-slate { border-style: dotted; border-width: 2px; }
+
+    /* Period Selector Strip (10 months) */
+    .period-strip-wrap {
+      background: var(--surface-container);
+      padding: var(--space-md);
+      display: grid;
+      gap: var(--space-sm);
+    }
+    .period-strip-head {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    .period-grid {
+      display: grid;
+      grid-template-columns: repeat(10, minmax(0, 1fr));
+      gap: var(--space-xs);
+    }
+    .period-btn {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      padding: var(--space-sm);
+      background: var(--background);
+      border: 1px solid var(--outline-variant);
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      text-align: left;
+      min-height: 44px;
+      transition: background-color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
+    }
+    .period-btn:hover {
+      background: var(--surface-container-high);
+    }
+    .period-btn.is-selected {
+      background: var(--primary-container);
+      border-color: var(--primary);
+      border-bottom: 3px solid var(--primary);
+    }
+    .period-btn-month {
+      font-family: var(--font-label);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--on-surface);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 2px;
+    }
+    .period-btn-ub {
+      font-family: var(--font-label);
+      font-size: 0.75rem;
+      color: var(--on-surface-variant);
+    }
+    .period-btn-status {
+      font-family: var(--font-label);
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    /* KPI Tiles */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: var(--space-md);
+    }
+    .kpi-tile {
+      background: var(--surface-container);
+      padding: var(--space-md);
+      display: grid;
+      gap: var(--space-xs);
+      align-content: space-between;
+    }
+    .kpi-tile.is-primary {
+      border-bottom: var(--indicator);
+    }
+    .kpi-value {
+      font-family: var(--font-label);
+      font-weight: 300;
+      font-size: clamp(1.35rem, 1.1rem + 0.9vw, 1.85rem);
+      line-height: 1.15;
+      color: var(--on-surface);
+    }
+    .kpi-foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-sm);
+      flex-wrap: wrap;
+    }
+
+    /* Carbon Tabs */
+    .tab-bar {
+      display: flex;
+      flex-wrap: wrap;
+      border-bottom: var(--rule);
+      gap: var(--space-xs);
+    }
+    .tab-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+      min-height: 44px;
+      padding: var(--space-sm) var(--space-md);
+      background: transparent;
+      border: 0;
+      border-bottom: 2px solid transparent;
+      color: var(--on-surface-variant);
+      font-size: var(--body-size);
+      font-weight: 400;
+      cursor: pointer;
+      transition: color var(--dur-micro) var(--ease-out), background-color var(--dur-micro) var(--ease-out);
+    }
+    .tab-btn:hover {
+      background: var(--surface-container);
+      color: var(--on-surface);
+    }
+    .tab-btn.is-active {
+      color: var(--on-surface);
+      font-weight: 600;
+      border-bottom: var(--indicator);
+    }
+    .tab-count {
+      font-family: var(--font-label);
+      font-size: 0.75rem;
+      padding: 0.1rem 0.45rem;
+      border-radius: var(--rounded-full);
+      background: var(--surface-container-high);
+      color: var(--on-surface);
+    }
+    .tab-count.has-alert {
+      background: var(--st-coral-bg);
+      color: var(--st-coral-fg);
+    }
+    .tab-panel { display: none; gap: var(--space-lg); }
+    .tab-panel.is-active { display: grid; }
+
+    /* Layers & Sections */
+    .layer {
+      background: var(--surface-container);
+      padding: var(--space-md);
+      display: grid;
+      gap: var(--space-md);
+    }
+    .layer-white {
+      background: var(--background);
+      border: var(--rule);
+      padding: var(--space-md);
+      display: grid;
+      gap: var(--space-md);
+    }
+    .layer .layer-nested {
+      background: var(--surface-container-high);
+      padding: var(--space-md);
+    }
+    .section-head {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: var(--space-sm);
+      padding-bottom: var(--space-sm);
+      border-bottom: var(--rule);
+    }
+
+    /* Split Grids */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-lg);
+    }
+    .grid-asym {
+      display: grid;
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      gap: var(--space-lg);
+    }
+
+    /* Notification Strip */
+    .notice-strip {
+      background: var(--surface-container);
+      padding: var(--space-md);
+      border-left: 4px solid var(--primary);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-md);
+    }
+    .notice-strip.is-coral { border-left-color: var(--st-coral-border); background: var(--st-coral-bg); }
+    .notice-strip.is-emerald { border-left-color: var(--st-emerald-border); background: var(--st-emerald-bg); }
+    .notice-strip.is-amber { border-left-color: var(--st-amber-border); background: var(--st-amber-bg); }
+
+    /* Tables */
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      border: var(--rule);
+      background: var(--background);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+    thead th {
+      background: var(--surface-container-high);
+      font-family: var(--font-label);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--on-surface);
+      text-align: left;
+      padding: 0.65rem 0.75rem;
+      border-bottom: var(--rule);
+      white-space: nowrap;
+    }
+    thead th.num, tbody td.num, tfoot td.num { text-align: right; }
+    tbody td {
+      padding: 0.6rem 0.75rem;
+      border-bottom: var(--rule);
+      vertical-align: middle;
+    }
+    tbody tr:nth-child(even) { background: var(--surface-container-low); }
+    tbody tr:hover { background: var(--primary-container); }
+    tbody tr.is-row-open { background: var(--st-coral-bg); }
+    tbody tr.is-row-spinoff { background: var(--st-slate-bg); }
+    tfoot td {
+      padding: 0.65rem 0.75rem;
+      font-weight: 600;
+      background: var(--surface-container);
+      border-top: 2px solid var(--outline);
+    }
+
+    /* 4-Box Bank Reconciliation Matrix */
+    .matrix-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-md);
+    }
+    .matrix-box {
+      background: var(--background);
+      border: var(--rule);
+      padding: var(--space-md);
+      display: grid;
+      gap: var(--space-sm);
+      align-content: start;
+    }
+    .matrix-box.has-items {
+      border-left: 4px solid var(--st-coral-border);
+    }
+    .matrix-box.is-clear {
+      border-left: 4px solid var(--st-emerald-border);
+    }
+    .matrix-item {
+      padding: var(--space-sm);
+      background: var(--surface-container);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-sm);
+      font-size: 0.825rem;
+    }
+
+    /* Form Controls */
+    .field-group {
+      display: grid;
+      gap: 0.25rem;
+    }
+    .field-group label {
+      font-family: var(--font-label);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--on-surface-variant);
+    }
+    .input-ctrl, .select-ctrl, .textarea-ctrl {
+      min-height: 40px;
+      padding: 0.45rem 0.75rem;
+      background: var(--surface-container);
+      border: 0;
+      border-bottom: var(--field-rule);
+      border-radius: 0;
+      color: var(--on-surface);
+      font-size: var(--body-size);
+      width: 100%;
+    }
+    .select-ctrl { padding-right: 2rem; }
+    .textarea-ctrl { min-height: 110px; font-family: var(--font-label); font-size: 0.8rem; }
+    .controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-md);
+      align-items: end;
+    }
+
+    /* Charts */
+    .chart-box {
+      position: relative;
+      min-height: 290px;
+      width: 100%;
+      background: var(--background);
+      border: var(--rule);
+      padding: var(--space-md);
+    }
+    .chart-canvas-wrap {
+      position: relative;
+      min-height: 230px;
+      height: 230px;
+      width: 100%;
+    }
+
+    /* Spin-Off Voucher Cards */
+    .voucher-card {
+      background: var(--background);
+      border: var(--rule);
+      padding: var(--space-md);
+      display: grid;
+      gap: var(--space-md);
+    }
+    .voucher-card.is-approved {
+      border-left: 4px solid var(--st-slate-border);
+    }
+    .voucher-card.is-draft {
+      border-left: 4px solid var(--st-amber-border);
+    }
+
+    /* Code Export Preview */
+    .code-preview {
+      background: var(--surface-container-low);
+      border: var(--rule);
+      padding: var(--space-md);
+      font-family: var(--font-label);
+      font-size: 0.78rem;
+      line-height: 1.5;
+      overflow-x: auto;
+      max-height: 320px;
+      white-space: pre;
+      margin: 0;
+    }
+
+    /* AI Closer Copilot Drawer */
+    .copilot-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      height: 100vh;
+      width: min(440px, 100vw);
+      background: var(--background);
+      border-left: 2px solid var(--on-surface);
+      box-shadow: var(--shadow-2);
+      z-index: 50;
+      display: none;
+      flex-direction: column;
+    }
+    .copilot-drawer.is-open { display: flex; }
+    .copilot-head {
+      padding: var(--space-md);
+      background: var(--surface-container);
+      border-bottom: var(--rule);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    .copilot-messages {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      padding: var(--space-md);
+      display: grid;
+      gap: var(--space-sm);
+      align-content: start;
+    }
+    .chat-msg {
+      padding: var(--space-sm) var(--space-md);
+      border: var(--rule);
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+    .chat-msg.is-ai {
+      background: var(--surface-container);
+      border-left: 3px solid var(--primary);
+    }
+    .chat-msg.is-user {
+      background: var(--primary-container);
+      color: var(--on-primary-container);
+      margin-left: var(--space-lg);
+    }
+    .copilot-prompts {
+      padding: var(--space-sm) var(--space-md);
+      border-top: var(--rule);
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-xs);
+      background: var(--surface-container-low);
+    }
+    .copilot-form {
+      padding: var(--space-md);
+      border-top: var(--rule);
+      display: flex;
+      gap: var(--space-sm);
+      align-items: end;
+    }
+
+    /* Inline toast */
+    .toast-banner {
+      padding: var(--space-sm) var(--space-md);
+      background: var(--st-slate-bg);
+      color: var(--st-slate-fg);
+      border-left: 4px solid var(--st-slate-border);
+      font-size: 0.85rem;
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-md);
+    }
+    .toast-banner.is-visible { display: flex; }
+
+    /* Responsive Breakpoints */
+    @media (max-width: 1100px) {
+      .period-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+      .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid-2, .grid-asym, .matrix-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .app-shell { padding: var(--space-sm); gap: var(--space-md); }
+      .period-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .kpi-grid { grid-template-columns: 1fr; }
+      .topbar-actions { width: 100%; }
+      .btn { width: 100%; justify-content: space-between; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell" id="app-root" data-cb-mode="false">
+    <!-- Top Header -->
+    <header class="topbar">
+      <div>
+        <div class="mono-label">AI CLOSER · FINANCIAL CLOSE &amp; ADRA MATCHER CONTROL ROOM</div>
+        <h1 class="headline-display">Kontrollrom for <strong>1925 Nordea Driftskonto NOK</strong></h1>
+        <div class="topbar-meta">
+          <span>Selskap: Nordic Engineering Projects AS (Org.nr 984 210 552)</span>
+          <span>Kontonr: 1503.44.82910</span>
+          <span>Datasett: 01.01.2026 – 31.10.2026</span>
+          <span>Motor: Adra Multi-Way + Spin-Off Engine</span>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button type="button" class="btn btn-ghost" id="btn-cb-toggle" onclick="toggleColorblindMode()" aria-pressed="false">
+          <i data-lucide="eye" aria-hidden="true"></i>
+          <span id="cb-toggle-label">Fargeblind-modus: Av (Soft RAG)</span>
+        </button>
+        <button type="button" class="btn btn-secondary" onclick="toggleCopilot()">
+          <i data-lucide="bot" aria-hidden="true"></i>
+          <span>AI Closer Copilot</span>
+        </button>
+        <button type="button" class="btn btn-ghost" id="btn-reset-session" onclick="handleResetSession(this)">
+          <i data-lucide="rotate-ccw" aria-hidden="true"></i>
+          <span>Tilbakestill økt</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Live Status Toast -->
+    <div class="toast-banner" id="toast-banner" role="status" aria-live="polite">
+      <span id="toast-text">Klar.</span>
+      <button type="button" class="btn btn-sm btn-ghost" onclick="hideToast()">Lukk</button>
+    </div>
+
+    <!-- 10-Month Period Selector -->
+    <section class="period-strip-wrap" aria-label="Periodevelger Januar til Oktober 2026">
+      <div class="period-strip-head">
+        <div>
+          <div class="mono-label">Periodevelger 2026 (10 måneder)</div>
+          <p class="helper-text">Velg måned for å inspisere historisk saldobalanse, avstemmingsgrad, close-hastighet og transaksjonsdetaljer. Fokusperiode er 31.10.2026.</p>
+        </div>
+        <div class="mono-label" id="selected-period-badge">Aktiv periode: Oktober 2026 (31.10.2026)</div>
+      </div>
+      <div class="period-grid" id="period-grid"></div>
+    </section>
+
+    <!-- Headline KPI Strip -->
+    <section class="kpi-grid" aria-label="Nøkkeltall for valgt periode">
+      <div class="kpi-tile is-primary">
+        <div class="mono-label">Avstemmingsgrad &amp; Status</div>
+        <div class="kpi-value mono-num" id="kpi-match-rate">87,5%</div>
+        <div class="kpi-foot">
+          <span id="kpi-match-badge"></span>
+          <span class="helper-text" id="kpi-open-count">2 åpne poster</span>
+        </div>
+      </div>
+      <div class="kpi-tile">
+        <div class="mono-label">UB Bank — Nordea (1503.44.82910)</div>
+        <div class="kpi-value mono-num" id="kpi-ub-bank">3 391 300,00 kr</div>
+        <div class="kpi-foot">
+          <span class="helper-text mono-num" id="kpi-ib-bank">IB: 2 840 000,00 kr</span>
+        </div>
+      </div>
+      <div class="kpi-tile">
+        <div class="mono-label">UB ERP — Hovedbok (Konto 1925)</div>
+        <div class="kpi-value mono-num" id="kpi-ub-erp">3 412 500,00 kr</div>
+        <div class="kpi-foot">
+          <span class="helper-text mono-num" id="kpi-spinoff-count">0 Spin-Off bilag bokført</span>
+        </div>
+      </div>
+      <div class="kpi-tile">
+        <div class="mono-label">Avstemmingsdifferanse (Bank − ERP)</div>
+        <div class="kpi-value mono-num" id="kpi-diff">-21 200,00 kr</div>
+        <div class="kpi-foot">
+          <span id="kpi-diff-badge"></span>
+          <span class="helper-text" id="kpi-close-speed">Close: WD+2</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Action Alert for October 2026 -->
+    <div id="october-action-banner" class="notice-strip is-coral">
+      <div>
+        <strong id="banner-title">2 ubokførte banklinjer per 31.10.2026 (−21 200,00 NOK) funnet i Boks 2</strong>
+        <p class="helper-text" id="banner-desc">Nordea Kontohold &amp; Transaksjonsgebyr (−2 450,00 kr) og Betalte renter (−18 750,00 kr) mangler i ERP. AI-agenten har klargjort 2 balanserte Spin-Off bilag med 99% tillit.</p>
+      </div>
+      <div style="display:flex; gap:var(--space-sm); flex-wrap:wrap;">
+        <button type="button" class="btn btn-primary btn-sm" id="banner-cta-btn" onclick="switchTab('spinoff')">
+          <i data-lucide="sparkles" aria-hidden="true"></i>
+          <span>Åpne Bilagsgenerator (Spin-Off)</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Carbon Navigation Tabs -->
+    <nav class="tab-bar" role="tablist" aria-label="Moduler i kontrollrommet">
+      <button type="button" class="tab-btn is-active" role="tab" aria-selected="true" data-tab="overview" onclick="switchTab('overview')">
+        <i data-lucide="layout-dashboard" aria-hidden="true"></i>
+        <span>Balansekontroll &amp; 4-delt Matrise</span>
+      </button>
+      <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="workbench" onclick="switchTab('workbench')">
+        <i data-lucide="git-compare" aria-hidden="true"></i>
+        <span>Adra Matcher Workbench</span>
+        <span class="tab-count has-alert" id="badge-open-workbench">2</span>
+      </button>
+      <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="spinoff" onclick="switchTab('spinoff')">
+        <i data-lucide="file-plus-2" aria-hidden="true"></i>
+        <span>Bilagsgenerator (Spin-Off)</span>
+        <span class="tab-count has-alert" id="badge-spinoff-drafts">2</span>
+      </button>
+      <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="rules" onclick="switchTab('rules')">
+        <i data-lucide="sliders-horizontal" aria-hidden="true"></i>
+        <span>Regelbygger &amp; Kontoadm.</span>
+      </button>
+      <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="import" onclick="switchTab('import')">
+        <i data-lucide="upload" aria-hidden="true"></i>
+        <span>Import Studio (Nordea ↔ ERP)</span>
+      </button>
+    </nav>
+
+    <!-- TAB 1: BALANSEKONTROLL, 4-DELT MATRISE & HISTORIKK -->
+    <section class="tab-panel is-active" id="panel-overview" role="tabpanel">
+      <!-- Deterministic Balance Check + 4-Box Matrix -->
+      <div class="grid-asym">
+        <!-- Deterministic IB + Movements = UB -->
+        <div class="layer-white">
+          <div class="section-head">
+            <div>
+              <div class="mono-label">Deterministisk Balansekontroll</div>
+              <h2 class="section-title"><strong>IB + Bevegelser = UB</strong> (<span id="bal-period-label">Oktober 2026</span>)</h2>
+            </div>
+            <span id="bal-status-pill"></span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Regnskapslinje (Konto 1925)</th>
+                  <th class="num">Nordea Bankutskrift</th>
+                  <th class="num">ERP Hovedbok (1925)</th>
+                  <th class="num">Differanse (Bank − ERP)</th>
+                </tr>
+              </thead>
+              <tbody id="balance-check-body"></tbody>
+            </table>
+          </div>
+          <div class="layer-nested">
+            <div class="mono-label">Kontrollformel &amp; Sporbarhet</div>
+            <p class="helper-text" id="balance-proof-text" style="margin-top:0.25rem;"></p>
+          </div>
+        </div>
+
+        <!-- 4-Box Bank Reconciliation Matrix -->
+        <div class="layer-white">
+          <div class="section-head">
+            <div>
+              <div class="mono-label">4-delt Bankavstemmingsmatrise</div>
+              <h2 class="section-title"><strong>Avviksfordeling</strong> per 31.10.2026</h2>
+            </div>
+            <span class="mono-label" id="matrix-adjusted-diff">Justert avvik: -21 200,00 kr</span>
+          </div>
+          <div class="matrix-grid" id="matrix-grid"></div>
+          <div class="layer-nested" id="matrix-summary-box"></div>
+        </div>
+      </div>
+
+      <!-- 10-Month Historical Charts & Table -->
+      <div class="layer-white">
+        <div class="section-head">
+          <div>
+            <div class="mono-label">Historisk Utvikling 01.01.2026 – 31.10.2026</div>
+            <h2 class="section-title"><strong>Saldobalanse, Avstemmingsgrad &amp; Close-hastighet</strong></h2>
+          </div>
+          <span class="helper-text">Klikk på en måned i tabellen eller periodevelgeren for å bytte aktiv arbeidsperiode</span>
+        </div>
+        <div class="grid-2">
+          <div class="chart-box">
+            <div class="subhead" style="margin-bottom:0.2rem;">Saldobalanse UB: Bank vs ERP (NOK)</div>
+            <div class="mono-label" style="margin-bottom:0.75rem;">Januar – Oktober 2026</div>
+            <div class="chart-canvas-wrap">
+              <canvas id="chart-balance-history"></canvas>
+            </div>
+          </div>
+          <div class="chart-box">
+            <div class="subhead" style="margin-bottom:0.2rem;">Avstemmingsgrad (%) &amp; Close-hastighet (Dager)</div>
+            <div class="mono-label" style="margin-bottom:0.75rem;">Kontinuerlig forbedring fra WD+5 til WD+2</div>
+            <div class="chart-canvas-wrap">
+              <canvas id="chart-close-speed"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Periode</th>
+                <th class="num">IB (01.xx)</th>
+                <th class="num">Innbetalinger</th>
+                <th class="num">Utbetalinger</th>
+                <th class="num">UB Bank</th>
+                <th class="num">UB ERP (1925)</th>
+                <th class="num">Differanse</th>
+                <th class="num">Avstemt %</th>
+                <th class="num">Automatch</th>
+                <th class="num">Close (dager)</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="history-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: ADRA MATCHER WORKBENCH -->
+    <section class="tab-panel" id="panel-workbench" role="tabpanel">
+      <!-- Filters & Actions -->
+      <div class="layer">
+        <div class="section-head">
+          <div>
+            <div class="mono-label">Adra Matcher Transaksjonsmotor</div>
+            <h2 class="section-title"><strong>Transaksjons-Workbench</strong> — <span id="wb-period-name">Oktober 2026</span></h2>
+          </div>
+          <div style="display:flex; gap:var(--space-sm); flex-wrap:wrap;">
+            <button type="button" class="btn btn-primary btn-sm" onclick="runAdraAutoMatch()">
+              <i data-lucide="play" aria-hidden="true"></i>
+              <span>Kjør Adra Auto-Match</span>
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-inject-rounding" onclick="injectRoundingDemo()">
+              <i data-lucide="flask-conical" aria-hidden="true"></i>
+              <span>Simuler øredifferanse (+0,48 kr)</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="controls-row">
+          <div class="field-group" style="flex: 2 1 220px;">
+            <label for="wb-search">Søk i alle dimensjoner</label>
+            <input type="text" id="wb-search" class="input-ctrl" placeholder="Faktura, KID, arkivref, motpart, WBS…" oninput="renderWorkbench()">
+          </div>
+          <div class="field-group" style="flex: 1 1 150px;">
+            <label for="wb-status-filter">Status</label>
+            <select id="wb-status-filter" class="select-ctrl" onchange="renderWorkbench()">
+              <option value="ALL">Alle statuser</option>
+              <option value="OPEN">Kun Åpne / Uavstemt</option>
+              <option value="MATCHED">Avstemt (Standard)</option>
+              <option value="SPINOFF">Avstemt (R-SPINOFF)</option>
+              <option value="ROUND">Avstemt (R-ROUND)</option>
+            </select>
+          </div>
+          <div class="field-group" style="flex: 1 1 150px;">
+            <label for="wb-side-filter">Datakilde</label>
+            <select id="wb-side-filter" class="select-ctrl" onchange="renderWorkbench()">
+              <option value="ALL">Bank + ERP</option>
+              <option value="BANK">Kun Nordea Bank</option>
+              <option value="ERP">Kun ERP Hovedbok (1925)</option>
+            </select>
+          </div>
+          <div class="field-group" style="flex: 1 1 170px;">
+            <label for="wb-wbs-filter">Prosjekt / WBS</label>
+            <select id="wb-wbs-filter" class="select-ctrl" onchange="renderWorkbench()">
+              <option value="ALL">Alle WBS-prosjekter</option>
+              <option value="WBS-401">WBS-401 Subsea Manifold</option>
+              <option value="WBS-408">WBS-408 Offshore Plattform</option>
+              <option value="WBS-412">WBS-412 Landanlegg West</option>
+              <option value="WBS-900">WBS-900 Konsern/Felles</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Manual Matching & Øredifferanse Tolerance Tool -->
+      <div class="layer-white">
+        <div class="section-head">
+          <div>
+            <div class="mono-label">Manuell Avstemming &amp; Øredifferanse-verktøy</div>
+            <h3 class="subhead">Kryss av åpne Bank- og ERP-linjer nedenfor for å matche manuelt eller runde av øredifferanse</h3>
+          </div>
+          <span class="mono-label" id="manual-selection-summary">Valgt: 0 Bank / 0 ERP</span>
+        </div>
+        <div class="controls-row">
+          <div class="field-group" style="width: 180px;">
+            <label for="manual-tolerance-input">Toleransefelt (NOK)</label>
+            <input type="number" id="manual-tolerance-input" class="input-ctrl mono-num" value="1.00" min="0" max="50" step="0.05" oninput="updateManualMatchPanel()">
+          </div>
+          <div class="field-group" style="width: 220px;">
+            <label for="manual-rounding-account">Avrundingskonto (ERP)</label>
+            <select id="manual-rounding-account" class="select-ctrl">
+              <option value="7790">7790 — Øreavrunding / Mindre avvik</option>
+              <option value="8160">8160 — Agio / Disagio &amp; Finanskost</option>
+              <option value="7770">7770 — Bank- og kortgebyr</option>
+            </select>
+          </div>
+          <div class="field-group" style="flex: 1 1 200px;">
+            <label>Beregnet differanse (Valgt Bank − ERP)</label>
+            <div class="input-ctrl mono-num" id="manual-diff-readout" style="display:flex; align-items:center; font-weight:600;">0,00 kr</div>
+          </div>
+          <button type="button" class="btn btn-primary btn-sm" id="btn-manual-round-match" onclick="executeManualMatchWithRounding()" disabled>
+            <i data-lucide="check-circle-2" aria-hidden="true"></i>
+            <span>Avrund øredifferanse &amp; Avstem</span>
+          </button>
+          <button type="button" class="btn btn-ghost btn-sm" onclick="clearManualSelection()">Nullstill valg</button>
+        </div>
+        <p class="helper-text" id="manual-match-helper">Tips: Bruk «Simuler øredifferanse (+0,48 kr)» eller opphev avstemming på et eksisterende par («Opphev») for å teste manuell matching med øreavrunding.</p>
+      </div>
+
+      <!-- Full 10-Dimension Transaction Table -->
+      <div class="layer-white">
+        <div class="section-head">
+          <div>
+            <div class="mono-label">Komplett Transaksjonsliste (Alle 10 dimensjoner)</div>
+            <h3 class="subhead" id="wb-table-count">Viser transaksjoner</h3>
+          </div>
+          <span class="helper-text">«Opphev» flytter avstemte poster eller R-SPINOFF-bilag tilbake til Åpne poster umiddelbart</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:36px;">Velg</th>
+                <th>Side</th>
+                <th>Dato</th>
+                <th>Valutering</th>
+                <th>Transaksjonstype</th>
+                <th>Leverandør / Kunde</th>
+                <th>Bilagsnr</th>
+                <th>Fakturanr</th>
+                <th>KID / OCR</th>
+                <th>Prosjekt / WBS</th>
+                <th>Nordea Arkivref</th>
+                <th class="num">Beløp (NOK)</th>
+                <th>Status &amp; Match-ID</th>
+                <th>Handling</th>
+              </tr>
+            </thead>
+            <tbody id="workbench-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: BILAGSGENERATOR (SPIN-OFF JOURNAL ENTRY ENGINE) -->
+    <section class="tab-panel" id="panel-spinoff" role="tabpanel">
+      <div class="layer">
+        <div class="section-head">
+          <div>
+            <div class="mono-label">Spin-Off Journal Entry Engine · Konto 1925</div>
+            <h2 class="section-title"><strong>AI Bilagsgenerator</strong> for åpne banklinjer per 31.10.2026</h2>
+          </div>
+          <div style="display:flex; gap:var(--space-sm); flex-wrap:wrap;">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="rescanOpenBankLines()">
+              <i data-lucide="scan-line" aria-hidden="true"></i>
+              <span>Skann åpne banklinjer</span>
+            </button>
+            <button type="button" class="btn btn-primary btn-sm" id="btn-approve-all-spinoff" onclick="approveAllSpinoffVouchers()">
+              <i data-lucide="check-check" aria-hidden="true"></i>
+              <span>Godkjenn alle bilag (Spin-Off)</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="spinoff-scan-status" class="notice-strip is-amber">
+          <div>
+            <strong>AI-Skanner: 2 åpne banklinjer per 31.10.2026 identifisert med 99% tillitsscore</strong>
+            <p class="helper-text">Systemet har automatisk generert ferdig balanserte bilagskladder (Debet = Kredit, differanse 0,00 kr) mot Konto 7770 (Bankgebyrer) og Konto 8150 (Annen rentekostnad).</p>
+          </div>
+          <span class="rag-badge rag-slate"><i data-lucide="shield-check" aria-hidden="true"></i> 99% AI-tillit</span>
+        </div>
+      </div>
+
+      <!-- Voucher Drafts Grid -->
+      <div class="grid-2" id="spinoff-vouchers-container"></div>
+
+      <!-- Export Panel (SAF-T XML & Visma/Business Central CSV) -->
+      <div class="layer-white">
+        <div class="section-head">
+          <div>
+            <div class="mono-label">ERP-Import &amp; Revisjonseksport</div>
+            <h2 class="section-title"><strong>Eksporter godkjente / klargjorte bilag</strong></h2>
+          </div>
+          <div style="display:flex; gap:var(--space-sm); flex-wrap:wrap;">
+            <button type="button" class="btn btn-primary btn-sm" onclick="downloadExportFile('saft')">
+              <i data-lucide="download" aria-hidden="true"></i>
+              <span>Last ned SAF-T XML</span>
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="downloadExportFile('csv')">
+              <i data-lucide="file-spreadsheet" aria-hidden="true"></i>
+              <span>Last ned Visma / BC CSV</span>
+            </button>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="copyExportPreview()">
+              <i data-lucide="copy" aria-hidden="true"></i>
+              <span>Kopier forhåndsvisning</span>
+            </button>
+          </div>
+        </div>
+        <div style="display:flex; gap:var(--space-xs); border-bottom:var(--rule); padding-bottom:var(--space-sm);">
+          <button type="button" class="btn btn-sm btn-secondary" id="exp-tab-saft" onclick="setExportPreviewFormat('saft')">SAF-T Financial XML (.xml)</button>
+          <button type="button" class="btn btn-sm btn-ghost" id="exp-tab-csv" onclick="setExportPreviewFormat('csv')">Visma / Business Central CSV (.csv)</button>
+        </div>
+        <pre class="code-preview" id="export-code-preview"></pre>
+      </div>
+    </section>
+
+    <!-- TAB 4: REGELBYGGER & KONTOADMINISTRASJON -->
+    <section class="tab-panel" id="panel-rules" role="tabpanel">
+      <div class="grid-asym">
+        <!-- Superuser Account Admin -->
+        <div class="layer-white">
+          <div class="section-head">
+            <div>
+              <div class="mono-label">Superbruker Kontoadministrasjon</div>
+              <h2 class="section-title"><strong>Kontooppsett &amp; Toleranseparametre</strong></h2>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Konto</th>
+                  <th>Kontonavn</th>
+                  <th>Bank / Kilde</th>
+                  <th>Datotoleranse</th>
+                  <th>Beløpstoleranse</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="accounts-admin-body"></tbody>
+            </table>
+          </div>
+          <form onsubmit="addAccountConfig(event)" class="layer" style="margin-top:var(--space-sm);">
+            <div class="mono-label">Legg til ny avstemmingskonto</div>
+            <div class="controls-row">
+              <div class="field-group" style="width:110px;">
+                <label for="new-acc-num">Kontonr</label>
+                <input type="text" id="new-acc-num" class="input-ctrl mono-num" placeholder="1928" required>
+              </div>
+              <div class="field-group" style="flex:1 1 180px;">
+                <label for="new-acc-name">Kontonavn</label>
+                <input type="text" id="new-acc-name" class="input-ctrl" placeholder="Nordea Prosjektkonto EUR" required>
+              </div>
+              <div class="field-group" style="width:140px;">
+                <label for="new-acc-tol">Toleranse (kr)</label>
+                <input type="number" id="new-acc-tol" class="input-ctrl mono-num" value="1.00" step="0.50" min="0">
+              </div>
+              <button type="submit" class="btn btn-primary btn-sm">Opprett konto</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Rule Builder + Simulator -->
+        <div class="layer-white">
+          <div class="section-head">
+            <div>
+              <div class="mono-label">Adra Matcher Regelbygger</div>
+              <h2 class="section-title"><strong>Regler &amp; Live Simulator</strong></h2>
+            </div>
+          </div>
+          <div id="rules-list" style="display:grid; gap:var(--space-sm);"></div>
+
+          <div class="layer">
+            <div class="mono-label">Simuler ny eller tilpasset match-regel mot Oktober 2026</div>
+            <div class="controls-row">
+              <div class="field-group" style="flex:1 1 160px;">
+                <label for="sim-rule-name">Regelnavn</label>
+                <input type="text" id="sim-rule-name" class="input-ctrl" value="Same Day + KID/WBS Fuzzy">
+              </div>
+              <div class="field-group" style="width:130px;">
+                <label for="sim-rule-type">Kardinalitet</label>
+                <select id="sim-rule-type" class="select-ctrl">
+                  <option value="1:1">1:1 Eksakt</option>
+                  <option value="1:M">1:M Batch</option>
+                  <option value="M:M">M:M Netto</option>
+                </select>
+              </div>
+              <div class="field-group" style="width:120px;">
+                <label for="sim-date-tol">Dager (±)</label>
+                <input type="number" id="sim-date-tol" class="input-ctrl mono-num" value="3" min="0" max="14">
+              </div>
+              <div class="field-group" style="width:130px;">
+                <label for="sim-amt-tol">Beløp (NOK ±)</label>
+                <input type="number" id="sim-amt-tol" class="input-ctrl mono-num" value="1.00" min="0" max="500" step="0.50">
+              </div>
+              <button type="button" class="btn btn-primary btn-sm" onclick="runRuleSimulator()">Kjør simulator</button>
+            </div>
+            <div class="layer-nested" id="sim-result-box">
+              <div class="mono-label">Simuleringsresultat</div>
+              <p class="helper-text" style="margin-top:0.25rem;">Klikk «Kjør simulator» for å teste regelens treffrate mot samtlige 31.10.2026-transaksjoner for Konto 1925.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: IMPORT STUDIO -->
+    <section class="tab-panel" id="panel-import" role="tabpanel">
+      <div class="grid-asym">
+        <div class="layer-white">
+          <div class="section-head">
+            <div>
+              <div class="mono-label">Skreddersydd Kolonne-mapping</div>
+              <h2 class="section-title"><strong>Import Studio: Nordea Bank ↔ ERP 1925</strong></h2>
+            </div>
+            <span class="rag-badge rag-emerald"><i data-lucide="check" aria-hidden="true"></i> Raw Readability Aktiv</span>
+          </div>
+          <p class="helper-text">Adra Matcher leser Nordea-utskrifter (CSV / CAMT.053) i råformat uten manuell Excel-redigering. Juster feltmappingen mellom Nordea-kildekolonner og ERP/Adra-dimensjoner nedenfor.</p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nordea Kildekolonne (Bank)</th>
+                  <th>Eksempelverdi (31.10.2026)</th>
+                  <th>Mål-dimensjon i Adra / ERP</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="import-mapping-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="layer-white">
+          <div class="section-head">
+            <div>
+              <div class="mono-label">Rådata-parser &amp; Testimport</div>
+              <h3 class="subhead">Test Nordea CSV-linjer direkte</h3>
+            </div>
+          </div>
+          <div class="field-group">
+            <label for="import-raw-sample">Rå Nordea-data (semikolon-separert)</label>
+            <textarea id="import-raw-sample" class="textarea-ctrl">2026-10-31;2026-10-31;-2450.00;ARC-20261031-99401;GEBYR-OKT26;Nordea Kontohold &amp; Transaksjonsgebyr okt 2026;WBS-900
+2026-10-31;2026-10-31;-18750.00;ARC-20261031-99402;RENTE-OKT26;Nordea Renter kassekreditt/lån per 31.10.2026;WBS-900</textarea>
+          </div>
+          <div style="display:flex; gap:var(--space-sm); flex-wrap:wrap;">
+            <button type="button" class="btn btn-primary btn-sm" onclick="previewRawImport()">Valider &amp; Parse rådata</button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="saveMappingProfile()">Lagre mapping-profil</button>
+          </div>
+          <div id="import-preview-output" class="layer">
+            <div class="mono-label">Parser-forhåndsvisning</div>
+            <p class="helper-text">Klikk «Valider &amp; Parse rådata» for å kontrollere at alle 10 dimensjoner leses korrekt.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer style="border-top:var(--rule); padding-top:var(--space-md); display:flex; flex-wrap:wrap; justify-content:space-between; gap:var(--space-sm);">
+      <span class="helper-text">AI Closer Kontrollrom · Konto 1925 Nordea Driftskonto NOK · Periode 01.01.2026 – 31.10.2026</span>
+      <span class="helper-text">Faglig forankring: Trintech Adra Matcher-dokumentasjon, Numeric 2026 Account Reconciliation Guide &amp; Bluecopa 2026.</span>
+    </footer>
+  </div>
+
+  <!-- AI CLOSER COPILOT DRAWER -->
+  <aside class="copilot-drawer" id="copilot-drawer" aria-label="AI Closer Copilot Assistent">
+    <div class="copilot-head">
+      <div>
+        <div class="mono-label">AI Closer Copilot</div>
+        <div class="subhead">Regnskapsassistent for Konto 1925</div>
+      </div>
+      <button type="button" class="btn btn-sm btn-ghost" onclick="toggleCopilot()" aria-label="Lukk Copilot">
+        <i data-lucide="x" aria-hidden="true"></i>
+        <span>Lukk</span>
+      </button>
+    </div>
+    <div class="copilot-messages" id="copilot-messages"></div>
+    <div class="copilot-prompts">
+      <button type="button" class="btn btn-sm btn-ghost" onclick="askCopilotPreset('Analyser åpne poster 31.10.2026')">Analyser åpne poster 31.10</button>
+      <button type="button" class="btn btn-sm btn-ghost" onclick="askCopilotPreset('Forklar Boks 2 i matrisen')">Forklar Boks 2</button>
+      <button type="button" class="btn btn-sm btn-ghost" onclick="askCopilotPreset('Vis 10-måneders trend jan–okt')">10-mnd trend</button>
+      <button type="button" class="btn btn-sm btn-ghost" onclick="askCopilotPreset('Hvordan fungerer Spin-Off bilagene?')">Spin-Off bilag</button>
+    </div>
+    <form class="copilot-form" onsubmit="handleCopilotSubmit(event)">
+      <div class="field-group" style="flex:1 1 auto;">
+        <label for="copilot-input">Spør AI Closer</label>
+        <input type="text" id="copilot-input" class="input-ctrl" placeholder="Skriv spørsmål om 1925, avvik eller bilag…" autocomplete="off">
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm">Send</button>
+    </form>
+  </aside>
+
+  <api-shim></api-shim>
+  <script>
+    /* ============================================================
+       1. DETERMINISTIC 10-MONTH DATASET (01.01.2026 - 31.10.2026)
+       Konto 1925 Nordea Driftskonto NOK (1503.44.82910)
+    ============================================================ */
+    const PERIOD_META = [
+      { id: `2026-01`, short: `JAN`, name: `Januar 2026`, endDate: `31.01.2026`, ib: 1850000.00, closeDays: 5.2, autoRate: 88.7 },
+      { id: `2026-02`, short: `FEB`, name: `Februar 2026`, endDate: `28.02.2026`, ib: 2230000.00, closeDays: 4.8, autoRate: 90.4 },
+      { id: `2026-03`, short: `MAR`, name: `Mars 2026`, endDate: `31.03.2026`, ib: 2085000.00, closeDays: 4.1, autoRate: 92.1 },
+      { id: `2026-04`, short: `APR`, name: `April 2026`, endDate: `30.04.2026`, ib: 2455000.00, closeDays: 3.8, autoRate: 93.7 },
+      { id: `2026-05`, short: `MAI`, name: `Mai 2026`, endDate: `31.05.2026`, ib: 2345000.00, closeDays: 3.4, autoRate: 95.3 },
+      { id: `2026-06`, short: `JUN`, name: `Juni 2026`, endDate: `30.06.2026`, ib: 2760000.00, closeDays: 3.0, autoRate: 96.3 },
+      { id: `2026-07`, short: `JUL`, name: `Juli 2026`, endDate: `31.07.2026`, ib: 2920000.00, closeDays: 2.8, autoRate: 96.8 },
+      { id: `2026-08`, short: `AUG`, name: `August 2026`, endDate: `31.08.2026`, ib: 2580000.00, closeDays: 2.5, autoRate: 97.6 },
+      { id: `2026-09`, short: `SEP`, name: `September 2026`, endDate: `30.09.2026`, ib: 2710000.00, closeDays: 2.2, autoRate: 98.3 },
+      { id: `2026-10`, short: `OKT`, name: `Oktober 2026`, endDate: `31.10.2026`, ib: 2840000.00, closeDays: 2.0, autoRate: 93.8 }
+    ];
+
+    function buildHistoricalMonthPairs(periodId, inflowsTotal, outflowsTotal, monthIdx) {
+      const mStr = String(monthIdx + 1).padStart(2, `0`);
+      const partnersIn = [`Equinor Energy AS`, `Vår Energi ASA`, `Aibel AS`, `ConocoPhillips Skandinavia`];
+      const partnersOut = [`Aker Solutions ASA`, `Subsea 7 Norway AS`, `Skatteetaten`, `Nordea Gebyr/Rente`];
+      const wbsList = [`WBS-408 Offshore Plattform`, `WBS-401 Subsea Manifold`, `WBS-412 Landanlegg West`, `WBS-900 Konsern/Felles`];
+      const rows = [];
+
+      const in1 = Math.round(inflowsTotal * 0.45 * 100) / 100;
+      const in2 = Math.round((inflowsTotal - in1) * 100) / 100;
+      const out1 = Math.round(outflowsTotal * 0.52 * 100) / 100;
+      const outFee = 2200.00;
+      const out2 = Math.round((outflowsTotal - out1 - outFee) * 100) / 100;
+
+      const templates = [
+        { day: `05`, type: `Innbetaling KID`, party: partnersIn[0], wbs: wbsList[0], amt: in1, inv: `F-2026-${mStr}11`, kid: `000${mStr}110082`, bilag: `KB-${mStr}01` },
+        { day: `12`, type: `Leverandørbetaling`, party: partnersOut[0], wbs: wbsList[1], amt: -out1, inv: `F-${mStr}412`, kid: `7741${mStr}001`, bilag: `LB-${mStr}02` },
+        { day: `19`, type: `Innbetaling OCR`, party: partnersIn[1], wbs: wbsList[2], amt: in2, inv: `F-2026-${mStr}24`, kid: `000${mStr}240019`, bilag: `KB-${mStr}03` },
+        { day: `25`, type: `Lønn / Skatt`, party: partnersOut[1], wbs: wbsList[3], amt: -out2, inv: `LØNN-2026-${mStr}`, kid: `BATCH-${mStr}25`, bilag: `LB-${mStr}04` },
+        { day: `28`, type: `Bankgebyr (Bokført)`, party: `Nordea Bank Abp`, wbs: wbsList[3], amt: -outFee, inv: `GEBYR-${mStr}`, kid: `ARC-${mStr}9901`, bilag: `SO-${mStr}05` }
+      ];
+
+      templates.forEach((tpl, idx) => {
+        const matchId = `R-${mStr}0${idx + 1}`;
+        const dateStr = `2026-${mStr}-${tpl.day}`;
+        const arcRef = `ARC-2026${mStr}${tpl.day}-${100 + idx}`;
+        rows.push({
+          id: `${periodId}-B-${idx + 1}`,
+          period: periodId,
+          side: `BANK`,
+          date: dateStr,
+          valueDate: dateStr,
+          amount: tpl.amt,
+          voucherNo: `—`,
+          invoiceNo: tpl.inv,
+          kid: tpl.kid,
+          counterparty: tpl.party,
+          wbs: tpl.wbs,
+          archiveRef: arcRef,
+          txType: tpl.type,
+          status: `MATCHED`,
+          matchId: matchId,
+          matchTag: `Standard`
+        });
+        rows.push({
+          id: `${periodId}-E-${idx + 1}`,
+          period: periodId,
+          side: `ERP`,
+          date: dateStr,
+          valueDate: dateStr,
+          amount: tpl.amt,
+          voucherNo: tpl.bilag,
+          invoiceNo: tpl.inv,
+          kid: tpl.kid,
+          counterparty: tpl.party,
+          wbs: tpl.wbs,
+          archiveRef: arcRef,
+          txType: tpl.type,
+          status: `MATCHED`,
+          matchId: matchId,
+          matchTag: `Standard`
+        });
+      });
+      return rows;
+    }
+
+    function buildOctober2026Transactions() {
+      const pairs = [
+        { d: `2026-10-02`, vd: `2026-10-02`, amt: 845000.00, bilag: `KB-1001`, inv: `F-2026-841`, kid: `0008410029184`, party: `Equinor Energy AS`, wbs: `WBS-408 Offshore Plattform`, arc: `ARC-20261002-11204`, type: `Innbetaling KID` },
+        { d: `2026-10-05`, vd: `2026-10-05`, amt: -412500.00, bilag: `LB-9920`, inv: `F-77412`, kid: `77412000182`, party: `Aker Solutions ASA`, wbs: `WBS-401 Subsea Manifold`, arc: `ARC-20261005-18921`, type: `Leverandørbetaling` },
+        { d: `2026-10-07`, vd: `2026-10-07`, amt: 620000.00, bilag: `KB-1003`, inv: `F-2026-852`, kid: `0008520041920`, party: `Aibel AS`, wbs: `WBS-412 Landanlegg West`, arc: `ARC-20261007-22014`, type: `Innbetaling OCR` },
+        { d: `2026-10-09`, vd: `2026-10-09`, amt: -685000.00, bilag: `LB-9934`, inv: `F-33019`, kid: `33019002411`, party: `Subsea 7 Norway AS`, wbs: `WBS-401 Subsea Manifold`, arc: `ARC-20261009-31092`, type: `Leverandørbetaling` },
+        { d: `2026-10-12`, vd: `2026-10-12`, amt: -540000.00, bilag: `LB-9941`, inv: `MVA-2026-04`, kid: `9842105520426`, party: `Skatteetaten`, wbs: `WBS-900 Konsern/Felles`, arc: `ARC-20261012-40182`, type: `Skatt & MVA` },
+        { d: `2026-10-14`, vd: `2026-10-14`, amt: 1150000.00, bilag: `KB-1006`, inv: `F-2026-865`, kid: `0008650019283`, party: `Vår Energi ASA`, wbs: `WBS-408 Offshore Plattform`, arc: `ARC-20261014-44910`, type: `Innbetaling KID` },
+        { d: `2026-10-15`, vd: `2026-10-15`, amt: -920000.00, bilag: `LØNN-1015`, inv: `LØNN-2026-10`, kid: `BATCH-PAY-1015`, party: `Ansatte Lønn Okt 2026`, wbs: `WBS-900 Konsern/Felles`, arc: `ARC-20261015-50011`, type: `Lønnskjøring` },
+        { d: `2026-10-19`, vd: `2026-10-19`, amt: -315000.00, bilag: `LB-9951`, inv: `F-55820`, kid: `55820001944`, party: `Kongsberg Maritime AS`, wbs: `WBS-401 Subsea Manifold`, arc: `ARC-20261019-58201`, type: `Leverandørbetaling` },
+        { d: `2026-10-21`, vd: `2026-10-21`, amt: 730000.00, bilag: `KB-1009`, inv: `F-2026-879`, kid: `0008790051204`, party: `Wintershall Dea Norge`, wbs: `WBS-412 Landanlegg West`, arc: `ARC-20261021-64120`, type: `Innbetaling OCR` },
+        { d: `2026-10-23`, vd: `2026-10-23`, amt: -290000.00, bilag: `LB-9968`, inv: `F-11294`, kid: `11294008812`, party: `TechnipFMC Norge AS`, wbs: `WBS-408 Offshore Plattform`, arc: `ARC-20261023-71904`, type: `Leverandørbetaling` },
+        { d: `2026-10-26`, vd: `2026-10-26`, amt: 510000.00, bilag: `KB-1011`, inv: `F-2026-891`, kid: `0008910077210`, party: `ConocoPhillips Skandinavia`, wbs: `WBS-408 Offshore Plattform`, arc: `ARC-20261026-82019`, type: `Innbetaling KID` },
+        { d: `2026-10-27`, vd: `2026-10-27`, amt: -145000.00, bilag: `LB-9979`, inv: `F-88901`, kid: `88901001190`, party: `DNV AS`, wbs: `WBS-412 Landanlegg West`, arc: `ARC-20261027-88412`, type: `Leverandørbetaling` },
+        { d: `2026-10-28`, vd: `2026-10-28`, amt: 270000.00, bilag: `KB-1013`, inv: `F-2026-903`, kid: `0009030038192`, party: `OKEA ASA`, wbs: `WBS-401 Subsea Manifold`, arc: `ARC-20261028-91004`, type: `Innbetaling OCR` },
+        { d: `2026-10-29`, vd: `2026-10-29`, amt: -245000.00, bilag: `LB-9992`, inv: `F-40118`, kid: `40118009201`, party: `ClampOn AS`, wbs: `WBS-401 Subsea Manifold`, arc: `ARC-20261029-95210`, type: `Leverandørbetaling` }
+      ];
+
+      const rows = [];
+      pairs.forEach((p, idx) => {
+        const matchId = `R-10${String(idx + 1).padStart(2, `0`)}`;
+        rows.push({
+          id: `2026-10-B-${idx + 1}`,
+          period: `2026-10`,
+          side: `BANK`,
+          date: p.d,
+          valueDate: p.vd,
+          amount: p.amt,
+          voucherNo: `—`,
+          invoiceNo: p.inv,
+          kid: p.kid,
+          counterparty: p.party,
+          wbs: p.wbs,
+          archiveRef: p.arc,
+          txType: p.type,
+          status: `MATCHED`,
+          matchId: matchId,
+          matchTag: `Standard`
+        });
+        rows.push({
+          id: `2026-10-E-${idx + 1}`,
+          period: `2026-10`,
+          side: `ERP`,
+          date: p.d,
+          valueDate: p.vd,
+          amount: p.amt,
+          voucherNo: p.bilag,
+          invoiceNo: p.inv,
+          kid: p.kid,
+          counterparty: p.party,
+          wbs: p.wbs,
+          archiveRef: p.arc,
+          txType: p.type,
+          status: `MATCHED`,
+          matchId: matchId,
+          matchTag: `Standard`
+        });
+      });
+
+      /* Two mandatory open Nordea bank lines on 31.10.2026 NOT booked in ERP */
+      rows.push({
+        id: `2026-10-B-FEE`,
+        period: `2026-10`,
+        side: `BANK`,
+        date: `2026-10-31`,
+        valueDate: `2026-10-31`,
+        amount: -2450.00,
+        voucherNo: `—`,
+        invoiceNo: `NORDEA-GEBYR-1026`,
+        kid: `GEBYR-OKT26`,
+        counterparty: `Nordea Kontohold & Transaksjonsgebyr okt 2026`,
+        wbs: `WBS-900 Konsern/Felles`,
+        archiveRef: `ARC-20261031-99401`,
+        txType: `Bankgebyr`,
+        status: `OPEN`,
+        matchId: ``,
+        matchTag: `SpinOffCandidate`
+      });
+      rows.push({
+        id: `2026-10-B-INT`,
+        period: `2026-10`,
+        side: `BANK`,
+        date: `2026-10-31`,
+        valueDate: `2026-10-31`,
+        amount: -18750.00,
+        voucherNo: `—`,
+        invoiceNo: `NORDEA-RENTE-1026`,
+        kid: `RENTE-OKT26`,
+        counterparty: `Nordea Renter kassekreditt/lån per 31.10.2026`,
+        wbs: `WBS-900 Konsern/Felles`,
+        archiveRef: `ARC-20261031-99402`,
+        txType: `Betalte renter`,
+        status: `OPEN`,
+        matchId: ``,
+        matchTag: `SpinOffCandidate`
+      });
+
+      return rows;
+    }
+
+    function createInitialDataset() {
+      const histFlows = [
+        { id: `2026-01`, inf: 3120000, out: 2740000 },
+        { id: `2026-02`, inf: 2940000, out: 3085000 },
+        { id: `2026-03`, inf: 3680000, out: 3310000 },
+        { id: `2026-04`, inf: 3410000, out: 3520000 },
+        { id: `2026-05`, inf: 3890000, out: 3475000 },
+        { id: `2026-06`, inf: 4250000, out: 4090000 },
+        { id: `2026-07`, inf: 2640000, out: 2980000 },
+        { id: `2026-08`, inf: 3740000, out: 3610000 },
+        { id: `2026-09`, inf: 3980000, out: 3850000 }
+      ];
+      let all = [];
+      histFlows.forEach((h, idx) => {
+        all = all.concat(buildHistoricalMonthPairs(h.id, h.inf, h.out, idx));
+      });
+      all = all.concat(buildOctober2026Transactions());
+      return all;
+    }
+
+    function createDefaultState() {
+      return {
+        selectedPeriod: `2026-10`,
+        activeTab: `overview`,
+        colorblindMode: false,
+        exportFormat: `saft`,
+        transactions: createInitialDataset(),
+        spinoffDrafts: [
+          {
+            id: `SO-1`,
+            voucherNo: `BILAG-SO-101`,
+            bankLineId: `2026-10-B-FEE`,
+            erpLineId: `2026-10-E-SPINOFF-1`,
+            title: `Bilag 1 — Bankgebyr (Nordea okt 2026)`,
+            date: `2026-10-31`,
+            debitAccount: `7770`,
+            debitAccountName: `Bankgebyrer`,
+            creditAccount: `1925`,
+            creditAccountName: `Nordea Driftskonto NOK`,
+            amount: 2450.00,
+            wbs: `WBS-900 Konsern/Felles`,
+            description: `Nordea Kontohold & Transaksjonsgebyr okt 2026`,
+            archiveRef: `ARC-20261031-99401`,
+            confidence: 99,
+            matchId: `R-SPINOFF-101`,
+            approved: false
+          },
+          {
+            id: `SO-2`,
+            voucherNo: `BILAG-SO-102`,
+            bankLineId: `2026-10-B-INT`,
+            erpLineId: `2026-10-E-SPINOFF-2`,
+            title: `Bilag 2 — Betalte renter (Nordea 31.10.2026)`,
+            date: `2026-10-31`,
+            debitAccount: `8150`,
+            debitAccountName: `Annen rentekostnad`,
+            creditAccount: `1925`,
+            creditAccountName: `Nordea Driftskonto NOK`,
+            amount: 18750.00,
+            wbs: `WBS-900 Konsern/Felles`,
+            description: `Nordea Renter kassekreditt/lån per 31.10.2026`,
+            archiveRef: `ARC-20261031-99402`,
+            confidence: 99,
+            matchId: `R-SPINOFF-102`,
+            approved: false
+          }
+        ],
+        accounts: [
+          { account: `1925`, name: `Nordea Driftskonto NOK`, source: `Nordea API / CAMT.053 (1503.44.82910)`, dateTol: 3, amtTol: 1.00, active: true },
+          { account: `1920`, name: `DNB Bankinnskudd Konsern`, source: `DNB SFTP / ISO 20022`, dateTol: 3, amtTol: 1.00, active: true },
+          { account: `1940`, name: `Skattetrekkskonto NOK`, source: `Nordea Bundet Konto`, dateTol: 1, amtTol: 0.00, active: true }
+        ],
+        rules: [
+          { id: `R-01`, name: `Eksakt KID/OCR + Beløp`, type: `1:1`, dateTol: 2, amtTol: 0.00, enabled: true, hits: 10 },
+          { id: `R-02`, name: `Same Day–Same Value (Adra Standard)`, type: `1:1`, dateTol: 0, amtTol: 0.00, enabled: true, hits: 14 },
+          { id: `R-03`, name: `Nordea Arkivref & Fakturanr`, type: `1:M`, dateTol: 4, amtTol: 0.00, enabled: true, hits: 4 },
+          { id: `R-04`, name: `AI Spin-Off Gebyr/Rente-detektor (99% tillit)`, type: `Spin-Off`, dateTol: 0, amtTol: 0.00, enabled: true, hits: 2 },
+          { id: `R-05`, name: `Øredifferanse-toleranse (±1,00 NOK -> Konto 7790)`, type: `1:1 Toleranse`, dateTol: 3, amtTol: 1.00, enabled: true, hits: 0 }
+        ],
+        importMapping: [
+          { bankCol: `Bokført dato`, sample: `2026-10-31`, target: `Dato`, ok: true },
+          { bankCol: `Valuteringsdato`, sample: `2026-10-31`, target: `Valutering`, ok: true },
+          { bankCol: `Beløp (NOK)`, sample: `-2 450,00`, target: `Beløp`, ok: true },
+          { bankCol: `Arkivreferanse`, sample: `ARC-20261031-99401`, target: `Nordea Arkivref`, ok: true },
+          { bankCol: `KID / Betalingsref`, sample: `GEBYR-OKT26`, target: `KID/OCR`, ok: true },
+          { bankCol: `Forklaringstekst`, sample: `Nordea Kontohold & Transaksjonsgebyr`, target: `Leverandør/Kunde`, ok: true },
+          { bankCol: `Prosjektkode (Tag)`, sample: `WBS-900`, target: `Prosjekt/WBS`, ok: true }
+        ],
+        selectedIds: [],
+        nextSeq: 200,
+        chatHistory: [
+          {
+            role: `ai`,
+            text: `Hei! Jeg er AI Closer Copilot for Konto 1925 Nordea Driftskonto NOK. Per 31.10.2026 har jeg identifisert 2 ubokførte banklinjer på totalt −21 200,00 kr i Boks 2 (Bankgebyr −2 450,00 kr og Betalte renter −18 750,00 kr). Åpne Bilagsgeneratoren for å godkjenne de balanserte Spin-Off bilagene.`
+          }
+        ]
+      };
+    }
+
+    let appState = createDefaultState();
+    let balanceChartInstance = null;
+    let speedChartInstance = null;
+
+    /* ============================================================
+       2. FORMATTERS & CALCULATIONS
+    ============================================================ */
+    function formatNOK(val) {
+      const n = Number(val) || 0;
+      const absStr = Math.abs(n).toLocaleString(`nb-NO`, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      if (Math.abs(n) < 0.005) return `0,00 kr`;
+      return (n < 0 ? `−` : ``) + absStr + ` kr`;
+    }
+
+    function formatShortNOK(val) {
+      const n = Number(val) || 0;
+      return (n / 1000000).toLocaleString(`nb-NO`, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + `M`;
+    }
+
+    function computePeriodMetrics(periodId) {
+      const meta = PERIOD_META.find((p) => p.id === periodId) || PERIOD_META[9];
+      const rows = appState.transactions.filter((t) => t.period === periodId);
+      const bankRows = rows.filter((t) => t.side === `BANK`);
+      const erpRows = rows.filter((t) => t.side === `ERP`);
+
+      const bankIn = bankRows.filter((t) => t.amount > 0).reduce((s, t) => s + t.amount, 0);
+      const bankOut = bankRows.filter((t) => t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0);
+      const erpIn = erpRows.filter((t) => t.amount > 0).reduce((s, t) => s + t.amount, 0);
+      const erpOut = erpRows.filter((t) => t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0);
+
+      const ubBank = Math.round((meta.ib + bankIn - bankOut) * 100) / 100;
+      const ubErp = Math.round((meta.ib + erpIn - erpOut) * 100) / 100;
+      const rawDiff = Math.round((ubBank - ubErp) * 100) / 100;
+
+      const openRows = rows.filter((t) => t.status === `OPEN`);
+      const openBank = openRows.filter((t) => t.side === `BANK`);
+      const openErp = openRows.filter((t) => t.side === `ERP`);
+
+      /* 4-box Bank Reconciliation Matrix */
+      const box1Items = openBank.filter((t) => t.amount > 0);   /* Kreditert Bank / Ikke debetert ERP */
+      const box2Items = openBank.filter((t) => t.amount < 0);   /* Debetert Bank / Ikke kreditert ERP */
+      const box3Items = openErp.filter((t) => t.amount > 0);    /* Debetert ERP / Ikke kreditert Bank */
+      const box4Items = openErp.filter((t) => t.amount < 0);    /* Kreditert ERP / Ikke debetert Bank */
+
+      const box1Sum = Math.round(box1Items.reduce((s, t) => s + t.amount, 0) * 100) / 100;
+      const box2Sum = Math.round(box2Items.reduce((s, t) => s + Math.abs(t.amount), 0) * 100) / 100;
+      const box3Sum = Math.round(box3Items.reduce((s, t) => s + t.amount, 0) * 100) / 100;
+      const box4Sum = Math.round(box4Items.reduce((s, t) => s + Math.abs(t.amount), 0) * 100) / 100;
+
+      /* Timing items (Box 3 & 4) explain timing; unbooked bank items (Box 1 & 2) require ERP posting! */
+      const adjustedBank = Math.round((ubBank + box3Sum - box4Sum) * 100) / 100;
+      const adjustedDiffBeforeSpinOff = Math.round((adjustedBank - ubErp) * 100) / 100;
+      const fullyExplainedDiff = Math.round((adjustedBank - (ubErp + box1Sum - box2Sum)) * 100) / 100;
+
+      const matchedCount = rows.filter((t) => t.status !== `OPEN`).length;
+      const matchRate = rows.length > 0 ? Math.round((matchedCount / rows.length) * 1000) / 10 : 100;
+
+      return {
+        meta,
+        rows,
+        bankIn,
+        bankOut,
+        erpIn,
+        erpOut,
+        ubBank,
+        ubErp,
+        rawDiff,
+        openRows,
+        box1Items,
+        box2Items,
+        box3Items,
+        box4Items,
+        box1Sum,
+        box2Sum,
+        box3Sum,
+        box4Sum,
+        adjustedBank,
+        adjustedDiffBeforeSpinOff,
+        fullyExplainedDiff,
+        matchRate
+      };
+    }
+
+    function getStatusBadgeHTML(status, matchId, matchTag) {
+      if (status === `OPEN`) {
+        return `<span class="rag-badge rag-coral">✕ Åpen</span>`;
+      }
+      if (matchTag === `R-SPINOFF` || (matchId && matchId.startsWith(`R-SPINOFF`))) {
+        return `<span class="rag-badge rag-slate">◆ ${matchId}</span>`;
+      }
+      if (matchTag === `R-ROUND` || (matchId && matchId.startsWith(`R-ROUND`))) {
+        return `<span class="rag-badge rag-amber">▲ ${matchId}</span>`;
+      }
+      return `<span class="rag-badge rag-emerald">✓ ${matchId || `Avstemt`}</span>`;
+    }
+
+    /* ============================================================
+       3. RENDERING PIPELINE
+    ============================================================ */
+    function renderAll() {
+      const root = document.getElementById(`app-root`);
+      if (root) {
+        root.setAttribute(`data-cb-mode`, appState.colorblindMode ? `true` : `false`);
+      }
+      const cbBtn = document.getElementById(`btn-cb-toggle`);
+      const cbLbl = document.getElementById(`cb-toggle-label`);
+      if (cbBtn) cbBtn.setAttribute(`aria-pressed`, appState.colorblindMode ? `true` : `false`);
+      if (cbLbl) {
+        cbLbl.textContent = appState.colorblindMode
+          ? `Fargeblind-modus: På (Okabe-Ito)`
+          : `Fargeblind-modus: Av (Soft RAG)`;
+      }
+
+      renderPeriodSelector();
+      renderKPIsAndBanner();
+      renderOverviewPanel();
+      renderWorkbench();
+      renderSpinoffPanel();
+      renderRulesPanel();
+      renderImportStudio();
+      renderCopilotMessages();
+
+      if (window.lucide && typeof window.lucide.createIcons === `function`) {
+        window.lucide.createIcons();
+      }
+    }
+
+    function renderPeriodSelector() {
+      const grid = document.getElementById(`period-grid`);
+      if (!grid) return;
+
+      grid.innerHTML = PERIOD_META.map((p) => {
+        const m = computePeriodMetrics(p.id);
+        const isSel = p.id === appState.selectedPeriod;
+        const isClean = m.openRows.length === 0 && Math.abs(m.rawDiff) < 0.01;
+        const stColor = isClean ? `var(--st-emerald-fg)` : `var(--st-coral-fg)`;
+        const stText = isClean ? `✓ ${m.matchRate.toFixed(1).replace(`.`, `,`)}%` : `✕ ${m.openRows.length} åpne`;
+        return `
+          <button type="button" class="period-btn ${isSel ? `is-selected` : ``}" onclick="selectPeriod('${p.id}')">
+            <div class="period-btn-month">
+              <span>${p.short} 26</span>
+              <span>${p.id === `2026-10` ? `★` : ``}</span>
+            </div>
+            <div class="period-btn-ub">${formatShortNOK(m.ubBank)}</div>
+            <div class="period-btn-status" style="color:${stColor};">${stText}</div>
+          </button>
+        `;
+      }).join(``);
+
+      const activeMeta = PERIOD_META.find((p) => p.id === appState.selectedPeriod) || PERIOD_META[9];
+      const badge = document.getElementById(`selected-period-badge`);
+      if (badge) {
+        badge.textContent = `Aktiv periode: ${activeMeta.name} (${activeMeta.endDate})`;
+      }
+    }
+
+    function renderKPIsAndBanner() {
+      const m = computePeriodMetrics(appState.selectedPeriod);
+      const approvedCount = appState.spinoffDrafts.filter((d) => d.approved).length;
+      const pendingDrafts = appState.spinoffDrafts.filter((d) => !d.approved).length;
+
+      const rateEl = document.getElementById(`kpi-match-rate`);
+      const badgeEl = document.getElementById(`kpi-match-badge`);
+      const openEl = document.getElementById(`kpi-open-count`);
+      const ubBankEl = document.getElementById(`kpi-ub-bank`);
+      const ibBankEl = document.getElementById(`kpi-ib-bank`);
+      const ubErpEl = document.getElementById(`kpi-ub-erp`);
+      const spinEl = document.getElementById(`kpi-spinoff-count`);
+      const diffEl = document.getElementById(`kpi-diff`);
+      const diffBadgeEl = document.getElementById(`kpi-diff-badge`);
+      const speedEl = document.getElementById(`kpi-close-speed`);
+
+      if (rateEl) rateEl.textContent = `${m.matchRate.toFixed(1).replace(`.`, `,`)}%`;
+      if (badgeEl) {
+        badgeEl.innerHTML = m.openRows.length === 0
+          ? `<span class="rag-badge rag-emerald">✓ 100% Avstemt</span>`
+          : `<span class="rag-badge rag-amber">◐ Avventer handling</span>`;
+      }
+      if (openEl) openEl.textContent = `${m.openRows.length} åpne poster`;
+      if (ubBankEl) ubBankEl.textContent = formatNOK(m.ubBank);
+      if (ibBankEl) ibBankEl.textContent = `IB: ${formatNOK(m.meta.ib)}`;
+      if (ubErpEl) ubErpEl.textContent = formatNOK(m.ubErp);
+      if (spinEl) {
+        spinEl.textContent = appState.selectedPeriod === `2026-10`
+          ? `${approvedCount} av 2 Spin-Off bilag bokført`
+          : `Historisk periode lukket`;
+      }
+      if (diffEl) diffEl.textContent = formatNOK(m.rawDiff);
+      if (diffBadgeEl) {
+        diffBadgeEl.innerHTML = Math.abs(m.rawDiff) < 0.01
+          ? `<span class="rag-badge rag-emerald">✓ I balanse (0,00 kr)</span>`
+          : `<span class="rag-badge rag-coral">✕ Ubokført avvik</span>`;
+      }
+      if (speedEl) speedEl.textContent = `Close-hastighet: ${m.meta.closeDays.toFixed(1).replace(`.`, `,`)} dager`;
+
+      /* Tab badges */
+      const octMetrics = computePeriodMetrics(`2026-10`);
+      const wbBadge = document.getElementById(`badge-open-workbench`);
+      if (wbBadge) {
+        wbBadge.textContent = String(m.openRows.length);
+        wbBadge.classList.toggle(`has-alert`, m.openRows.length > 0);
+      }
+      const soBadge = document.getElementById(`badge-spinoff-drafts`);
+      if (soBadge) {
+        soBadge.textContent = String(pendingDrafts);
+        soBadge.classList.toggle(`has-alert`, pendingDrafts > 0);
+      }
+
+      /* Top action banner */
+      const banner = document.getElementById(`october-action-banner`);
+      const bTitle = document.getElementById(`banner-title`);
+      const bDesc = document.getElementById(`banner-desc`);
+      const bBtn = document.getElementById(`banner-cta-btn`);
+      if (banner && bTitle && bDesc && bBtn) {
+        if (octMetrics.openRows.length === 0 && Math.abs(octMetrics.rawDiff) < 0.01) {
+          banner.className = `notice-strip is-emerald`;
+          bTitle.textContent = `Oktober 2026 (31.10.2026) er 100% avstemt — Differanse 0,00 NOK`;
+          bDesc.textContent = `Alle bankgebyrer (−2 450,00 kr) og betalte renter (−18 750,00 kr) er godkjent via R-SPINOFF. Konto 1925 er klar for SAF-T / Visma eksport og sign-off.`;
+          bBtn.innerHTML = `<i data-lucide="download" aria-hidden="true"></i><span>Eksporter SAF-T / CSV</span>`;
+        } else {
+          banner.className = `notice-strip is-coral`;
+          bTitle.textContent = `${octMetrics.openRows.length} åpne poster per 31.10.2026 (${formatNOK(octMetrics.rawDiff)}) krever avstemming / bilagsføring`;
+          bDesc.textContent = `Nordea Kontohold & Transaksjonsgebyr (−2 450,00 kr) og Betalte renter (−18 750,00 kr) ligger i Boks 2. AI-agenten har generert 2 balanserte Spin-Off bilag med 99% tillitsscore.`;
+          bBtn.innerHTML = `<i data-lucide="sparkles" aria-hidden="true"></i><span>Åpne Bilagsgenerator (Spin-Off)</span>`;
+        }
+      }
+    }
+
+    function renderOverviewPanel() {
+      const m = computePeriodMetrics(appState.selectedPeriod);
+      const lbl = document.getElementById(`bal-period-label`);
+      if (lbl) lbl.textContent = `${m.meta.name} (${m.meta.endDate})`;
+
+      const pill = document.getElementById(`bal-status-pill`);
+      if (pill) {
+        pill.innerHTML = Math.abs(m.rawDiff) < 0.01
+          ? `<span class="rag-badge rag-emerald">✓ Bank = ERP (0,00 kr)</span>`
+          : `<span class="rag-badge rag-coral">✕ Avvik: ${formatNOK(m.rawDiff)}</span>`;
+      }
+
+      const balBody = document.getElementById(`balance-check-body`);
+      if (balBody) {
+        balBody.innerHTML = `
+          <tr>
+            <td><strong>Inngående balanse (IB 01.${m.meta.id.slice(5)}.2026)</strong></td>
+            <td class="num mono-num">${formatNOK(m.meta.ib)}</td>
+            <td class="num mono-num">${formatNOK(m.meta.ib)}</td>
+            <td class="num mono-num">${formatNOK(0)}</td>
+          </tr>
+          <tr>
+            <td>+ Innbetalinger (Kredit Bank / Debet ERP)</td>
+            <td class="num mono-num">${formatNOK(m.bankIn)}</td>
+            <td class="num mono-num">${formatNOK(m.erpIn)}</td>
+            <td class="num mono-num">${formatNOK(m.bankIn - m.erpIn)}</td>
+          </tr>
+          <tr>
+            <td>− Utbetalinger (Debet Bank / Kredit ERP)</td>
+            <td class="num mono-num">${formatNOK(-m.bankOut)}</td>
+            <td class="num mono-num">${formatNOK(-m.erpOut)}</td>
+            <td class="num mono-num">${formatNOK(-m.bankOut - (-m.erpOut))}</td>
+          </tr>
+          <tr>
+            <td><strong>= Utgående balanse (UB ${m.meta.endDate})</strong></td>
+            <td class="num mono-num"><strong>${formatNOK(m.ubBank)}</strong></td>
+            <td class="num mono-num"><strong>${formatNOK(m.ubErp)}</strong></td>
+            <td class="num mono-num"><strong>${formatNOK(m.rawDiff)}</strong></td>
+          </tr>
+        `;
+      }
+
+      const proofEl = document.getElementById(`balance-proof-text`);
+      if (proofEl) {
+        proofEl.textContent = Math.abs(m.rawDiff) < 0.01
+          ? `Deterministisk kontroll bestått: IB (${formatNOK(m.meta.ib)}) + Netto bevegelser (${formatNOK(m.bankIn - m.bankOut)}) = UB (${formatNOK(m.ubBank)}). Bank og ERP Konto 1925 stemmer ned til 0,00 kr.`
+          : `Rå saldoavvik på ${formatNOK(m.rawDiff)} skyldes ubokførte uttak i Boks 2 (${formatNOK(m.box2Sum)}). Godkjenn Spin-Off bilagene for å kreditere Konto 1925 og nulle avviket.`;
+      }
+
+      /* 4-Box Bank Reconciliation Matrix */
+      const matDiff = document.getElementById(`matrix-adjusted-diff`);
+      if (matDiff) {
+        matDiff.textContent = `Justert differanse: ${formatNOK(m.adjustedDiffBeforeSpinOff)}`;
+      }
+
+      const renderBoxItems = (items) => {
+        if (items.length === 0) {
+          return `<div class="helper-text">Ingen åpne poster i denne boksen (0,00 kr).</div>`;
+        }
+        return items.map((it) => `
+          <div class="matrix-item">
+            <div>
+              <strong>${it.txType}</strong> — ${it.counterparty}<br>
+              <span class="mono-label">${it.date} · ${it.archiveRef}</span>
+            </div>
+            <strong class="mono-num">${formatNOK(it.amount)}</strong>
+          </div>
+        `).join(``);
+      };
+
+      const matGrid = document.getElementById(`matrix-grid`);
+      if (matGrid) {
+        matGrid.innerHTML = `
+          <div class="matrix-box ${m.box1Items.length > 0 ? `has-items` : `is-clear`}">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span class="mono-label">Boks 1: Kreditert Bank / Ikke debetert ERP</span>
+              <span class="rag-badge ${m.box1Items.length > 0 ? `rag-coral` : `rag-emerald`}">${formatNOK(m.box1Sum)}</span>
+            </div>
+            <div class="helper-text">Innbetalinger på bankkonto som mangler bilag i ERP</div>
+            ${renderBoxItems(m.box1Items)}
+          </div>
+
+          <div class="matrix-box ${m.box2Items.length > 0 ? `has-items` : `is-clear`}">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span class="mono-label">Boks 2: Debetert Bank / Ikke kreditert ERP</span>
+              <span class="rag-badge ${m.box2Items.length > 0 ? `rag-coral` : `rag-emerald`}">${formatNOK(-m.box2Sum)}</span>
+            </div>
+            <div class="helper-text">Bankgebyr, betalte renter og uttak som mangler i ERP</div>
+            ${renderBoxItems(m.box2Items)}
+            ${m.box2Items.length > 0 && appState.selectedPeriod === `2026-10`
+              ? `<button type="button" class="btn btn-primary btn-sm" onclick="switchTab('spinoff')">Bilagsfør via Spin-Off Engine →</button>`
+              : ``}
+          </div>
+
+          <div class="matrix-box ${m.box3Items.length > 0 ? `has-items` : `is-clear`}">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span class="mono-label">Boks 3: Debetert ERP / Ikke kreditert Bank</span>
+              <span class="rag-badge ${m.box3Items.length > 0 ? `rag-amber` : `rag-emerald`}">${formatNOK(m.box3Sum)}</span>
+            </div>
+            <div class="helper-text">Bokførte innbetalinger underveis (timing-differanse)</div>
+            ${renderBoxItems(m.box3Items)}
+          </div>
+
+          <div class="matrix-box ${m.box4Items.length > 0 ? `has-items` : `is-clear`}">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span class="mono-label">Boks 4: Kreditert ERP / Ikke debetert Bank</span>
+              <span class="rag-badge ${m.box4Items.length > 0 ? `rag-amber` : `rag-emerald`}">${formatNOK(-m.box4Sum)}</span>
+            </div>
+            <div class="helper-text">Bokførte remisser / utbetalinger underveis</div>
+            ${renderBoxItems(m.box4Items)}
+          </div>
+        `;
+      }
+
+      const sumBox = document.getElementById(`matrix-summary-box`);
+      if (sumBox) {
+        sumBox.innerHTML = `
+          <div style="display:flex; flex-wrap:wrap; justify-content:space-between; gap:var(--space-sm); align-items:center;">
+            <div>
+              <div class="mono-label">Matrise-kontroll etter justering</div>
+              <div class="helper-text">Justert Bank (${formatNOK(m.adjustedBank)}) − UB ERP (${formatNOK(m.ubErp)}) = <strong>${formatNOK(m.adjustedDiffBeforeSpinOff)}</strong> (Uforklart etter Boks 2-forklaring: <strong>${formatNOK(m.fullyExplainedDiff)}</strong>)</div>
+            </div>
+            ${Math.abs(m.adjustedDiffBeforeSpinOff) < 0.01
+              ? `<span class="rag-badge rag-emerald">✓ Justert differanse = 0,00 NOK</span>`
+              : `<span class="rag-badge rag-amber">◐ Krever Spin-Off godkjenning for 0,00 NOK</span>`}
+          </div>
+        `;
+      }
+
+      /* 10-Month History Table */
+      const histBody = document.getElementById(`history-table-body`);
+      if (histBody) {
+        histBody.innerHTML = PERIOD_META.map((p) => {
+          const pm = computePeriodMetrics(p.id);
+          const isSel = p.id === appState.selectedPeriod;
+          const badge = pm.openRows.length === 0 && Math.abs(pm.rawDiff) < 0.01
+            ? `<span class="rag-badge rag-emerald">✓ Avsluttet</span>`
+            : `<span class="rag-badge rag-coral">✕ ${pm.openRows.length} åpne</span>`;
+          return `
+            <tr style="cursor:pointer; ${isSel ? `background:var(--primary-container);` : ``}" onclick="selectPeriod('${p.id}')">
+              <td><strong>${p.name}</strong></td>
+              <td class="num mono-num">${formatNOK(pm.meta.ib)}</td>
+              <td class="num mono-num">${formatNOK(pm.bankIn)}</td>
+              <td class="num mono-num">${formatNOK(-pm.bankOut)}</td>
+              <td class="num mono-num">${formatNOK(pm.ubBank)}</td>
+              <td class="num mono-num">${formatNOK(pm.ubErp)}</td>
+              <td class="num mono-num"><strong>${formatNOK(pm.rawDiff)}</strong></td>
+              <td class="num mono-num">${pm.matchRate.toFixed(1).replace(`.`, `,`)}%</td>
+              <td class="num mono-num">${pm.meta.autoRate.toFixed(1).replace(`.`, `,`)}%</td>
+              <td class="num mono-num">${pm.meta.closeDays.toFixed(1).replace(`.`, `,`)} d</td>
+              <td>${badge}</td>
+            </tr>
+          `;
+        }).join(``);
+      }
+
+      renderHistoricalCharts();
+    }
+
+    function renderHistoricalCharts() {
+      if (typeof Chart === `undefined`) return;
+      const styles = getComputedStyle(document.documentElement);
+      const cPrimary = styles.getPropertyValue(`--data-1`).trim() || `#0f62fe`;
+      const cPurple = styles.getPropertyValue(`--data-2`).trim() || `#6929c4`;
+      const cTeal = styles.getPropertyValue(`--data-3`).trim() || `#005d5d`;
+      const cGrid = styles.getPropertyValue(`--outline-variant`).trim() || `#e0e0e0`;
+      const cText = styles.getPropertyValue(`--on-surface-variant`).trim() || `#525252`;
+
+      const labels = PERIOD_META.map((p) => p.short);
+      const metricsArr = PERIOD_META.map((p) => computePeriodMetrics(p.id));
+      const ubBanks = metricsArr.map((m) => m.ubBank);
+      const ubErps = metricsArr.map((m) => m.ubErp);
+      const matchRates = metricsArr.map((m) => m.matchRate);
+      const closeDays = metricsArr.map((m) => m.meta.closeDays);
+
+      const balCanvas = document.getElementById(`chart-balance-history`);
+      if (balCanvas) {
+        if (balanceChartInstance) balanceChartInstance.destroy();
+        balanceChartInstance = new Chart(balCanvas.getContext(`2d`), {
+          type: `line`,
+          data: {
+            labels,
+            datasets: [
+              {
+                label: `UB Nordea Bank`,
+                data: ubBanks,
+                borderColor: cPrimary,
+                backgroundColor: cPrimary,
+                borderWidth: 2,
+                tension: 0.15,
+                pointRadius: 4
+              },
+              {
+                label: `UB ERP (1925)`,
+                data: ubErps,
+                borderColor: cPurple,
+                backgroundColor: cPurple,
+                borderWidth: 2,
+                borderDash: [5, 4],
+                tension: 0.15,
+                pointRadius: 3
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: `top`, align: `start`, labels: { boxWidth: 12, color: cText } }
+            },
+            scales: {
+              y: {
+                grid: { color: cGrid },
+                ticks: {
+                  color: cText,
+                  callback: (v) => (v / 1000000).toFixed(1).replace(`.`, `,`) + `M`
+                }
+              },
+              x: { grid: { display: false }, ticks: { color: cText } }
+            }
+          }
+        });
+      }
+
+      const spdCanvas = document.getElementById(`chart-close-speed`);
+      if (spdCanvas) {
+        if (speedChartInstance) speedChartInstance.destroy();
+        speedChartInstance = new Chart(spdCanvas.getContext(`2d`), {
+          type: `bar`,
+          data: {
+            labels,
+            datasets: [
+              {
+                label: `Avstemmingsgrad (%)`,
+                data: matchRates,
+                backgroundColor: cPrimary,
+                yAxisID: `y`
+              },
+              {
+                label: `Close-hastighet (dager)`,
+                data: closeDays,
+                type: `line`,
+                borderColor: cTeal,
+                backgroundColor: cTeal,
+                borderWidth: 2,
+                tension: 0.2,
+                yAxisID: `y1`
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: `top`, align: `start`, labels: { boxWidth: 12, color: cText } }
+            },
+            scales: {
+              y: {
+                min: 70,
+                max: 102,
+                grid: { color: cGrid },
+                ticks: { color: cText, callback: (v) => v + `%` }
+              },
+              y1: {
+                position: `right`,
+                min: 0,
+                max: 7,
+                grid: { display: false },
+                ticks: { color: cText, callback: (v) => v + ` d` }
+              },
+              x: { grid: { display: false }, ticks: { color: cText } }
+            }
+          }
+        });
+      }
+    }
+
+    function renderWorkbench() {
+      const m = computePeriodMetrics(appState.selectedPeriod);
+      const pName = document.getElementById(`wb-period-name`);
+      if (pName) pName.textContent = m.meta.name;
+
+      const q = (document.getElementById(`wb-search`)?.value || ``).trim().toLowerCase();
+      const stF = document.getElementById(`wb-status-filter`)?.value || `ALL`;
+      const sdF = document.getElementById(`wb-side-filter`)?.value || `ALL`;
+      const wbsF = document.getElementById(`wb-wbs-filter`)?.value || `ALL`;
+
+      const filtered = m.rows.filter((r) => {
+        if (sdF !== `ALL` && r.side !== sdF) return false;
+        if (wbsF !== `ALL` && !r.wbs.startsWith(wbsF)) return false;
+        if (stF === `OPEN` && r.status !== `OPEN`) return false;
+        if (stF === `MATCHED` && (r.status !== `MATCHED` || r.matchTag === `R-SPINOFF` || r.matchTag === `R-ROUND`)) return false;
+        if (stF === `SPINOFF` && r.matchTag !== `R-SPINOFF`) return false;
+        if (stF === `ROUND` && r.matchTag !== `R-ROUND`) return false;
+        if (q) {
+          const hay = `${r.date} ${r.txType} ${r.counterparty} ${r.voucherNo} ${r.invoiceNo} ${r.kid} ${r.wbs} ${r.archiveRef} ${r.matchId}`.toLowerCase();
+          if (!hay.includes(q)) return false;
+        }
+        return true;
+      });
+
+      const cntEl = document.getElementById(`wb-table-count`);
+      if (cntEl) cntEl.textContent = `Viser ${filtered.length} av ${m.rows.length} transaksjonslinjer`;
+
+      const tbody = document.getElementById(`workbench-table-body`);
+      if (tbody) {
+        if (filtered.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="14" style="text-align:center; padding:var(--space-lg);">Ingen transaksjoner matcher gjeldende filter. Nullstill søk eller velg «Alle statuser».</td></tr>`;
+        } else {
+          tbody.innerHTML = filtered.map((r) => {
+            const isChecked = appState.selectedIds.includes(r.id);
+            const rowCls = r.status === `OPEN` ? `is-row-open` : (r.matchTag === `R-SPINOFF` ? `is-row-spinoff` : ``);
+            const sideBadge = r.side === `BANK`
+              ? `<span class="rag-badge rag-slate">Nordea</span>`
+              : `<span class="rag-badge rag-amber">ERP 1925</span>`;
+            const actionBtn = r.status === `OPEN`
+              ? (r.matchTag === `SpinOffCandidate`
+                ? `<button type="button" class="btn btn-sm btn-primary" onclick="switchTab('spinoff')">Til Spin-Off</button>`
+                : `<span class="helper-text">Velg for match</span>`)
+              : `<button type="button" class="btn btn-sm btn-danger" onclick="unmatchTransaction('${r.id}')">Opphev</button>`;
+
+            return `
+              <tr class="${rowCls}">
+                <td>
+                  <input type="checkbox" ${isChecked ? `checked` : ``} ${r.status !== `OPEN` ? `disabled` : ``}
+                    aria-label="Velg linje ${r.archiveRef}" onchange="toggleSelectTx('${r.id}', this.checked)">
+                </td>
+                <td>${sideBadge}</td>
+                <td class="mono-num" style="white-space:nowrap;">${r.date}</td>
+                <td class="mono-num" style="white-space:nowrap;">${r.valueDate}</td>
+                <td>${r.txType}</td>
+                <td><strong>${r.counterparty}</strong></td>
+                <td class="mono-num">${r.voucherNo}</td>
+                <td class="mono-num">${r.invoiceNo}</td>
+                <td class="mono-num">${r.kid}</td>
+                <td>${r.wbs}</td>
+                <td class="mono-num">${r.archiveRef}</td>
+                <td class="num mono-num"><strong>${formatNOK(r.amount)}</strong></td>
+                <td>${getStatusBadgeHTML(r.status, r.matchId, r.matchTag)}</td>
+                <td>${actionBtn}</td>
+              </tr>
+            `;
+          }).join(``);
+        }
+      }
+      updateManualMatchPanel();
+    }
+
+    function updateManualMatchPanel() {
+      const selectedRows = appState.transactions.filter((t) => appState.selectedIds.includes(t.id) && t.status === `OPEN`);
+      const selBank = selectedRows.filter((t) => t.side === `BANK`);
+      const selErp = selectedRows.filter((t) => t.side === `ERP`);
+      const sumBank = selBank.reduce((s, t) => s + t.amount, 0);
+      const sumErp = selErp.reduce((s, t) => s + t.amount, 0);
+      const diff = Math.round((sumBank - sumErp) * 100) / 100;
+      const tol = Math.abs(parseFloat(document.getElementById(`manual-tolerance-input`)?.value || `1`) || 0);
+
+      const sumEl = document.getElementById(`manual-selection-summary`);
+      if (sumEl) sumEl.textContent = `Valgt: ${selBank.length} Bank / ${selErp.length} ERP`;
+
+      const diffEl = document.getElementById(`manual-diff-readout`);
+      if (diffEl) diffEl.textContent = formatNOK(diff);
+
+      const btn = document.getElementById(`btn-manual-round-match`);
+      const helper = document.getElementById(`manual-match-helper`);
+      const canMatch = selBank.length > 0 && selErp.length > 0 && Math.abs(diff) <= tol;
+
+      if (btn) {
+        btn.disabled = !canMatch;
+        btn.innerHTML = Math.abs(diff) < 0.005
+          ? `<i data-lucide="check-circle-2" aria-hidden="true"></i><span>Avstem valgte (0,00 kr diff)</span>`
+          : `<i data-lucide="check-circle-2" aria-hidden="true"></i><span>Avrund øredifferanse (${formatNOK(diff)}) &amp; Avstem</span>`;
+      }
+      if (helper) {
+        if (selectedRows.length === 0) {
+          helper.textContent = `Tips: Bruk «Simuler øredifferanse (+0,48 kr)» eller opphev avstemming på et eksisterende par («Opphev») for å teste manuell matching med øreavrunding.`;
+        } else if (selBank.length === 0 || selErp.length === 0) {
+          helper.textContent = `Velg minst én åpen Bank-linje og én åpen ERP-linje for å beregne differansen.`;
+        } else if (Math.abs(diff) > tol) {
+          helper.textContent = `Differansen (${formatNOK(diff)}) overstiger toleransefeltet på ${formatNOK(tol)}. Øk toleransen eller velg matchende motpost.`;
+        } else {
+          helper.textContent = `Innenfor toleranse (±${formatNOK(tol)}). Klar til avstemming${Math.abs(diff) > 0 ? ` med automatisk øreavrunding til valgt konto.` : `.`}`;
+        }
+      }
+    }
+
+    function renderSpinoffPanel() {
+      const container = document.getElementById(`spinoff-vouchers-container`);
+      if (!container) return;
+
+      const allApproved = appState.spinoffDrafts.every((d) => d.approved);
+      const scanBanner = document.getElementById(`spinoff-scan-status`);
+      const approveAllBtn = document.getElementById(`btn-approve-all-spinoff`);
+
+      if (scanBanner) {
+        if (allApproved) {
+          scanBanner.className = `notice-strip is-emerald`;
+          scanBanner.innerHTML = `
+            <div>
+              <strong>Alle Spin-Off bilag for 31.10.2026 er godkjent og avstemt (R-SPINOFF)</strong>
+              <p class="helper-text">Konto 1925 er oppdatert med totalt −21 200,00 kr. Bank og ERP er nå 100% i balanse (Differanse: 0,00 NOK).</p>
+            </div>
+            <span class="rag-badge rag-emerald">✓ Fullført &amp; Bokført</span>
+          `;
+        } else {
+          scanBanner.className = `notice-strip is-amber`;
+          scanBanner.innerHTML = `
+            <div>
+              <strong>AI-Skanner: ${appState.spinoffDrafts.filter((d) => !d.approved).length} åpne banklinjer per 31.10.2026 identifisert med 99% tillitsscore</strong>
+              <p class="helper-text">Systemet har automatisk generert ferdig balanserte bilagskladder (Debet = Kredit, differanse 0,00 kr) mot Konto 7770 og Konto 8150.</p>
+            </div>
+            <span class="rag-badge rag-slate">◆ 99% AI-tillit</span>
+          `;
+        }
+      }
+      if (approveAllBtn) {
+        approveAllBtn.disabled = allApproved;
+      }
+
+      container.innerHTML = appState.spinoffDrafts.map((d) => `
+        <article class="voucher-card ${d.approved ? `is-approved` : `is-draft`}">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:var(--space-sm); flex-wrap:wrap;">
+            <div>
+              <div class="mono-label">${d.voucherNo} · ${d.date} · Arkivref ${d.archiveRef}</div>
+              <h3 class="subhead" style="margin-top:0.2rem;">${d.title}</h3>
+            </div>
+            <div style="display:flex; gap:var(--space-xs); align-items:center;">
+              <span class="rag-badge rag-slate">${d.confidence}% AI-tillit</span>
+              ${d.approved
+                ? `<span class="rag-badge rag-emerald">✓ Godkjent (${d.matchId})</span>`
+                : `<span class="rag-badge rag-amber">◐ Utkast klar</span>`}
+            </div>
+          </div>
+
+          <div class="controls-row">
+            <div class="field-group" style="flex:1 1 160px;">
+              <label for="so-acc-${d.id}">Kostnadskonto (Debet)</label>
+              <select id="so-acc-${d.id}" class="select-ctrl" ${d.approved ? `disabled` : ``} onchange="updateDraftAccount('${d.id}', this.value)">
+                <option value="7770" ${d.debitAccount === `7770` ? `selected` : ``}>7770 — Bankgebyrer</option>
+                <option value="8150" ${d.debitAccount === `8150` ? `selected` : ``}>8150 — Annen rentekostnad</option>
+                <option value="7790" ${d.debitAccount === `7790` ? `selected` : ``}>7790 — Andre driftskostnader</option>
+              </select>
+            </div>
+            <div class="field-group" style="flex:1 1 180px;">
+              <label for="so-wbs-${d.id}">Prosjekt / WBS</label>
+              <input type="text" id="so-wbs-${d.id}" class="input-ctrl" value="${d.wbs}" ${d.approved ? `disabled` : ``} onchange="updateDraftWbs('${d.id}', this.value)">
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Konto</th>
+                  <th>Beskrivelse</th>
+                  <th class="num">Debet (NOK)</th>
+                  <th class="num">Kredit (NOK)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="mono-num"><strong>${d.debitAccount}</strong> (${d.debitAccountName})</td>
+                  <td>${d.description}</td>
+                  <td class="num mono-num">${formatNOK(d.amount)}</td>
+                  <td class="num mono-num">0,00 kr</td>
+                </tr>
+                <tr>
+                  <td class="mono-num"><strong>${d.creditAccount}</strong> (${d.creditAccountName})</td>
+                  <td>Motpost bankutskrift ${d.archiveRef}</td>
+                  <td class="num mono-num">0,00 kr</td>
+                  <td class="num mono-num">${formatNOK(d.amount)}</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="2">Sum bilag (Differanse: 0,00 kr — Balansert)</td>
+                  <td class="num mono-num">${formatNOK(d.amount)}</td>
+                  <td class="num mono-num">${formatNOK(d.amount)}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:var(--space-sm); flex-wrap:wrap;">
+            <span class="helper-text">${d.approved ? `Bokført i ERP 1925 og avstemt med tag ${d.matchId}.` : `Ved godkjenning flyttes banklinjen til Avstemt (${d.matchId}) og UB ERP reduseres med ${formatNOK(d.amount)}.`}</span>
+            ${d.approved
+              ? `<button type="button" class="btn btn-danger btn-sm" onclick="revertSpinoffVoucher('${d.id}')">Opphev bilag (Unmatch)</button>`
+              : `<button type="button" class="btn btn-primary btn-sm" onclick="approveSpinoffVoucher('${d.id}')">Godkjenn bilag</button>`}
+          </div>
+        </article>
+      `).join(``);
+
+      renderExportPreview();
+    }
+
+    function generateSaftXml() {
+      const entries = appState.spinoffDrafts.map((d, idx) => `    <Journal>
+      <JournalID>SPINOFF-1925</JournalID>
+      <Description>AI Closer Spin-Off Journal Entry Engine</Description>
+      <Transaction>
+        <TransactionID>${d.voucherNo}</TransactionID>
+        <Period>10</Period>
+        <PeriodYear>2026</PeriodYear>
+        <TransactionDate>${d.date}</TransactionDate>
+        <Description>${d.description} (${d.matchId})</Description>
+        <Line>
+          <RecordID>${idx * 2 + 1}</RecordID>
+          <AccountID>${d.debitAccount}</AccountID>
+          <Analysis><AnalysisType>WBS</AnalysisType><AnalysisID>${d.wbs.split(` `)[0]}</AnalysisID></Analysis>
+          <Description>${d.description}</Description>
+          <DebitAmount><Amount>${d.amount.toFixed(2)}</Amount></DebitAmount>
+        </Line>
+        <Line>
+          <RecordID>${idx * 2 + 2}</RecordID>
+          <AccountID>${d.creditAccount}</AccountID>
+          <Analysis><AnalysisType>WBS</AnalysisType><AnalysisID>${d.wbs.split(` `)[0]}</AnalysisID></Analysis>
+          <Description>Nordea Arkivref ${d.archiveRef}</Description>
+          <CreditAmount><Amount>${d.amount.toFixed(2)}</Amount></CreditAmount>
+        </Line>
+      </Transaction>
+    </Journal>`).join(`\n`);
+
+      return `<?xml version="1.0" encoding="UTF-8"?>
+<AuditFile xmlns="urn:StandardAuditFile-Taxation-Financial:NO">
+  <Header>
+    <AuditFileVersion>1.30</AuditFileVersion>
+    <AuditFileCountry>NO</AuditFileCountry>
+    <AuditFileDateCreated>2026-10-31</AuditFileDateCreated>
+    <SoftwareCompanyName>AI Closer Control Room</SoftwareCompanyName>
+    <Company>
+      <RegistrationNumber>984210552</RegistrationNumber>
+      <Name>Nordic Engineering Projects AS</Name>
+    </Company>
+    <DefaultCurrencyCode>NOK</DefaultCurrencyCode>
+  </Header>
+  <GeneralLedgerEntries>
+    <NumberOfEntries>${appState.spinoffDrafts.length * 2}</NumberOfEntries>
+    <TotalDebit>${appState.spinoffDrafts.reduce((s, d) => s + d.amount, 0).toFixed(2)}</TotalDebit>
+    <TotalCredit>${appState.spinoffDrafts.reduce((s, d) => s + d.amount, 0).toFixed(2)}</TotalCredit>
+${entries}
+  </GeneralLedgerEntries>
+</AuditFile>`;
+    }
+
+    function generateVismaCsv() {
+      const header = `Bilagsnr;Bilagsdato;Konto;Kontonavn;Motkonto;Prosjekt_WBS;Tekst;Debet;Kredit;Valuta;Arkivref;Status`;
+      const lines = [];
+      appState.spinoffDrafts.forEach((d) => {
+        const st = d.approved ? `Godkjent_${d.matchId}` : `Utkast_Klar`;
+        lines.push(`${d.voucherNo};${d.date};${d.debitAccount};${d.debitAccountName};${d.creditAccount};${d.wbs.split(` `)[0]};${d.description};${d.amount.toFixed(2).replace(`.`, `,`)};0,00;NOK;${d.archiveRef};${st}`);
+        lines.push(`${d.voucherNo};${d.date};${d.creditAccount};${d.creditAccountName};${d.debitAccount};${d.wbs.split(` `)[0]};Motpost ${d.description};0,00;${d.amount.toFixed(2).replace(`.`, `,`)};NOK;${d.archiveRef};${st}`);
+      });
+      return [header].concat(lines).join(`\n`);
+    }
+
+    function renderExportPreview() {
+      const pre = document.getElementById(`export-code-preview`);
+      const btnSaft = document.getElementById(`exp-tab-saft`);
+      const btnCsv = document.getElementById(`exp-tab-csv`);
+      if (btnSaft && btnCsv) {
+        btnSaft.className = `btn btn-sm ${appState.exportFormat === `saft` ? `btn-secondary` : `btn-ghost`}`;
+        btnCsv.className = `btn btn-sm ${appState.exportFormat === `csv` ? `btn-secondary` : `btn-ghost`}`;
+      }
+      if (pre) {
+        pre.textContent = appState.exportFormat === `saft` ? generateSaftXml() : generateVismaCsv();
+      }
+    }
+
+    function renderRulesPanel() {
+      const accBody = document.getElementById(`accounts-admin-body`);
+      if (accBody) {
+        accBody.innerHTML = appState.accounts.map((a) => `
+          <tr>
+            <td class="mono-num"><strong>${a.account}</strong></td>
+            <td>${a.name}</td>
+            <td>${a.source}</td>
+            <td class="mono-num">±${a.dateTol} dager</td>
+            <td class="mono-num">±${formatNOK(a.amtTol)}</td>
+            <td><span class="rag-badge rag-emerald">✓ Aktiv</span></td>
+          </tr>
+        `).join(``);
+      }
+
+      const rulesList = document.getElementById(`rules-list`);
+      if (rulesList) {
+        rulesList.innerHTML = appState.rules.map((r) => `
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:var(--space-sm); padding:var(--space-sm); background:var(--surface-container);">
+            <div>
+              <strong>${r.id}: ${r.name}</strong>
+              <div class="helper-text">Type: ${r.type} · Datotoleranse: ±${r.dateTol}d · Beløp: ±${formatNOK(r.amtTol)} · Treff okt: ${r.hits}</div>
+            </div>
+            <button type="button" class="btn btn-sm ${r.enabled ? `btn-secondary` : `btn-ghost`}" onclick="toggleRule('${r.id}')">
+              ${r.enabled ? `Aktiv` : `Deaktivert`}
+            </button>
+          </div>
+        `).join(``);
+      }
+    }
+
+    function renderImportStudio() {
+      const tbody = document.getElementById(`import-mapping-body`);
+      if (!tbody) return;
+      const targets = [`Dato`, `Valutering`, `Beløp`, `Nordea Arkivref`, `KID/OCR`, `Leverandør/Kunde`, `Prosjekt/WBS`, `Bilagsnr`, `Fakturanr`, `Transaksjonstype`];
+      tbody.innerHTML = appState.importMapping.map((m, idx) => `
+        <tr>
+          <td><strong>${m.bankCol}</strong></td>
+          <td class="mono-num">${m.sample}</td>
+          <td>
+            <select class="select-ctrl" aria-label="Måldimensjon for ${m.bankCol}" onchange="updateImportMapping(${idx}, this.value)">
+              ${targets.map((t) => `<option value="${t}" ${m.target === t ? `selected` : ``}>${t}</option>`).join(``)}
+            </select>
+          </td>
+          <td><span class="rag-badge rag-emerald">✓ Mappet</span></td>
+        </tr>
+      `).join(``);
+    }
+
+    function renderCopilotMessages() {
+      const box = document.getElementById(`copilot-messages`);
+      if (!box) return;
+      box.innerHTML = appState.chatHistory.map((msg) => `
+        <div class="chat-msg ${msg.role === `ai` ? `is-ai` : `is-user`}">
+          <div class="mono-label" style="margin-bottom:0.2rem;">${msg.role === `ai` ? `AI Closer` : `Controller`}</div>
+          <div>${msg.text}</div>
+        </div>
+      `).join(``);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    /* ============================================================
+       4. INTERACTIVE HANDLERS (HOISTED FUNCTIONS)
+    ============================================================ */
+    function showToast(msg) {
+      const bar = document.getElementById(`toast-banner`);
+      const txt = document.getElementById(`toast-text`);
+      if (txt) txt.textContent = msg;
+      if (bar) bar.classList.add(`is-visible`);
+    }
+    function hideToast() {
+      const bar = document.getElementById(`toast-banner`);
+      if (bar) bar.classList.remove(`is-visible`);
+    }
+
+    function selectPeriod(periodId) {
+      appState.selectedPeriod = periodId;
+      appState.selectedIds = [];
+      saveState();
+      renderAll();
+    }
+
+    function switchTab(tabKey) {
+      appState.activeTab = tabKey;
+      document.querySelectorAll(`.tab-btn`).forEach((btn) => {
+        const isAct = btn.dataset.tab === tabKey;
+        btn.classList.toggle(`is-active`, isAct);
+        btn.setAttribute(`aria-selected`, isAct ? `true` : `false`);
+      });
+      document.querySelectorAll(`.tab-panel`).forEach((pnl) => {
+        pnl.classList.toggle(`is-active`, pnl.id === `panel-${tabKey}`);
+      });
+      if (tabKey === `overview`) {
+        renderHistoricalCharts();
+      }
+      saveState();
+    }
+
+    function toggleColorblindMode() {
+      appState.colorblindMode = !appState.colorblindMode;
+      saveState();
+      renderAll();
+      showToast(appState.colorblindMode
+        ? `Fargeblind-vennlig Okabe-Ito palett med dobbel koding aktivert.`
+        : `Soft RAG-palett (Smaragd, Varm Amber, Koral, Skiferblå) aktivert.`);
+    }
+
+    function toggleCopilot() {
+      const drawer = document.getElementById(`copilot-drawer`);
+      if (drawer) drawer.classList.toggle(`is-open`);
+    }
+
+    function toggleSelectTx(txId, checked) {
+      if (checked) {
+        if (!appState.selectedIds.includes(txId)) appState.selectedIds.push(txId);
+      } else {
+        appState.selectedIds = appState.selectedIds.filter((id) => id !== txId);
+      }
+      updateManualMatchPanel();
+    }
+
+    function clearManualSelection() {
+      appState.selectedIds = [];
+      renderWorkbench();
+    }
+
+    function executeManualMatchWithRounding() {
+      const selRows = appState.transactions.filter((t) => appState.selectedIds.includes(t.id) && t.status === `OPEN`);
+      const selBank = selRows.filter((t) => t.side === `BANK`);
+      const selErp = selRows.filter((t) => t.side === `ERP`);
+      if (selBank.length === 0 || selErp.length === 0) return;
+
+      const sumBank = selBank.reduce((s, t) => s + t.amount, 0);
+      const sumErp = selErp.reduce((s, t) => s + t.amount, 0);
+      const diff = Math.round((sumBank - sumErp) * 100) / 100;
+      const tol = Math.abs(parseFloat(document.getElementById(`manual-tolerance-input`)?.value || `1`) || 0);
+      if (Math.abs(diff) > tol) return;
+
+      const seq = ++appState.nextSeq;
+      const isRound = Math.abs(diff) >= 0.005;
+      const matchId = isRound ? `R-ROUND-${seq}` : `R-MAN-${seq}`;
+      const matchTag = isRound ? `R-ROUND` : `Standard`;
+
+      selRows.forEach((r) => {
+        r.status = `MATCHED`;
+        r.matchId = matchId;
+        r.matchTag = matchTag;
+      });
+
+      if (isRound) {
+        const roundAcc = document.getElementById(`manual-rounding-account`)?.value || `7790`;
+        const refRow = selErp[0];
+        appState.transactions.push({
+          id: `ERP-ROUND-${seq}`,
+          period: refRow.period,
+          side: `ERP`,
+          date: refRow.date,
+          valueDate: refRow.valueDate,
+          amount: diff,
+          voucherNo: `AVR-${seq}`,
+          invoiceNo: refRow.invoiceNo,
+          kid: refRow.kid,
+          counterparty: `Øreavrunding mot konto ${roundAcc}`,
+          wbs: refRow.wbs,
+          archiveRef: selBank[0].archiveRef,
+          txType: `Øreavrunding`,
+          status: `MATCHED`,
+          matchId: matchId,
+          matchTag: `R-ROUND`
+        });
+      }
+
+      appState.selectedIds = [];
+      saveState();
+      renderAll();
+      showToast(isRound
+        ? `Manuell avstemming utført (${matchId}) med øreavrunding ${formatNOK(diff)} på ERP.`
+        : `Manuell avstemming fullført (${matchId}).`);
+    }
+
+    function unmatchTransaction(txId) {
+      const target = appState.transactions.find((t) => t.id === txId);
+      if (!target || target.status === `OPEN`) return;
+      const mId = target.matchId;
+
+      /* Check if it belongs to an approved Spin-Off voucher */
+      const linkedDraft = appState.spinoffDrafts.find((d) => d.matchId === mId && d.approved);
+      if (linkedDraft) {
+        revertSpinoffVoucher(linkedDraft.id);
+        return;
+      }
+
+      /* Remove any generated rounding ERP entry and reopen original items */
+      appState.transactions = appState.transactions.filter((t) => !(t.matchId === mId && t.id.startsWith(`ERP-ROUND-`)));
+      appState.transactions.forEach((t) => {
+        if (t.matchId === mId) {
+          t.status = `OPEN`;
+          t.matchId = ``;
+          t.matchTag = t.id.includes(`B-FEE`) || t.id.includes(`B-INT`) ? `SpinOffCandidate` : `Unmatched`;
+        }
+      });
+
+      saveState();
+      renderAll();
+      showToast(`Opphevet avstemming for ${mId}. Postene er flyttet tilbake til Åpne poster.`);
+    }
+
+    function injectRoundingDemo() {
+      const exists = appState.transactions.some((t) => t.id === `2026-10-B-DEMO-R` || t.id === `2026-10-E-DEMO-R`);
+      if (exists) {
+        showToast(`Øredifferanse-eksempel (+0,48 kr) ligger allerede i oktober-tabellen.`);
+        return;
+      }
+      appState.transactions.push(
+        {
+          id: `2026-10-B-DEMO-R`,
+          period: `2026-10`,
+          side: `BANK`,
+          date: `2026-10-30`,
+          valueDate: `2026-10-30`,
+          amount: 142350.48,
+          voucherNo: `—`,
+          invoiceNo: `F-2026-918`,
+          kid: `0009180044102`,
+          counterparty: `Gassco AS (Test ørediff)`,
+          wbs: `WBS-408 Offshore Plattform`,
+          archiveRef: `ARC-20261030-98110`,
+          txType: `Innbetaling OCR`,
+          status: `OPEN`,
+          matchId: ``,
+          matchTag: `RoundingDemo`
+        },
+        {
+          id: `2026-10-E-DEMO-R`,
+          period: `2026-10`,
+          side: `ERP`,
+          date: `2026-10-30`,
+          valueDate: `2026-10-30`,
+          amount: 142350.00,
+          voucherNo: `KB-1018`,
+          invoiceNo: `F-2026-918`,
+          kid: `0009180044102`,
+          counterparty: `Gassco AS (Test ørediff)`,
+          wbs: `WBS-408 Offshore Plattform`,
+          archiveRef: `ARC-20261030-98110`,
+          txType: `Innbetaling OCR`,
+          status: `OPEN`,
+          matchId: ``,
+          matchTag: `RoundingDemo`
+        }
+      );
+      appState.selectedPeriod = `2026-10`;
+      appState.selectedIds = [`2026-10-B-DEMO-R`, `2026-10-E-DEMO-R`];
+      saveState();
+      renderAll();
+      showToast(`La inn testpar fra Gassco AS (+0,48 kr ørediff) og forhåndsvalgte linjene. Klikk «Avrund øredifferanse & Avstem» for å teste!`);
+    }
+
+    function runAdraAutoMatch() {
+      const m = computePeriodMetrics(appState.selectedPeriod);
+      const openBank = m.openRows.filter((r) => r.side === `BANK`);
+      const openErp = m.openRows.filter((r) => r.side === `ERP`);
+      let matchedPairs = 0;
+
+      openBank.forEach((b) => {
+        if (b.status !== `OPEN`) return;
+        const hit = openErp.find((e) => e.status === `OPEN` && Math.abs(b.amount - e.amount) < 0.005 && (b.kid === e.kid || b.invoiceNo === e.invoiceNo));
+        if (hit) {
+          const seq = ++appState.nextSeq;
+          const mId = `R-AUTO-${seq}`;
+          b.status = `MATCHED`;
+          b.matchId = mId;
+          b.matchTag = `Standard`;
+          hit.status = `MATCHED`;
+          hit.matchId = mId;
+          hit.matchTag = `Standard`;
+          matchedPairs++;
+        }
+      });
+
+      saveState();
+      renderAll();
+      showToast(matchedPairs > 0
+        ? `Adra Auto-Match fant og avstemte ${matchedPairs} eksakte par.`
+        : `Adra Auto-Match fullført: Alle eksakte par er allerede avstemt. De gjenstående banklinjene per 31.10.2026 krever Spin-Off bilag.`);
+    }
+
+    function approveSpinoffVoucher(draftId) {
+      const d = appState.spinoffDrafts.find((item) => item.id === draftId);
+      if (!d || d.approved) return;
+
+      const bankRow = appState.transactions.find((t) => t.id === d.bankLineId);
+      if (bankRow) {
+        bankRow.status = `MATCHED`;
+        bankRow.matchId = d.matchId;
+        bankRow.matchTag = `R-SPINOFF`;
+      }
+
+      const existingErp = appState.transactions.find((t) => t.id === d.erpLineId);
+      if (!existingErp) {
+        appState.transactions.push({
+          id: d.erpLineId,
+          period: `2026-10`,
+          side: `ERP`,
+          date: d.date,
+          valueDate: d.date,
+          amount: -d.amount,
+          voucherNo: d.voucherNo,
+          invoiceNo: bankRow ? bankRow.invoiceNo : d.voucherNo,
+          kid: bankRow ? bankRow.kid : `SPINOFF`,
+          counterparty: `${d.description} (Kto ${d.debitAccount})`,
+          wbs: d.wbs,
+          archiveRef: d.archiveRef,
+          txType: d.debitAccount === `7770` ? `Bankgebyr (Spin-Off)` : `Betalte renter (Spin-Off)`,
+          status: `MATCHED`,
+          matchId: d.matchId,
+          matchTag: `R-SPINOFF`
+        });
+      }
+
+      d.approved = true;
+      appState.selectedPeriod = `2026-10`;
+      saveState();
+      renderAll();
+      showToast(`${d.voucherNo} godkjent! Banklinje flyttet til Avstemt (${d.matchId}) og ERP Konto 1925 kreditert med ${formatNOK(d.amount)}.`);
+    }
+
+    function approveAllSpinoffVouchers() {
+      appState.spinoffDrafts.forEach((d) => {
+        if (!d.approved) approveSpinoffVoucher(d.id);
+      });
+    }
+
+    function revertSpinoffVoucher(draftId) {
+      const d = appState.spinoffDrafts.find((item) => item.id === draftId);
+      if (!d || !d.approved) return;
+
+      const bankRow = appState.transactions.find((t) => t.id === d.bankLineId);
+      if (bankRow) {
+        bankRow.status = `OPEN`;
+        bankRow.matchId = ``;
+        bankRow.matchTag = `SpinOffCandidate`;
+      }
+      appState.transactions = appState.transactions.filter((t) => t.id !== d.erpLineId);
+      d.approved = false;
+
+      saveState();
+      renderAll();
+      showToast(`Opphevet ${d.voucherNo}. Banklinjen er tilbake i Åpne poster og Boks 2.`);
+    }
+
+    function updateDraftAccount(draftId, accNum) {
+      const d = appState.spinoffDrafts.find((item) => item.id === draftId);
+      if (!d) return;
+      const names = { "7770": `Bankgebyrer`, "8150": `Annen rentekostnad`, "7790": `Andre driftskostnader` };
+      d.debitAccount = accNum;
+      d.debitAccountName = names[accNum] || `Driftskostnad`;
+      saveState();
+      renderSpinoffPanel();
+    }
+
+    function updateDraftWbs(draftId, wbsVal) {
+      const d = appState.spinoffDrafts.find((item) => item.id === draftId);
+      if (!d) return;
+      d.wbs = wbsVal;
+      saveState();
+      renderExportPreview();
+    }
+
+    function rescanOpenBankLines() {
+      const pending = appState.spinoffDrafts.filter((d) => !d.approved).length;
+      showToast(pending > 0
+        ? `AI-skann fullført: ${pending} åpne banklinjer per 31.10.2026 gjenkjent med 99% tillitsscore.`
+        : `AI-skann fullført: 0 åpne banklinjer per 31.10.2026.`);
+    }
+
+    function setExportPreviewFormat(fmt) {
+      appState.exportFormat = fmt;
+      saveState();
+      renderExportPreview();
+    }
+
+    function downloadExportFile(fmt) {
+      const isSaft = fmt === `saft`;
+      const content = isSaft ? generateSaftXml() : generateVismaCsv();
+      const filename = isSaft ? `SAF-T_Financial_1925_2026-10.xml` : `Visma_BC_Bilag_1925_2026-10.csv`;
+      const contentType = isSaft ? `text/plain` : `text/csv`;
+
+      if (window.notebookAppApi && typeof window.notebookAppApi.triggerFileDownload === `function`) {
+        window.notebookAppApi.triggerFileDownload({
+          content,
+          contentType,
+          encoding: `UTF-8`,
+          filename
+        });
+      } else {
+        const blob = new Blob([content], { type: `${contentType};charset=utf-8;` });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement(`a`);
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+      showToast(`Lastet ned ${filename}.`);
+    }
+
+    function copyExportPreview() {
+      const text = appState.exportFormat === `saft` ? generateSaftXml() : generateVismaCsv();
+      if (navigator.clipboard && typeof navigator.clipboard.writeText === `function`) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast(`Eksportfil kopiert til utklippstavle.`);
+        }).catch(() => {
+          showToast(`Forhåndsvisning klar til kopiering.`);
+        });
+      }
+    }
+
+    function addAccountConfig(ev) {
+      ev.preventDefault();
+      const num = (document.getElementById(`new-acc-num`)?.value || ``).trim();
+      const name = (document.getElementById(`new-acc-name`)?.value || ``).trim();
+      const tol = parseFloat(document.getElementById(`new-acc-tol`)?.value || `1`) || 0;
+      if (!num || !name) return;
+
+      appState.accounts.push({
+        account: num,
+        name,
+        source: `Manuell / API-tilkobling`,
+        dateTol: 3,
+        amtTol: tol,
+        active: true
+      });
+      document.getElementById(`new-acc-num`).value = ``;
+      document.getElementById(`new-acc-name`).value = ``;
+      saveState();
+      renderRulesPanel();
+      showToast(`Konto ${num} (${name}) lagt til i Kontoadministrasjon.`);
+    }
+
+    function toggleRule(ruleId) {
+      const r = appState.rules.find((x) => x.id === ruleId);
+      if (!r) return;
+      r.enabled = !r.enabled;
+      saveState();
+      renderRulesPanel();
+    }
+
+    function runRuleSimulator() {
+      const rName = document.getElementById(`sim-rule-name`)?.value || `Simulert regel`;
+      const rType = document.getElementById(`sim-rule-type`)?.value || `1:1`;
+      const dTol = parseInt(document.getElementById(`sim-date-tol`)?.value || `3`, 10);
+      const aTol = parseFloat(document.getElementById(`sim-amt-tol`)?.value || `1`) || 0;
+
+      const octRows = appState.transactions.filter((t) => t.period === `2026-10`);
+      const bankRows = octRows.filter((t) => t.side === `BANK`);
+      const erpRows = octRows.filter((t) => t.side === `ERP`);
+
+      let hits = 0;
+      bankRows.forEach((b) => {
+        const match = erpRows.find((e) => {
+          const daysDiff = Math.abs((new Date(b.date) - new Date(e.date)) / 86400000);
+          return daysDiff <= dTol && Math.abs(b.amount - e.amount) <= aTol;
+        });
+        if (match) hits++;
+      });
+
+      const pct = bankRows.length > 0 ? ((hits / bankRows.length) * 100).toFixed(1).replace(`.`, `,`) : `0,0`;
+      const box = document.getElementById(`sim-result-box`);
+      if (box) {
+        box.innerHTML = `
+          <div class="mono-label">Simulering: ${rName} (${rType})</div>
+          <p style="margin:0.35rem 0 0 0;">
+            Treffer <strong>${hits} av ${bankRows.length} banklinjer</strong> (${pct}%) i Oktober 2026 med toleranse ±${dTol} dager og ±${formatNOK(aTol)}.
+            ${hits < bankRows.length ? `De gjenstående ${bankRows.length - hits} linjene fanges av Spin-Off Engine (99% AI-tillit).` : `100% dekning!`}
+          </p>
+        `;
+      }
+    }
+
+    function updateImportMapping(idx, val) {
+      if (!appState.importMapping[idx]) return;
+      appState.importMapping[idx].target = val;
+      saveState();
+      showToast(`Oppdaterte mapping: ${appState.importMapping[idx].bankCol} → ${val}.`);
+    }
+
+    function previewRawImport() {
+      const raw = (document.getElementById(`import-raw-sample`)?.value || ``).trim();
+      const lines = raw.split(`\n`).filter((l) => l.trim().length > 0);
+      const out = document.getElementById(`import-preview-output`);
+      if (!out) return;
+
+      const parsed = lines.map((line, i) => {
+        const cols = line.split(`;`);
+        return `<tr>
+          <td class="mono-num">${i + 1}</td>
+          <td class="mono-num">${cols[0] || `—`}</td>
+          <td class="mono-num">${cols[1] || `—`}</td>
+          <td class="mono-num">${cols[2] || `—`}</td>
+          <td class="mono-num">${cols[3] || `—`}</td>
+          <td>${cols[5] || `—`}</td>
+          <td>${cols[6] || `—`}</td>
+        </tr>`;
+      }).join(``);
+
+      out.innerHTML = `
+        <div class="mono-label">Validerte ${lines.length} linjer (Raw Readability OK)</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>#</th><th>Dato</th><th>Valutering</th><th>Beløp</th><th>Arkivref</th><th>Tekst</th><th>WBS</th></tr>
+            </thead>
+            <tbody>${parsed}</tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function saveMappingProfile() {
+      saveState();
+      showToast(`Import-mapping profil for Nordea CAMT.053 / CSV lagret for Konto 1925.`);
+    }
+
+    /* Inline two-step session reset (no confirm()) */
+    function handleResetSession(btn) {
+      if (btn.dataset.armed !== `true`) {
+        btn.dataset.armed = `true`;
+        btn.innerHTML = `<i data-lucide="alert-triangle" aria-hidden="true"></i><span>Klikk igjen for å tilbakestille</span>`;
+        if (window.lucide) window.lucide.createIcons();
+        setTimeout(() => {
+          if (btn.dataset.armed === `true`) {
+            btn.dataset.armed = `false`;
+            btn.innerHTML = `<i data-lucide="rotate-ccw" aria-hidden="true"></i><span>Tilbakestill økt</span>`;
+            if (window.lucide) window.lucide.createIcons();
+          }
+        }, 4500);
+        return;
+      }
+      btn.dataset.armed = `false`;
+      btn.innerHTML = `<i data-lucide="rotate-ccw" aria-hidden="true"></i><span>Tilbakestill økt</span>`;
+      appState = createDefaultState();
+      saveState();
+      renderAll();
+      showToast(`Arbeidsøkten er tilbakestilt til utgangspunktet per 31.10.2026.`);
+    }
+
+    /* AI Closer Copilot */
+    function buildCopilotReply(question) {
+      const q = question.toLowerCase();
+      const oct = computePeriodMetrics(`2026-10`);
+      const approved = appState.spinoffDrafts.filter((d) => d.approved).length;
+
+      if (q.includes(`boks 2`) || q.includes(`matrise`)) {
+        return `Boks 2 («Debetert Bank / Ikke kreditert ERP») viser bankuttak som ennå ikke er bokført i Konto 1925. Akkurat nå står Boks 2 på ${formatNOK(-oct.box2Sum)}. ${oct.box2Items.length > 0 ? `Dette gjelder Nordea Bankgebyr (−2 450,00 kr) og Betalte renter (−18 750,00 kr). Når du godkjenner Spin-Off bilagene, tømmes Boks 2 og justert differanse blir 0,00 kr.` : `Boks 2 er nå tømt (0,00 kr) fordi begge Spin-Off bilagene er godkjent!`}`;
+      }
+      if (q.includes(`spin`) || q.includes(`bilag`) || q.includes(`gebyr`) || q.includes(`rente`)) {
+        return `Spin-Off Journal Entry Engine skannet åpne banklinjer 31.10.2026 med 99% tillit: Bilag 1 debiterer 7770 Bankgebyrer (2 450,00 kr) og krediterer 1925. Bilag 2 debiterer 8150 Annen rentekostnad (18 750,00 kr) og krediterer 1925. Status: ${approved} av 2 bilag er godkjent.`;
+      }
+      if (q.includes(`trend`) || q.includes(`10`) || q.includes(`jan`) || q.includes(`histor`)) {
+        return `Fra januar til oktober 2026 har Konto 1925 økt fra IB 1 850 000,00 kr til UB Bank ${formatNOK(oct.ubBank)}. Close-hastigheten har samtidig blitt forbedret fra 5,2 dager i januar til 2,0 dager (WD+2) i oktober ved hjelp av daglig Adra Matcher-kjøring.`;
+      }
+      if (q.includes(`åpne`) || q.includes(`avvik`) || q.includes(`31.10`)) {
+        return `Status per 31.10.2026: UB Bank er ${formatNOK(oct.ubBank)}, UB ERP (1925) er ${formatNOK(oct.ubErp)}, og differansen er ${formatNOK(oct.rawDiff)}. Antall åpne poster: ${oct.openRows.length}. ${oct.openRows.length === 0 ? `Alt er 100% avstemt og klart for SAF-T / Visma eksport.` : `Gå til fanen «Bilagsgenerator (Spin-Off)» for å godkjenne de 2 utkastene.`}`;
+      }
+      return `Konto 1925 (Oktober 2026): UB Bank = ${formatNOK(oct.ubBank)}, UB ERP = ${formatNOK(oct.ubErp)}, Rå differanse = ${formatNOK(oct.rawDiff)}. Spør meg gjerne om Boks 2 i matrisen, Spin-Off bilagene, eller 10-måneders historikk!`;
+    }
+
+    function askCopilotPreset(promptText) {
+      appState.chatHistory.push({ role: `user`, text: promptText });
+      appState.chatHistory.push({ role: `ai`, text: buildCopilotReply(promptText) });
+      saveState();
+      renderCopilotMessages();
+    }
+
+    function handleCopilotSubmit(ev) {
+      ev.preventDefault();
+      const inp = document.getElementById(`copilot-input`);
+      if (!inp) return;
+      const val = inp.value.trim();
+      if (!val) return;
+      inp.value = ``;
+      askCopilotPreset(val);
+    }
+
+    /* ============================================================
+       5. STATE PERSISTENCE (notebookAppApi) & INIT
+    ============================================================ */
+    async function saveState() {
+      if (window.notebookAppApi && typeof window.notebookAppApi.setAppState === `function`) {
+        try {
+          await window.notebookAppApi.setAppState(appState);
+        } catch (err) {
+          /* Ignore transient host errors */
+        }
+      }
+    }
+
+    async function initApp() {
+      if (window.notebookAppApi && typeof window.notebookAppApi.getAppState === `function`) {
+        try {
+          const saved = await window.notebookAppApi.getAppState();
+          if (saved && Array.isArray(saved.transactions) && Array.isArray(saved.spinoffDrafts)) {
+            appState = Object.assign(createDefaultState(), saved);
+          }
+        } catch (err) {
+          /* Use default state */
+        }
+      }
+
+      switchTab(appState.activeTab || `overview`);
+      renderAll();
+
+      if (window.notebookAppApi && typeof window.notebookAppApi.notifyAppReady === `function`) {
+        window.notebookAppApi.notifyAppReady();
+      }
+    }
+
+    document.addEventListener(`DOMContentLoaded`, initApp);
+  </script>
+</body>
+</html>

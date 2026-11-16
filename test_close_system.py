@@ -22,6 +22,7 @@ from src.ml.anomaly_detector import run_anomaly_detection
 from src.agent.evidence_graph import ControllerEvidenceGraph
 from src.agent.investigator import CloseInvestigatorAgent
 from src.audit.audit_manager import AuditManager
+from tests.test_control_room_duckdb import TestControlRoomDuckDB
 
 class TestCloseAISystem(unittest.TestCase):
     @classmethod

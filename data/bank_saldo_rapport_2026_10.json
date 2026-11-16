@@ -1,0 +1,11 @@
+{
+  "rapport_navn": "Nordea Account Statement Summary",
+  "konto": "1925 Nordea Driftskonto NOK (NO93 1503 1234 5678)",
+  "periode": "2026-10-01 til 2026-10-31",
+  "inngaende_balanse": 5842100.0,
+  "totalt_godskrevet": 8120400.0,
+  "totalt_belastet": -7641200.0,
+  "utgaende_balanse": 6321300.0,
+  "kontrollsum_formel": "IB + Innbetalinger + Utbetalinger == UB",
+  "status": "VERIFISERT_OK"
+}

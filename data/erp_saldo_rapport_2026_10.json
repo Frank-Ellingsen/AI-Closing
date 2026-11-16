@@ -1,0 +1,11 @@
+{
+  "rapport_navn": "Hovedbok Kontosaldorapport (Konto 1925)",
+  "selskap": "Nordic Engineering Projects AS",
+  "periode": "Oktober 2026",
+  "inngaende_balanse": 5842100.0,
+  "sum_debet": 8120400.0,
+  "sum_kredit_ordinar": -7620000.0,
+  "ubokfort_bankgebyr_og_rente": -21200.0,
+  "utgaende_balanse_etter_spinoff": 6321300.0,
+  "status": "AVVENTER_SPINOFF_BILAG"
+}
