@@ -1,132 +1,127 @@
-# CLOSE-AI: Autonomous Financial Close, Complex Reconciliation & Control Room Suite (v3.0)
+# AI Closer — Enterprise Financial Close Control Room
 
-A production-grade financial close, Adra reconciliation matcher, and audit control room engineered for engineering, maritime, and project-heavy organizations (exemplified by **Nordic Engineering Projects AS**). The solution combines deterministic accounting checks, combinatorial subset-sum matching, autonomous regex investigation, two-way interactive reconciliation lifecycle, Adra Balancer 4-way balance control formulation, and a cryptographic SHA-256 audit chain.
-
----
-
-## Core Capabilities
-
-- **4-Way Balance Control & Avstemmingsbro (Adra Balancer)**: Mathematical proof of $\mathbf{IB} + \sum \text{Periodens bevegelser} = \mathbf{UB}$ across general ledger and bank statements, isolating timing differences (Boks 1, 3, 4) and autonomous spin-off items (Boks 2) down to $\Delta = 0.00\text{ NOK}$.
-- **FastAPI & DuckDB REST Backend (`api_server.py`)**: High-performance local backend exposing transactional REST endpoints for live DuckDB state queries, balance control calculations, multi-way matching, rollback unmatching, and SAF-T journal exports.
-- **Unified Multi-Module Streamlit Cockpit (`app.py`)**: Seamless switching between the **Adra Balancer & Matcher Control Room**, the **Financial Controls & AI Audit Dossier**, or the **Unified Master Executive View**.
-- **Multi-Period Ingestion Engine**: Native switching between fiscal periods (**August 2026** historical baseline, **September 2026** prior period cut-off, and **Oktober 2026** active close window) with CAMT.053 XML and SAFT CSV file upload simulation.
-- **Reconciliation Rule Ladder (R-01 to R-AI)**: Prioritized execution hierarchy from 1:1 exact KID/OCR matching to combinatorial 1:M merchant batch settlement, multi-currency netting (agio/disagio), fuzzy vendor recognition, and R-SPINOFF autonomous voucher proposal.
-- **Two-Way Interactive Lifecycle**: Full bidirectional workflow supporting manual multi-line matching (**"Avstem Valgte"**) and instant audit rollback (**"Opphev Avstemming / Unmatch"**) returning lines to open items in DuckDB.
-- **Autonomous AI Copilot (`AIMatchSuggester`)**: Natural language forensic reasoning, root-cause diagnosis, and zero-delta balanced journal voucher proposals for complex exceptions (e.g. unapproved shipyard overtime under ISA 240/315).
-- **Aging Analysis & IFRS 9 ECL Provisions**: Stratification of open balances into regulatory aging bands (0–30, 31–60, 61–90, 90+ days) with scenario toggles (*Standard*, *Konservativ*, *Stresstest*) and ISA 500 audit risk ratings.
-- **Spin-Offs & Paired Accrual Vouchers**: Automated generation of balancing entries (fees, interest, currency diffs) and paired accruals (*Bilag A* period adjustment + *Bilag B* auto-reversal) with zero-delta validation and export in Norwegian SAF-T Financial XML, Dynamics 365 Business Central CSV, and Visma.net.
-- **Cryptographic Governance (ISA 240 / 315)**: Immutable SHA-256 linear hash chain sealing every automated match, manual override, and voucher posting with on-click cryptographic chain verification.
+Nordic Engineering Projects AS · Org.nr 984 512 330 MVA  
+Komplett Record-to-Report (R2R) kontrollrom for automatisert transaksjonsavstemming, 4-veis balansekontroll, revisjonsdossier og deterministisk månedsavslutning.
 
 ---
 
-## Repository Structure
+## Produksjonsmiljo og Arkitektur
 
-```
-AI Financial Close Room/
-├── app/
-│   ├── index.html                   # Aurora-styled Production Web Cockpit (v3.0)
-│   ├── index_carbon.html            # Carbon-styled Enterprise Suite Web Cockpit
-│   └── index_nordea_simulation.html # Nordea 10-Month Simulation Cockpit
-├── config/
-│   ├── pipeline_config.yaml         # Ingestion & system parameters
-│   └── rules_config.json            # Externalized SQL control rules
-├── data/
-│   ├── audit_logs/                  # SHA-256 linear audit trail (JSONL)
-│   ├── lakehouse/                   # Medallion Lakehouse Parquet files (Bronze/Silver/Gold)
-│   ├── bank_nordea_2026_10.csv      # Nordea October 2026 statement extract
-│   ├── bank_saldo_rapport_2026_10.json # Bank reconciliation report
-│   ├── erp_hovedbok_2026_10.csv     # ERP Account 1925 GL extract
-│   ├── erp_saldo_rapport_2026_10.json  # ERP GL balance report
-│   ├── reconciliation.duckdb        # Main DuckDB analytical database (accounts, staging, views)
-│   ├── reconciled_transactions.duckdb # Reconciled transactions database
-│   └── unreconciled_transactions.duckdb # Open bank and ERP items database
-├── erp_data_2026_10/                # Relational ERP datasets (10 Master & Transactional tables)
-├── scripts/
-│   ├── benchmark_matching_speed.py  # Latency & throughput benchmark
-│   ├── generate_nordea_data.py      # Nordea bank & GL data generator script
-│   ├── run_close_pipeline.py        # 5-stage close pipeline runner
-│   └── setup_duckdb.py              # DuckDB database setup script
-├── src/
-│   ├── agent/                       # Regex agent, evidence graph, investigator
-│   ├── api/                         # FastAPI backend implementation
-│   ├── audit/                       # SHA-256 audit chaining & statutory evidence
-│   ├── data_generator/              # Multi-table ERP & Nordea data synthesis
-│   ├── engine/                      # Complex matcher, voucher generator, aging
-│   ├── governance/                  # Audit logger & compliance
-│   ├── lakehouse/                   # DuckDB medallion lakehouse & reconciliation manager
-│   └── ml/                          # Scikit-learn Isolation Forest anomaly detector
-├── tests/
-│   ├── __init__.py                  # Test package marker
-│   ├── test_complex_reconciliations.py # Multi-way matching unit tests
-│   ├── test_control_room_duckdb.py  # DuckDB schemas, balance control & API tests
-│   └── test_reconciliation_duckdb.py # DuckDB analytical views & RAG status tests
-├── api_server.py                    # Root FastAPI entrypoint
-├── app.py                           # Master Streamlit interactive control room
-├── close-ai-v3-system-specification.md # Complete architectural specification
-├── evaluate_controls.py             # DuckDB SQL deterministic rule evaluator
-├── generate_erp_data.py             # ERP dataset generator convenience entrypoint
-├── index.html                       # Aurora-styled single-page web cockpit
-├── index_carbon.html                # Carbon-styled enterprise suite web cockpit
-├── index_nordea_simulation.html     # Nordea simulation web cockpit
-├── project_outline.md               # Business problem statement & deep dive
-├── requirements.txt                 # Unified Python dependencies
-├── run_server.bat                   # Batch launcher for FastAPI server
-├── run_server.ps1                   # PowerShell launcher for FastAPI server
-├── run_streamlit.bat                # Batch launcher for Streamlit application
-├── setup_duckdb.py                  # Root DuckDB initialization script
-└── test_close_system.py             # Master end-to-end integration test runner
-```
+- Web Control Room: GitHub Pages produksjonsmiljo
+- Analytics Backend: Streamlit lokal port 8501 eller Streamlit Community Cloud
+- Lokal Database: Embedded DuckDB (reconciliation.duckdb, reconciled_transactions.duckdb, unreconciled_transactions.duckdb)
+- API Server: FastAPI (api_server.py) for toveis synkronisering mellom frontend og databasesjiktet
 
 ---
 
-## Verification & Execution
+## Visuell Fargekoding
 
-### 1. Run Complete Test Suite
-```bash
-# Discover and run all unit & integration test suites (19 tests)
-python -m unittest discover -s tests
+Applikasjonen har en gjennomfort visuell differensiering som gjor det enkelt for regnskapsforere og controllere a skille kilder fra hverandre:
 
-# Master end-to-end system integration test runner (17 tests)
-python test_close_system.py
-```
+- Hovedbok og Reskontro (ERP): Subtilt grablatt (#f0f4f8, border #cbd5e1, tekst #1e3a8a). Gjelder bokforte transaksjoner, saldorapporter, bilag og debet/kredit i ERP.
+- Bankforbindelse: Subtilt lysgult (#fefce8, border #fef08a, tekst #854d0e). Gjelder elektroniske kontoutdrag, valuteringsdatoer, CAMT.053 og banktransaksjoner.
+- Soft RAG / Tilgjengelighet: WCAG 2.1 AA kompatibel palett for fargeblinde brukere.
 
-### 2. Launch FastAPI & DuckDB Backend Server
-```bash
-# Via Python directly
-python api_server.py
+---
 
-# Or via Windows scripts
-.\run_server.bat
-# or in PowerShell:
-.\run_server.ps1
-```
-The API documentation is available at `http://127.0.0.1:8000/docs`.
+## Nokkelfunksjoner og Modulstruktur
 
-### 3. Launch Master Streamlit Control Room
-```bash
-# Via Python
-streamlit run app.py
+### 1. 4-Delt Balansekontroll og Avstemmingsmatrise
+- Balansebroen: Verifiserer formelen IB + Periodens bevegelser = UB i sanntid.
+- 4-Veis Revisjonsmatrise:
+  1. Kreditert Bank / Ikke debetert ERP
+  2. Debetert Bank / Ikke kreditert ERP (inkl. uavstemte bankgebyrer og renter)
+  3. Debetert ERP / Ikke kreditert Bank
+  4. Kreditert ERP / Ikke debetert Bank
+- Matematisk bevis: Etablerer formelt revisjonsbevis der uavklart avvik dokumenteres til noyaktig Delta = 0,00 NOK.
+- Balance Break Alert: Overvaker sertifiserte saldoer; dersom etterposteringer eller nye importfiler endrer en godkjent periode, utloses en umiddelbar revisjonsalarm.
 
-# Or via Windows batch
-.\run_streamlit.bat
-```
-Navigate in the sidebar between:
-- **📊 Adra Balancer & Matcher (DuckDB Lakehouse)**: 4-veis balansekontroll, åpne poster, og spin-off bilagsføring.
-- **🔍 CLOSE-AI Financial Controls & Audit Dossier**: 10 deterministiske regler, Isolation Forest ML og revisjonsdossier.
-- **🌐 Unified Executive Control Room**: Samlet oversikt med alle moduler aktive samtidig.
+### 2. To-delt Importstudio (Bank og ERP)
+- Del A: Bank Import Studio (Lysgul profil)
+  - Stotter Nordea Corporate, DNB Telepay, ISO 20022 CAMT.053 XML og MT940.
+  - Valg av enkeltfil eller hel lokal katalog via webkitdirectory.
+  - Sanntids saldokontroll: Viser Bankens IB, manedens inn- og utbetalinger, og beregnet ny UB.
+- Del B: ERP Import Studio (Grabla profil)
+  - Stotter Visma, Microsoft Dynamics 365 Business Central, Xledger og SAF-T Financial v1.30/v1.40 XML.
+  - Valg av enkeltfil eller lokal katalog for batch-import.
+  - Sanntids saldokontroll som verifiserer at importerte transaksjoner stemmer eksakt overens med den offisielle ERP-saldorapporten.
 
-### 4. Web Application Cockpits
-Open any of the single-page web cockpits directly in your browser:
-- [index.html](file:///G:/My%20Drive/AI%20Financial%20Close%20Room/index.html) — Aurora Design System Master Cockpit
-- [index_carbon.html](file:///G:/My%20Drive/AI%20Financial%20Close%20Room/index_carbon.html) — Carbon Design System Enterprise Suite
-- [index_nordea_simulation.html](file:///G:/My%20Drive/AI%20Financial%20Close%20Room/index_nordea_simulation.html) — Nordea 10-Måneders Avstemmingssimulering
-- Or via FastAPI: `http://127.0.0.1:8000/ui/aurora`, `http://127.0.0.1:8000/ui/carbon`, `http://127.0.0.1:8000/ui/nordea`
+### 3. AI Closer Matcher Workbench
+- Regelstigen:
+  - R-01: Eksakt 1:1 KID/OCR-match (samme belop og dato).
+  - R-02: 1:1 Faktura/arkivreferanse med dato-float.
+  - R-03: 1:M Samleoppgjor og batch-utbetalinger.
+  - R-04: Multi-Way Gateway for betalingsformidlere (Nets, Vipps, Stripe, Adyen).
+- Suggestive Matching (AI Copilot): Probabilistisk maskinlaering som foreslar kandidater ved skrivefeil eller datoavvik med tillitsscore og forklaring (Human-in-the-Loop).
+- Ett-klikks Unmatch: Full historikk med umiddelbar angremulighet som tilbakeforer transaksjoner til apne poster.
+- DFO-Metoden: Dedikert funksjon for a overfore gjenstaende apne poster direkte til AI Closer Balancer etter fullfort transaksjonsmatching.
 
-### 5. Run Close Pipeline & Performance Benchmarks
-```bash
-# Full 5-stage close execution (pre-match, spin-offs, aging, SHA-256 chain)
-python scripts/run_close_pipeline.py
+### 4. Reskontro-, Intercompany- og Avviks-Hub
+- Subledger-to-GL Avstemming: Automatisk kontroll av Kundereskontro (Konto 1500) og Leverandorreskontro (Konto 2400) mot Hovedbok, med varsling om manuelle bilag fort utenom reskontro.
+- Intercompany-avstemming: 2-veis konsernmatrise som avstemmer mellomvaerende (Konto 1310) mot datterselskapers tilsvarende gjeldskonto.
+- Statistisk Avvikskontroll:
+  - Benford's Law analyse av forste siffer for a identifisere uvanlige eller manipulerte bilagsmonstre.
+  - Duplikatvarsler for identiske belop til samme mottaker innenfor et kort tidsrom.
+  - Terskelkontroll for fakturaer lagt rett under attestasjonsgrensen.
+- Norges Bank Valutakurs-Feed: Automatisk manedssluttoppslag for EUR/NOK pa konto 1940 med beregning av agio/disagio.
 
-# High-volume throughput & latency benchmark
-python scripts/benchmark_matching_speed.py
-```
+### 5. AI Closer Balancer og 3-Trinns Sertifisering
+- Kontospesifikasjon (Open Items): Aldersfordeling i standardbotter (0-30d, 31-60d, 61-90d, 90+d).
+- Rollebasert Sertifiseringsmatrise:
+  - Preparer: Klargjor underlag og foretar primaersignering.
+  - Approver: Controller godkjenner avstemmingen.
+  - Reviewer / Revisor: Ekstern revisor eller CFO laser perioden.
+- Auto-Sertifisering: Lavrisikokontoer med avvik Delta = 0,00 kr og ingen apne poster over terskelverdien sertifiseres automatisk.
+
+### 6. Manedlig Avslutningssjekkliste (Task Manager)
+- 16 Standardoppgaver (T-01 til T-16) fordelt pa Fase 1 (Forberedelse), Fase 2 (Matching), Fase 3 (Balansekontroll) og Fase 4 (Sertifisering).
+- Formell PDF/Print Revisjonseksport: Genererer et komplett revisjonsdossier med signaturblokker, balansebevis og kryptografisk SHA-256 forsegling.
+
+### 7. Bilagsforslag og SAF-T v1.30/v1.40 Validator
+- Autonome Spin-Off Forslag: Genererer forslag for ubokforte bankposter for oktober 2026:
+  - Bankgebyr: 2 450,00 NOK (Debet 7770 / Kredit 1925)
+  - Lanerenter: 18 750,00 NOK (Debet 8150 / Kredit 1925)
+- Pre-flight Sjekk: Validerer standardkontokoder, MVA-koder og balansert debet/kredit for eksport til ERP.
+
+### 8. Superbruker og Kontoadministrasjon
+- 100% Dynamisk: Opprett og rediger konti i sanntid uten kodeendringer.
+- Regelbygger: Konfigurer nye regler med tilpasset feltmatching, toleranser og dato-float.
+- Oreavrunding: Konfigurerbar terskel (f.eks. 0,50 NOK) med automatisk kontering mot Konto 7740.
+- DuckDB Monitor: Sanntidsstatus pa lokale tabeller og transaksjonsvolum.
+
+---
+
+## Brukerveiledning (User Guide)
+
+### For Klargjorer (Preparer)
+1. Velg Konto og Periode i topplinjen.
+2. Ga til Import Studio. Last opp bankutskriften i Del A og ERP-hovedboken i Del B. Kontroller at gronn statusindikator bekrefter at IB pluss/minus bevegelser er lik UB.
+3. Ga til AI Closer Matcher. Klikk Kjor Auto-Match. Gjennomga apne poster og godkjenn eventuelle AI-forslag i Suggestive Drawer.
+4. Ga til Bilagsforslag, godkjenn foreslatte spin-off poster (gebyrer og renter), og last ned eksportfilen for innlesing i ERP.
+5. Under Matcher velger du de tre prikkene og klikker Send til Balancer (DFO-metoden) for a overfore uavstemte poster.
+6. Apne AI Closer Balancer, verifiser at uavklart avvik er 0,00 NOK, og klikk Signer som Preparer.
+
+### For Controller og Godkjenner (Approver)
+1. Apne 4-Delt Balansekontroll. Bekreft at differansen Delta er 0,00 NOK, og gjennomga de fire revisjonskategoriene.
+2. Verifiser at det ikke foreligger brudd pa reskontroavstemmingen (konto 1500/2400) eller avviksvarsler fra statistiske kontroller.
+3. Apne Task Manager, bekreft at oppgavene T-01 til T-13 er fullfort, og signer ut T-15.
+4. I AI Closer Balancer signerer du som Approver.
+
+### For Superbruker
+1. Ga til Superbruker, klikk Ny Konto, fyll ut kontonummer, navn, IBAN og inngaende balanser.
+2. Apne Regelbygger, velg kildekolonner for Bank og ERP, definer kardinalitet (1:1, 1:M) og tillatt dato-float.
+3. Juster maksimal tillatt oredifferanse for automatisk postering mot oreavrundingskonto 7740.
+
+---
+
+## Lokal Kkjoring
+
+1. Installer avhengigheter:
+   pip install -r requirements.txt
+2. Klargjor DuckDB og generer testdata:
+   python setup_duckdb.py
+   python generate_erp_data.py
+3. Start API-server og Streamlit:
+   python api_server.py
+   streamlit run app.py
+4. Apne index.html i nettleseren.
