@@ -796,13 +796,13 @@
     <!-- Top Header -->
     <header class="topbar">
       <div>
-        <div class="mono-label">AI CLOSER · FINANCIAL CLOSE &amp; ADRA MATCHER CONTROL ROOM</div>
+        <div class="mono-label">AI CLOSER · FINANCIAL CLOSE &amp; AI CLOSE MATCHER CONTROL ROOM</div>
         <h1 class="headline-display">Kontrollrom for <strong>1925 Nordea Driftskonto NOK</strong></h1>
         <div class="topbar-meta">
           <span>Selskap: Nordic Engineering Projects AS (Org.nr 984 210 552)</span>
           <span>Kontonr: 1503.44.82910</span>
           <span>Datasett: 01.01.2026 – 31.10.2026</span>
-          <span>Motor: Adra Multi-Way + Spin-Off Engine</span>
+          <span>Motor: AI Close Multi-Way + Spin-Off Engine</span>
         </div>
       </div>
       <div class="topbar-actions">
@@ -895,7 +895,7 @@
       </button>
       <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="workbench" onclick="switchTab('workbench')">
         <i data-lucide="git-compare" aria-hidden="true"></i>
-        <span>Adra Matcher Workbench</span>
+        <span>AI Close Matcher Workbench</span>
         <span class="tab-count has-alert" id="badge-open-workbench">2</span>
       </button>
       <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="spinoff" onclick="switchTab('spinoff')">
@@ -1007,19 +1007,19 @@
       </div>
     </section>
 
-    <!-- TAB 2: ADRA MATCHER WORKBENCH -->
+    <!-- TAB 2: AI CLOSE MATCHER WORKBENCH -->
     <section class="tab-panel" id="panel-workbench" role="tabpanel">
       <!-- Filters & Actions -->
       <div class="layer">
         <div class="section-head">
           <div>
-            <div class="mono-label">Adra Matcher Transaksjonsmotor</div>
+            <div class="mono-label">AI Close Matcher Transaksjonsmotor</div>
             <h2 class="section-title"><strong>Transaksjons-Workbench</strong> — <span id="wb-period-name">Oktober 2026</span></h2>
           </div>
           <div style="display:flex; gap:var(--space-sm); flex-wrap:wrap;">
             <button type="button" class="btn btn-primary btn-sm" onclick="runAdraAutoMatch()">
               <i data-lucide="play" aria-hidden="true"></i>
-              <span>Kjør Adra Auto-Match</span>
+              <span>Kjør AI Close Auto-Match</span>
             </button>
             <button type="button" class="btn btn-secondary btn-sm" id="btn-inject-rounding" onclick="injectRoundingDemo()">
               <i data-lucide="flask-conical" aria-hidden="true"></i>
@@ -1246,7 +1246,7 @@
         <div class="layer-white">
           <div class="section-head">
             <div>
-              <div class="mono-label">Adra Matcher Regelbygger</div>
+              <div class="mono-label">AI Close Matcher Regelbygger</div>
               <h2 class="section-title"><strong>Regler &amp; Live Simulator</strong></h2>
             </div>
           </div>
@@ -1297,14 +1297,14 @@
             </div>
             <span class="rag-badge rag-emerald"><i data-lucide="check" aria-hidden="true"></i> Raw Readability Aktiv</span>
           </div>
-          <p class="helper-text">Adra Matcher leser Nordea-utskrifter (CSV / CAMT.053) i råformat uten manuell Excel-redigering. Juster feltmappingen mellom Nordea-kildekolonner og ERP/Adra-dimensjoner nedenfor.</p>
+          <p class="helper-text">AI Close Matcher leser Nordea-utskrifter (CSV / CAMT.053) i råformat uten manuell Excel-redigering. Juster feltmappingen mellom Nordea-kildekolonner og ERP/AI Close-dimensjoner nedenfor.</p>
           <div class="table-wrap">
             <table>
               <thead>
                 <tr>
                   <th>Nordea Kildekolonne (Bank)</th>
                   <th>Eksempelverdi (31.10.2026)</th>
-                  <th>Mål-dimensjon i Adra / ERP</th>
+                  <th>Mål-dimensjon i AI Close / ERP</th>
                   <th>Status</th>
                 </tr>
               </thead>
@@ -1339,7 +1339,7 @@
 
     <footer style="border-top:var(--rule); padding-top:var(--space-md); display:flex; flex-wrap:wrap; justify-content:space-between; gap:var(--space-sm);">
       <span class="helper-text">AI Closer Kontrollrom · Konto 1925 Nordea Driftskonto NOK · Periode 01.01.2026 – 31.10.2026</span>
-      <span class="helper-text">Faglig forankring: Trintech Adra Matcher-dokumentasjon, Numeric 2026 Account Reconciliation Guide &amp; Bluecopa 2026.</span>
+      <span class="helper-text">Faglig forankring: Trintech AI Close Matcher-dokumentasjon, Numeric 2026 Account Reconciliation Guide &amp; Bluecopa 2026.</span>
     </footer>
   </div>
 
@@ -1629,7 +1629,7 @@
         ],
         rules: [
           { id: `R-01`, name: `Eksakt KID/OCR + Beløp`, type: `1:1`, dateTol: 2, amtTol: 0.00, enabled: true, hits: 10 },
-          { id: `R-02`, name: `Same Day–Same Value (Adra Standard)`, type: `1:1`, dateTol: 0, amtTol: 0.00, enabled: true, hits: 14 },
+          { id: `R-02`, name: `Same Day–Same Value (AI Close Standard)`, type: `1:1`, dateTol: 0, amtTol: 0.00, enabled: true, hits: 14 },
           { id: `R-03`, name: `Nordea Arkivref & Fakturanr`, type: `1:M`, dateTol: 4, amtTol: 0.00, enabled: true, hits: 4 },
           { id: `R-04`, name: `AI Spin-Off Gebyr/Rente-detektor (99% tillit)`, type: `Spin-Off`, dateTol: 0, amtTol: 0.00, enabled: true, hits: 2 },
           { id: `R-05`, name: `Øredifferanse-toleranse (±1,00 NOK -> Konto 7790)`, type: `1:1 Toleranse`, dateTol: 3, amtTol: 1.00, enabled: true, hits: 0 }
@@ -2733,8 +2733,8 @@ ${entries}
       saveState();
       renderAll();
       showToast(matchedPairs > 0
-        ? `Adra Auto-Match fant og avstemte ${matchedPairs} eksakte par.`
-        : `Adra Auto-Match fullført: Alle eksakte par er allerede avstemt. De gjenstående banklinjene per 31.10.2026 krever Spin-Off bilag.`);
+        ? `AI Close Auto-Match fant og avstemte ${matchedPairs} eksakte par.`
+        : `AI Close Auto-Match fullført: Alle eksakte par er allerede avstemt. De gjenstående banklinjene per 31.10.2026 krever Spin-Off bilag.`);
     }
 
     function approveSpinoffVoucher(draftId) {
@@ -3012,7 +3012,7 @@ ${entries}
         return `Spin-Off Journal Entry Engine skannet åpne banklinjer 31.10.2026 med 99% tillit: Bilag 1 debiterer 7770 Bankgebyrer (2 450,00 kr) og krediterer 1925. Bilag 2 debiterer 8150 Annen rentekostnad (18 750,00 kr) og krediterer 1925. Status: ${approved} av 2 bilag er godkjent.`;
       }
       if (q.includes(`trend`) || q.includes(`10`) || q.includes(`jan`) || q.includes(`histor`)) {
-        return `Fra januar til oktober 2026 har Konto 1925 økt fra IB 1 850 000,00 kr til UB Bank ${formatNOK(oct.ubBank)}. Close-hastigheten har samtidig blitt forbedret fra 5,2 dager i januar til 2,0 dager (WD+2) i oktober ved hjelp av daglig Adra Matcher-kjøring.`;
+        return `Fra januar til oktober 2026 har Konto 1925 økt fra IB 1 850 000,00 kr til UB Bank ${formatNOK(oct.ubBank)}. Close-hastigheten har samtidig blitt forbedret fra 5,2 dager i januar til 2,0 dager (WD+2) i oktober ved hjelp av daglig AI Close Matcher-kjøring.`;
       }
       if (q.includes(`åpne`) || q.includes(`avvik`) || q.includes(`31.10`)) {
         return `Status per 31.10.2026: UB Bank er ${formatNOK(oct.ubBank)}, UB ERP (1925) er ${formatNOK(oct.ubErp)}, og differansen er ${formatNOK(oct.rawDiff)}. Antall åpne poster: ${oct.openRows.length}. ${oct.openRows.length === 0 ? `Alt er 100% avstemt og klart for SAF-T / Visma eksport.` : `Gå til fanen «Bilagsgenerator (Spin-Off)» for å godkjenne de 2 utkastene.`}`;

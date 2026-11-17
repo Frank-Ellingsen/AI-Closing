@@ -705,7 +705,299 @@
         scroll-behavior: auto !important;
       }
     }
-  </style>
+  
+    /* =========================================================================
+       CARBON FLOATING POP-UP CHATBOT & COPILOT DRAWER
+       ========================================================================= */
+    .chatbot-trigger-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--primary, #0f62fe);
+      color: #ffffff;
+      border: 1px solid var(--primary, #0f62fe);
+      border-radius: 24px;
+      padding: 10px 18px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+      cursor: pointer;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 600;
+      transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .chatbot-trigger-btn:hover {
+      background: var(--primary-hover, #0353e9);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+    }
+    .chatbot-trigger-btn:active {
+      transform: translateY(0);
+    }
+    .chatbot-trigger-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+    }
+    .chatbot-pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #24a148;
+      box-shadow: 0 0 6px #24a148;
+      display: inline-block;
+    }
+
+    .chatbot-drawer {
+      position: fixed;
+      bottom: 76px;
+      right: 24px;
+      width: 450px;
+      max-width: calc(100vw - 32px);
+      height: 600px;
+      max-height: calc(100vh - 100px);
+      background: #ffffff;
+      border: 1px solid var(--outline, #8d8d8d);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+      display: flex;
+      flex-direction: column;
+      z-index: 10000;
+      font-family: 'IBM Plex Sans', sans-serif;
+      animation: chatbotSlideIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .chatbot-drawer.is-hidden {
+      display: none !important;
+    }
+    @keyframes chatbotSlideIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .chatbot-header {
+      padding: 12px 16px;
+      background: #161616;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #393939;
+    }
+    .chatbot-title-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .chatbot-avatar {
+      width: 30px;
+      height: 30px;
+      background: #0f62fe;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+    }
+    .chatbot-title {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: #ffffff;
+      line-height: 1.2;
+    }
+    .chatbot-subtitle {
+      font-size: 0.72rem;
+      color: #c6c6c6;
+    }
+    .chatbot-controls {
+      display: flex;
+      gap: 4px;
+    }
+    .chatbot-icon-btn {
+      background: transparent;
+      border: none;
+      color: #c6c6c6;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, color 0.15s;
+    }
+    .chatbot-icon-btn:hover {
+      background: #393939;
+      color: #ffffff;
+    }
+
+    .chatbot-role-bar {
+      padding: 8px 16px;
+      background: #f4f4f4;
+      border-bottom: 1px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .chatbot-role-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #525252;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .chatbot-seg-group {
+      display: inline-flex;
+      border: 1px solid #8d8d8d;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .chatbot-seg-btn {
+      border: none;
+      background: transparent;
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 4px 10px;
+      cursor: pointer;
+      color: #161616;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .chatbot-seg-btn.is-active {
+      background: #0f62fe;
+      color: #ffffff;
+    }
+
+    .chatbot-quick-chips {
+      padding: 8px 12px;
+      background: #ffffff;
+      border-bottom: 1px solid #e0e0e0;
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      white-space: nowrap;
+      scrollbar-width: thin;
+    }
+    .chatbot-chip {
+      background: #f4f4f4;
+      border: 1px solid #e0e0e0;
+      color: #161616;
+      font-size: 0.72rem;
+      padding: 4px 10px;
+      border-radius: 12px;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+    .chatbot-chip:hover {
+      background: #d0e2ff;
+      border-color: #0f62fe;
+      color: #0043ce;
+    }
+
+    .chatbot-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: #f4f4f4;
+    }
+    .chat-bubble {
+      max-width: 90%;
+      font-size: 0.82rem;
+      line-height: 1.45;
+      word-break: break-word;
+    }
+    .chat-bubble.bot {
+      align-self: flex-start;
+      background: #ffffff;
+      border-left: 3px solid #0f62fe;
+      border-top: 1px solid #e0e0e0;
+      border-right: 1px solid #e0e0e0;
+      border-bottom: 1px solid #e0e0e0;
+      color: #161616;
+      padding: 10px 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .chat-bubble.user {
+      align-self: flex-end;
+      background: #0f62fe;
+      color: #ffffff;
+      padding: 8px 14px;
+      border-radius: 4px;
+    }
+    .chat-bubble-actions {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .chat-action-btn {
+      background: #ffffff;
+      border: 1px solid #0f62fe;
+      color: #0f62fe;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      cursor: pointer;
+      border-radius: 2px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .chat-action-btn:hover {
+      background: #0f62fe;
+      color: #ffffff;
+    }
+
+    .chatbot-input-bar {
+      padding: 10px 12px;
+      background: #ffffff;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .chatbot-input {
+      flex: 1;
+      padding: 8px 12px;
+      font-size: 0.82rem;
+      font-family: inherit;
+      border: 1px solid #8d8d8d;
+      background: #ffffff;
+      color: #161616;
+      outline: none;
+    }
+    .chatbot-input:focus {
+      border-color: #0f62fe;
+      outline: 2px solid #0f62fe;
+      outline-offset: -2px;
+    }
+    .chatbot-send-btn {
+      background: #0f62fe;
+      color: #ffffff;
+      border: none;
+      padding: 8px 14px;
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+    .chatbot-send-btn:hover {
+      background: #0353e9;
+    }
+
+</style>
 </head>
 <body>
   <div class="page-grid">
@@ -761,7 +1053,7 @@
           <span class="helper" id="kpi-exposure-sub">Netto avvik på tvers av Bank/GL og avvikskø</span>
         </div>
         <div class="kpi-tile">
-          <span class="label">Automatch-rate (Adra Regelstige)</span>
+          <span class="label">Automatch-rate (AI Close Regelstige)</span>
           <span class="kpi-value" id="kpi-automatch">99,2%</span>
           <span class="helper" id="kpi-automatch-sub">1 232 av 1 242 linjer avstemt i daglig batch</span>
         </div>
@@ -789,7 +1081,7 @@
         <div class="clock-step active" id="clock-wd2">
           <span class="label">WD+2 · Aktiv fase</span>
           <strong>Avstemming &amp; Periodisering</strong>
-          <span class="helper">Adra Matcher, 4-veis Balancer &amp; Bilag A+B</span>
+          <span class="helper">AI Close Matcher, 4-veis Balancer &amp; Bilag A+B</span>
         </div>
         <div class="clock-step blocked" id="clock-wd4">
           <span class="label" id="clock-wd4-status">WD+4 · Sperret</span>
@@ -1037,7 +1329,7 @@
     <section id="tab-matcher" class="tab-panel" aria-label="Arbeidsbenk for transaksjonsavstemming">
       <div class="section-head">
         <div>
-          <span class="label">Modul 2 · Adra Matcher &amp; DFØ-metoden</span>
+          <span class="label">Modul 2 · AI Close Matcher &amp; DFØ-metoden</span>
           <h2 class="section-title">Arbeidsbenk for transaksjonsavstemming &amp; regelstige</h2>
         </div>
         <div style="display:flex; gap:var(--space-sm); flex-wrap:wrap;">
@@ -1206,7 +1498,7 @@
     <section id="tab-balancer" class="tab-panel" aria-label="Balansekontroll med 4-veis matrise og sertifisering">
       <div class="section-head">
         <div>
-          <span class="label">Modul 3 · Adra Balancer &amp; EPC Prosjektkontroll</span>
+          <span class="label">Modul 3 · AI Close Balancer &amp; EPC Prosjektkontroll</span>
           <h2 class="section-title">Balansekontroll med 4-veis matrise &amp; sertifisering</h2>
         </div>
         <div style="display:flex; gap:var(--space-sm); flex-wrap:wrap;">
@@ -1757,7 +2049,7 @@
               <select id="guide-category" class="select" onchange="renderGuide()">
                 <option value="ALL">Alle emner</option>
                 <option value="Farger">Fargekoder (Bank vs. GL)</option>
-                <option value="Matcher">DFØ Adra Matcher</option>
+                <option value="Matcher">DFØ AI Close Matcher</option>
                 <option value="Balancer">Balancer &amp; Roller</option>
                 <option value="Regelverk">SAF-T &amp; Revisjon</option>
               </select>
@@ -1771,7 +2063,7 @@
 
     <footer class="site-footer">
       <div>Nordic Engineering Projects AS (Org.nr 984 210 552) · AI Closer Kontrollrom v2026.10 · Alle beløp i NOK med mindre annen valuta er oppgitt.</div>
-      <div>Kilder: Trintech Adra Matcher &amp; Balancer-dokumentasjon, DFØ brukerveiledninger, Numeric 2026 Reconciliation Guide, Skatteetaten SAF-T v1.4, ERP Research.</div>
+      <div>Kilder: Trintech AI Close Matcher &amp; Balancer-dokumentasjon, DFØ brukerveiledninger, Numeric 2026 Reconciliation Guide, Skatteetaten SAF-T v1.4, ERP Research.</div>
     </footer>
   </div>
 
@@ -1927,10 +2219,10 @@
       checklist: [
         { id: 'T1', phase: 'WD-2', offset: `WD-2 (29.10)`, name: `Innlese CAMT.053 & MT940 bankfeeder for alle valutaer`, preparer: `Maren Lind`, approver: `Ingrid Solberg`, status: 'approved' },
         { id: 'T2', phase: 'WD-2', offset: `WD-2 (29.10)`, name: `Avskjæring varemottak (GRN) og prosjekttimer WBS-401/408`, preparer: `Thomas Viken`, approver: `Henrik Bakke`, status: 'approved' },
-        { id: 'T3', phase: 'WD+1', offset: `WD+1 (02.11)`, name: `Kjør daglig Adra Matcher regelstige & overfør åpne poster`, preparer: `Maren Lind`, approver: `Ingrid Solberg`, status: 'prepared' },
+        { id: 'T3', phase: 'WD+1', offset: `WD+1 (02.11)`, name: `Kjør daglig AI Close Matcher regelstige & overfør åpne poster`, preparer: `Maren Lind`, approver: `Ingrid Solberg`, status: 'prepared' },
         { id: 'T4', phase: 'WD+2', offset: `WD+2 (03.11)`, name: `Løs 4-veis blokker på PO-8809 Subsea Manifold (ISA 240)`, preparer: `Thomas Viken`, approver: `Ingrid Solberg`, status: 'open' },
         { id: 'T5', phase: 'WD+2', offset: `WD+2 (03.11)`, name: `Periodiser Nets/Adyen kortgebyr (7770) og valutaagio (8060/8160)`, preparer: `Maren Lind`, approver: `Henrik Bakke`, status: 'open' },
-        { id: 'T6', phase: 'WD+4', offset: `WD+4 (04.11)`, name: `Sertifiser alle balansekonti i Adra Balancer`, preparer: `Maren Lind`, approver: `Ingrid Solberg`, status: 'open' },
+        { id: 'T6', phase: 'WD+4', offset: `WD+4 (04.11)`, name: `Sertifiser alle balansekonti i AI Close Balancer`, preparer: `Maren Lind`, approver: `Ingrid Solberg`, status: 'open' },
         { id: 'T7', phase: 'WD+4', offset: `WD+4 (04.11)`, name: `Generer SAF-T v1.4 kontrollfil & signer revisjonsrapport`, preparer: `Ingrid Solberg`, approver: `Henrik Bakke`, status: 'open' }
       ],
 
@@ -1993,17 +2285,17 @@
       ],
 
       auditLog: [
-        { block: 1, time: `01.11.2026 08:00`, actor: `System (Adra Batch)`, action: `Daglig CAMT.053 & ERP-import fullført (1 242 linjer)`, hash: `a4f9c2e1b807d412` },
+        { block: 1, time: `01.11.2026 08:00`, actor: `System (AI Close Batch)`, action: `Daglig CAMT.053 & ERP-import fullført (1 242 linjer)`, hash: `a4f9c2e1b807d412` },
         { block: 2, time: `01.11.2026 08:05`, actor: `System (Regelstige)`, action: `Automatch Nivå 1–3 fullført: 1 232 avstemt, 10 åpne`, hash: `7c318e9021fa45b0` },
         { block: 3, time: `01.11.2026 09:18`, actor: `Ingrid Solberg`, action: `Flagget ISA 240-blokker på PO-8809 (145 000 NOK)`, hash: `9e0411b63d28c771` }
       ]
     };
 
     const GUIDE_ITEMS = [
-      { cat: 'Farger', title: `Hvorfor har hovedbok gråblått hint og bank lysgult hint?`, body: `Etter DFØ- og Adra-metodikken skilles interne regnskapsposter fra eksterne banktransaksjoner visuelt gjennom hele kontrollrommet: Bankelementer har et subtilt lysgult hint og viser bankkontonummer, mens hovedbokselementer fra ERP har et subtilt gråblått hint og viser hovedbokskonto.` },
+      { cat: 'Farger', title: `Hvorfor har hovedbok gråblått hint og bank lysgult hint?`, body: `Etter DFØ- og AI Close-metodikken skilles interne regnskapsposter fra eksterne banktransaksjoner visuelt gjennom hele kontrollrommet: Bankelementer har et subtilt lysgult hint og viser bankkontonummer, mens hovedbokselementer fra ERP har et subtilt gråblått hint og viser hovedbokskonto.` },
       { cat: 'Matcher', title: `DFØ-metoden: Manuell avstemming av åpne poster til 0,00`, body: `I arbeidsbenken (Modul 2) merker du åpne bankposter til venstre (lysgult) og hovedboksposter til høyre (gråblått). Kontroll-linjen nederst viser summen av merkede poster. Når «Gjenstående beløp» er 0,00 NOK (eller innenfor aktivert gebyrtoleranse til kto 7770), aktiveres knappen «Avstem poster».` },
       { cat: 'Matcher', title: `Angre avstemming via unik Avstemmings-ID`, body: `Alle poster som utlignes sammen får en felles Avstemmings-ID (f.eks. AVS-2026-101). Under fanen «Avstemte poster» vil avhuking av én post automatisk markere hele gruppen med samme ID, slik at du trygt kan angre hele operasjonen tilbake til Åpne poster.` },
-      { cat: 'Matcher', title: `Overføre åpne poster til Adra Balancer`, body: `Etter at daglig regelstige og manuell utligning er ferdig, klikker du «Overfør åpne poster til Balancer». Gjenstående uavstemte poster danner da dokumentert grunnlag for sluttavstemming av balansekontoen i Modul 3.` },
+      { cat: 'Matcher', title: `Overføre åpne poster til AI Close Balancer`, body: `Etter at daglig regelstige og manuell utligning er ferdig, klikker du «Overfør åpne poster til Balancer». Gjenstående uavstemte poster danner da dokumentert grunnlag for sluttavstemming av balansekontoen i Modul 3.` },
       { cat: 'Balancer', title: `Roller: Klargjører (Preparer) vs. Godkjenner (Approver)`, body: `Kun brukere med rollen Klargjører kan laste opp eller slette kontodokumentasjon (og kun når status er «Ikke klargjort» eller «Avslått»). Godkjennere bruker «Periodedokumenter» for å legge ved tilleggsdokumentasjon til revisor, og sertifiserer avstemte konti.` },
       { cat: 'Balancer', title: `4-veis balansekontroll & Auto-sertifisering`, body: `Hver nøkkelkonto kontrolleres langs 4 akser: 1) Hovedbok (GL), 2) Bank/Ekstern bekreftelse, 3) Subreskontro/Matcher åpne poster, og 4) Innkjøpsordre (PO) / Varemottak (GRN). Lavrisikokonti under vesentlighetsgrensen kan auto-sertifiseres.` },
       { cat: 'Regelverk', title: `SAF-T v1.4, Altinn og ISA 240 / 315 / 500`, body: `Norske foretak over 5 mill. NOK i omsetning eller 600 bilag må kunne levere balansert SAF-T Financial XML via Altinn (versjon 1.4 blir obligatorisk januar 2027). ISA 240 krever særskilt menneskelig (HITL) attestasjon ved uvanlige eller uautoriserte overtidsposter før periodefrys.` }
@@ -2375,7 +2667,7 @@
       });
     }
 
-    /* ==================== MODUL 2: ADRA MATCHER (DFØ-METODEN) ==================== */
+    /* ==================== MODUL 2: AI CLOSE MATCHER (DFØ-METODEN) ==================== */
     function setMatcherTolerance(val) {
       appState.toleranceDays = Number(val) || 4;
       saveAppState();
@@ -2474,7 +2766,7 @@
 
       selectedOpenBankIds.clear();
       selectedOpenGLIds.clear();
-      await appendAuditEvent(`Kjørte Adra regelstige: ${autoMatchedPairs} par automatisk avstemt`);
+      await appendAuditEvent(`Kjørte AI Close regelstige: ${autoMatchedPairs} par automatisk avstemt`);
       renderAll();
       showToast(autoMatchedPairs > 0
         ? `Regelstige fullført: ${autoMatchedPairs} transaksjonspar flyttet til Avstemte poster.`
@@ -2595,11 +2887,11 @@
       const totalOpen = appState.matcherOpenBank.length + appState.matcherOpenGL.length;
       const now = new Date();
       const stamp = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-      appState.lastTransferMessage = `Overført ${totalOpen} åpne poster til Adra Balancer kl. ${stamp} (Bank åpen: ${fmtNOK(openBankSum)} NOK · GL åpen: ${fmtNOK(openGLSum)} NOK).`;
-      await appendAuditEvent(`Overførte ${totalOpen} åpne Matcher-poster til Adra Balancer`);
+      appState.lastTransferMessage = `Overført ${totalOpen} åpne poster til AI Close Balancer kl. ${stamp} (Bank åpen: ${fmtNOK(openBankSum)} NOK · GL åpen: ${fmtNOK(openGLSum)} NOK).`;
+      await appendAuditEvent(`Overførte ${totalOpen} åpne Matcher-poster til AI Close Balancer`);
       renderMatcherTables();
       renderAuditLog();
-      showToast(`Åpne poster (${totalOpen} linjer) overført til Adra Balancer som dokumentasjon.`);
+      showToast(`Åpne poster (${totalOpen} linjer) overført til AI Close Balancer som dokumentasjon.`);
       saveAppState();
     }
 
@@ -2955,11 +3247,11 @@
         `Selskap: Nordic Engineering Projects AS (Org.nr 984 210 552)`,
         `Regnskapsperiode: 01.10.2026 – 31.10.2026 | Eksportformat: SAF-T v1.4`,
         `========================================================================`,
-        `1. STATUS BALANSEKONTROLL (ADRA BALANCER · 4-VEIS MATRISE)`,
+        `1. STATUS BALANSEKONTROLL (AI CLOSE BALANCER · 4-VEIS MATRISE)`,
         `   Sertifiserte konti: ${certified} av ${totalBal}`,
         ...appState.balancerAccounts.map(a => `   - ${a.name}: GL ${fmtNOK(a.gl)} | Bank ${fmtNOK(a.bank)} | Status: ${a.status.toUpperCase()}`),
         ``,
-        `2. TRANSAKSJONSAVSTEMMING (ADRA MATCHER · DFØ-METODEN)`,
+        `2. TRANSAKSJONSAVSTEMMING (AI CLOSE MATCHER · DFØ-METODEN)`,
         `   Åpne poster Bank: ${appState.matcherOpenBank.length} | Åpne poster GL: ${appState.matcherOpenGL.length} | Avstemte linjer (økt): ${appState.matcherMatched.length}`,
         `   Siste overføring: ${appState.lastTransferMessage}`,
         ``,
@@ -3526,6 +3818,449 @@
     }
 
     document.addEventListener('DOMContentLoaded', initApp);
-  </script>
+  
+    /* =========================================================================
+       AI CLOSE COPILOT & SUPERBRUKER POP-UP CHATBOT ENGINE
+       ========================================================================= */
+    let chatbotMessages = [];
+    let chatbotRole = 'user';
+    let chatbotOpen = false;
+
+    function toggleChatbot() {
+      const drawer = document.getElementById('chatbot-drawer');
+      if (!drawer) return;
+      const isHidden = drawer.classList.contains('is-hidden');
+      if (isHidden) {
+        drawer.classList.remove('is-hidden');
+        chatbotOpen = true;
+        if (!chatbotMessages || chatbotMessages.length === 0) {
+          initChatbotGreeting();
+        } else {
+          renderChatbotMessages();
+        }
+        renderChatbotQuickChips();
+        const input = document.getElementById('chatbot-input');
+        if (input) input.focus();
+      } else {
+        drawer.classList.add('is-hidden');
+        chatbotOpen = false;
+      }
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function setChatbotRole(role) {
+      chatbotRole = role;
+      const btnUser = document.getElementById('chat-role-user');
+      const btnAdmin = document.getElementById('chat-role-admin');
+      if (btnUser && btnAdmin) {
+        if (role === 'user') {
+          btnUser.classList.add('is-active');
+          btnAdmin.classList.remove('is-active');
+        } else {
+          btnUser.classList.remove('is-active');
+          btnAdmin.classList.add('is-active');
+        }
+      }
+      renderChatbotQuickChips();
+      
+      const roleText = role === 'admin' ? 'Superbruker / Systemansvarlig' : 'Controller / Bruker';
+      addBotMessage(`Byttet assistent-modus til **${roleText}**.<br>${role === 'admin' ? 'Du kan nå spørre om importdefinisjoner (Visma, Business Central, Xledger, Tripletex, CAMT, BAI2), regelbygging, oppsett av nye konti med IB, eller øresavrundingsregler.' : 'Jeg er klar til å veilede deg gjennom avstemming, balansekontroll, bilagsføring og sign-off.'}`);
+    }
+
+    function renderChatbotQuickChips() {
+      const container = document.getElementById('chatbot-quick-chips');
+      if (!container) return;
+      const chips = chatbotRole === 'user' ? [
+        'Hvorfor er konto 1920 ubalansert?',
+        'Hva gjenstår for signering?',
+        'Hjelp med Bergen Marine tidsavvik',
+        'Kjør autoløp nå',
+        'Bokfør alle spinn-off bilag',
+        'Valutadifferanse & agio',
+        'Vis DuckDB avstemmingsstatus'
+      ] : [
+        'Hvordan opprette ny valutakonto 1921?',
+        'Importmal for Business Central',
+        'Importmal for Xledger',
+        'Lag 1:M Nets batch regel',
+        'Sett opp øresavrunding <= 5 kr',
+        'Hva er amerikansk BAI2 format?',
+        'DuckDB status & tabeller'
+      ];
+
+      container.innerHTML = chips.map((c) => `
+        <button type="button" class="chatbot-chip" onclick="handleQuickChipClick('${escapeHtml(c)}')">${escapeHtml(c)}</button>
+      `).join('');
+    }
+
+    function initChatbotGreeting() {
+      const openBankCount = appState.bankTransactions ? appState.bankTransactions.filter(t => !t.matched).length : 0;
+      const openGlCount = appState.glTransactions ? appState.glTransactions.filter(t => !t.matched).length : 0;
+      const acc = appState.importAccounts ? appState.importAccounts['1920'] : null;
+      const rawDelta = acc ? (acc.bankReportedUB - acc.glReportedUB) : -92725.0;
+      
+      const greeting = `Hei Frank! Jeg er din **AI Close Assistent**.<br><br>` +
+        `**Status akkurat nå:**<br>` +
+        `• Aktiv konto: **1920 DNB Driftskonto NOK**<br>` +
+        `• Avvik i Balansekontroll: **${fmtNOK(rawDelta)} kr**<br>` +
+        `• Åpne poster: **${openBankCount} i Bank** / **${openGlCount} i Hovedbok**<br>` +
+        `• Revisorattest: ${appState.reportSigned ? 'Signert og låst' : 'Åpen for avstemming'}<br><br>` +
+        `Hva ønsker du hjelp med?`;
+
+      const actions = [
+        { label: 'Åpne Balansekontroll', action: "switchTab('balancer')", icon: 'scale' },
+        { label: 'Kjør Matcher Regelmotor', action: "switchTab('matcher')", icon: 'play' },
+        { label: 'Bokfør Spinn-offs', action: "postAllSpinOffs()", icon: 'layers' }
+      ];
+
+      chatbotMessages = [{ sender: 'bot', text: greeting, actions }];
+      renderChatbotMessages();
+    }
+
+    function renderChatbotMessages() {
+      const container = document.getElementById('chatbot-messages');
+      if (!container) return;
+
+      container.innerHTML = chatbotMessages.map((msg) => {
+        const isBot = msg.sender === 'bot';
+        return `
+          <div class="chat-bubble ${isBot ? 'bot' : 'user'}">
+            <div>${msg.text}</div>
+            ${msg.actions && msg.actions.length > 0 ? `
+              <div class="chat-bubble-actions">
+                ${msg.actions.map((act) => `
+                  <button type="button" class="chat-action-btn" onclick="${escapeHtml(act.action)}">
+                    ${act.icon ? `<i data-lucide="${act.icon}" width="12" height="12"></i>` : ''}
+                    <span>${escapeHtml(act.label)}</span>
+                  </button>
+                `).join('')}
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+
+      container.scrollTop = container.scrollHeight;
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function handleQuickChipClick(text) {
+      const input = document.getElementById('chatbot-input');
+      if (input) input.value = text;
+      handleChatbotSubmit();
+    }
+
+    function handleChatbotSubmit(event) {
+      if (event && event.preventDefault) event.preventDefault();
+      const input = document.getElementById('chatbot-input');
+      if (!input) return;
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+
+      chatbotMessages.push({ sender: 'user', text: escapeHtml(text) });
+      renderChatbotMessages();
+
+      setTimeout(() => {
+        const botReply = generateChatbotReply(text, chatbotRole || 'user');
+        chatbotMessages.push(botReply);
+        renderChatbotMessages();
+      }, 150);
+    }
+
+    function addBotMessage(text, actions = []) {
+      chatbotMessages.push({ sender: 'bot', text, actions });
+      renderChatbotMessages();
+    }
+
+    function resetChatbotConversation() {
+      chatbotMessages = [];
+      initChatbotGreeting();
+      showToast('Samtale tilbakestilt.');
+    }
+
+    function generateChatbotReply(query, role) {
+      const q = query.toLowerCase();
+
+      // Controller / Bruker queries
+      if (role === 'user') {
+        if (q.includes('ubalanse') || q.includes('balanse') || q.includes('1920') || q.includes('avvik')) {
+          return {
+            sender: 'bot',
+            text: `**Balansekontroll for Konto 1920 Driftskonto NOK:**<br><br>` +
+              `• Bankens UB per DNB utskrift: **2 848 450,00 kr**<br>` +
+              `• Hovedbokens ujusterte UB: **2 941 175,00 kr**<br>` +
+              `• Rå differanse: **-92 725,00 kr**<br><br>` +
+              `**Avstemmingsbro som lukker avviket:**<br>` +
+              `1. *Bergen Marine innbetaling underveis*: +45 000,00 kr (Tidsavvik)<br>` +
+              `2. *Konsernavregning UK Ltd*: +48 900,00 kr (Valutadifferanse/agio)<br>` +
+              `3. *DNB Gebyr*: -175,00 kr (Bankkostnad)<br>` +
+              `4. *KLP pensjonspostering*: -1 000,00 kr (Premieavvik spinn-off)<br><br>` +
+              `Ved å godkjenne tidsavviket og bokføre spinn-off bilagene er differansen nøyaktig **0,00 kr**!`,
+            actions: [
+              { label: 'Gå til Balansekontroll', action: "switchTab('balancer')", icon: 'scale' },
+              { label: 'Bokfør Spinn-offs', action: "postAllSpinOffs()", icon: 'layers' }
+            ]
+          };
+        }
+
+        if (q.includes('sign') || q.includes('lås') || q.includes('godkjenn')) {
+          return {
+            sender: 'bot',
+            text: `**4-Øyne Prinsipp & Signering:**<br><br>` +
+              `• **Kvalitetssikring av Controller Frank Ellingsen**: ${appState.reportSigned ? 'Signert (' + appState.reportSignedAt + ')' : 'KLAR TIL SIGNERING'}<br>` +
+              `• **Krav for låsing**: Netto avstemmingsdifferanse må være 0,00 kr og spinn-off poster overført til hovedbok.`,
+            actions: [
+              { label: 'Gå til Sjekkliste', action: "switchTab('checklist')", icon: 'check-square' },
+              { label: 'Se Balansekontroll', action: "switchTab('balancer')", icon: 'scale' }
+            ]
+          };
+        }
+
+        if (q.includes('autoløp') || q.includes('match') || q.includes('regler')) {
+          return {
+            sender: 'bot',
+            text: `**AI Close Matcher Regelmotor:**<br><br>` +
+              `• **R-01**: 1:1 Eksakt KID og Fakturanummer<br>` +
+              `• **R-02**: 1:1 Eksakt med dato-toleranse<br>` +
+              `• **R-03**: 1:M Samleoppgjør / Batch med gebyrsplitt<br>` +
+              `• **R-04**: M:M Valutakurs- og konsernnetting<br>` +
+              `• **R-AI**: Multimodal OCR og remisser`,
+            actions: [
+              { label: 'Kjør Regelmotor nå', action: "runRuleLadder()", icon: 'play' },
+              { label: 'Åpne Matcher', action: "switchTab('matcher')", icon: 'git-merge' }
+            ]
+          };
+        }
+
+        if (q.includes('bergen marine') || q.includes('tidsavvik')) {
+          return {
+            sender: 'bot',
+            text: `**Tidsavvik: Bergen Marine (DEP-9941):**<br><br>` +
+              `• Beløp: **45 000,00 NOK**<br>` +
+              `• Registrert i ERP: 31.10.2026 kl. 16:45<br>` +
+              `• Godkjent clearing i DNB: 02.11.2026 (November CAMT.053)<br>` +
+              `• Status: Gyldig tidsavvik som lukkes mot november-oppgjøret.`,
+            actions: [
+              { label: 'Se i Balansekontroll', action: "switchTab('balancer')", icon: 'scale' }
+            ]
+          };
+        }
+
+        if (q.includes('agio') || q.includes('valuta')) {
+          return {
+            sender: 'bot',
+            text: `**Valutakursdifferanse & Agio/Disagio (Konto 1940 / 8060 / 8160):**<br><br>` +
+              `• Transaksjon: EUR faktura bokført til spotkurs 11,40, innbetalt i bank til kurs 11,65.<br>` +
+              `• Gevinst (Agio): **+1 245,50 NOK** konteres mot Konto 8060 Agio.<br>` +
+              `• Ett-klikks bilagsføring er tilgjengelig direkte i Spinn-off modulen.`,
+            actions: [
+              { label: 'Bokfør Agio-bilag', action: "postAgioEntry()", icon: 'trending-up' },
+              { label: 'Se Spinn-offs', action: "switchTab('exceptions')", icon: 'file-text' }
+            ]
+          };
+        }
+      }
+
+      // Superbruker / Admin queries
+      if (role === 'admin' || q.includes('erp') || q.includes('import') || q.includes('konto') || q.includes('bai2')) {
+        if (q.includes('valutakonto') || q.includes('ny konto') || q.includes('opprette konto') || q.includes('ib')) {
+          return {
+            sender: 'bot',
+            text: `**Superbruker Veiviser: Sette opp ny balansekonto med IB:**<br><br>` +
+              `1. **Konto-Master**: Opprett kontonummer (f.eks. \`1921 Driftskonto USD\` eller \`1950 Skattetrekk\`).<br>` +
+              `2. **Valuta & Bankkilde**: Angi ISO-kode (\`USD\`, \`EUR\`, \`NOK\`) og IBAN/kontonummer.<br>` +
+              `3. **Inngående Balanse (IB)**: Tast inn IB per 01.01.2026 for både Bank og Hovedbok.<br>` +
+              `4. **Migrering av Åpne Poster**: Importer uavstemte poster fra forrige system. Systemet validerer formelen:<br>` +
+              `$$\text{IB Hovedbok} + \sum(\text{Åpne poster}) = \text{IB Bank}$$<br>` +
+              `5. **Aktiver Avstemming**: Velg tilknyttet CAMT.053 XML eller MT940 feed.`,
+            actions: [
+              { label: 'Åpne Superbruker-veileder', action: "switchTab('guide-admin')", icon: 'shield' },
+              { label: 'Se Importoppsett', action: "switchTab('import')", icon: 'download' }
+            ]
+          };
+        }
+
+        if (q.includes('business central') || q.includes('bc')) {
+          return {
+            sender: 'bot',
+            text: `**Importmal: Microsoft Dynamics 365 Business Central (BC)**<br><br>` +
+              `• **Protokoll**: OData v4 web-tjeneste mot Page 21 (\`Customer Ledger Entries\`) og Page 20 (\`General Ledger Entries\`).<br>` +
+              `• **Påkrevde felter**: \`Posting_Date\`, \`Document_No\`, \`External_Document_No\`, \`Amount_LCY\`, \`Remaining_Amt_LCY\`, \`Global_Dimension_1_Code\` (WBS).<br>` +
+              `• **Støttet format**: JSON REST eller CSV flatfil-dump.`,
+            actions: [
+              { label: 'Gå til Import Studio', action: "switchTab('import')", icon: 'download' }
+            ]
+          };
+        }
+
+        if (q.includes('xledger')) {
+          return {
+            sender: 'bot',
+            text: `**Importmal: Xledger (GraphQL / SAF-T)**<br><br>` +
+              `• **Protokoll**: Xledger GraphQL API (\`query { glTransactions { ... } }\`) eller standard SAF-T eksport.<br>` +
+              `• **Spesialitet**: 5-dimensjonal kontering (\`Account\`, \`Subledger/Entity\`, \`Project/WBS\`, \`CostCenter\`, \`Activity\`).<br>` +
+              `• Fanger automatisk prosjektleder, milepæl og godkjenningsstatus for leverandørfakturaer direkte inn i AI Close.`,
+            actions: [
+              { label: 'Gå til Import Studio', action: "switchTab('import')", icon: 'download' }
+            ]
+          };
+        }
+
+        if (q.includes('visma')) {
+          return {
+            sender: 'bot',
+            text: `**Importmal: Visma.net / Visma Business**<br><br>` +
+              `• **Protokoll**: REST API (\`/controller/api/v1/customerledgerdocument\`) eller tab-separert fil.<br>` +
+              `• **Kjernemapping**: Bilagsart 1 (Faktura), Bilagsart 2 (Innbetaling), Bilagsart 8 (Kreditnota). Kobles mot Visma AutoPay CAMT.053 bankstrøm.`,
+            actions: [
+              { label: 'Gå til Import Studio', action: "switchTab('import')", icon: 'download' }
+            ]
+          };
+        }
+
+        if (q.includes('bai2') || q.includes('usa')) {
+          return {
+            sender: 'bot',
+            text: `**Bankformat: Amerikansk BAI2 (Bank Administration Institute v2)**<br><br>` +
+              `• **Struktur**: Record 01 (Header), 02 (Group), 03 (Account), 16 (Transaction Detail), 49 (Account Trailer), 98 (Group Trailer).<br>` +
+              `• **KRITISK REGEL**: I BAI2 oppgis alle beløp i **cent uten desimalpunktum** (f.eks. $10 000,00 skrives som \`1000000\`).<br>` +
+              `• **Vanlige koder**: Type 165 = Wire Transfer, Type 469 = Domestic Loan / Rentetrekk, Type 399 = Diverse gebyrer.`,
+            actions: [
+              { label: 'Se Formatoppsett', action: "switchTab('guide-admin')", icon: 'shield' }
+            ]
+          };
+        }
+
+        if (q.includes('øresavrunding') || q.includes('toleranse') || q.includes('øre')) {
+          return {
+            sender: 'bot',
+            text: `**Konfigurasjon av Øredifferanse- & Toleransemotor:**<br><br>` +
+              `• **Maksimal beløpsterskel**: Settes til f.eks. $\le 5,00\text{ NOK}$ (eller opptil $10,00\text{ NOK}$).<br>` +
+              `• **Autoføringsmekanisme**:<br>` +
+              `Dersom diff mellom Bank og ERP er innenfor terskelen, godkjenner motoren matchen automatisk og oppretter et balansert spinn-off mikrobilag:<br>` +
+              `- **Debet / Kredit**: \`Konto 7799 Fradragsberettigede andre driftskostnader (Øreavrunding)\`<br>` +
+              `- **Motkonto**: \`Konto 1920 Driftskonto NOK\`<br>` +
+              `• Revisorattest: Logges med regelkode \`R-TOLERANCE-AUTO\` i SHA-256 revisjonsloggen.`,
+            actions: [
+              { label: 'Se Spinn-off Studio', action: "switchTab('exceptions')", icon: 'file-text' }
+            ]
+          };
+        }
+
+        if (q.includes('regel') || q.includes('simulator') || q.includes('nets')) {
+          return {
+            sender: 'bot',
+            text: `**Avstemmingsregler & Dry-Run Simulator:**<br><br>` +
+              `• **Simulator**: Test nye regler mot historiske uavstemte poster uten å skrive til produksjonsdatabasen.<br>` +
+              `• **1:M Samleoppgjør med Gebyrsplitt**: Matcher brutto batch mot åpne kundeposter og splitter gebyr direkte til Konto 7770.`,
+            actions: [
+              { label: 'Simuler Regel Dry-Run', action: "simulateRuleDryRun()", icon: 'flask-conical' },
+              { label: 'Gå til Matcher', action: "switchTab('matcher')", icon: 'git-merge' }
+            ]
+          };
+        }
+      }
+
+      // DuckDB Lakehouse telemetri
+      if (q.includes('duckdb') || q.includes('database') || q.includes('lakehouse') || q.includes('unreconciled') || q.includes('reconciled transactions')) {
+        return {
+          sender: 'bot',
+          text: `**DuckDB Avstemmingsarkitektur & Sanntidslagring:**<br><br>` +
+            `Databasen er strukturert i \`data/reconciliation.duckdb\` (samt satellitter \`reconciled_transactions.duckdb\` og \`unreconciled_transactions.duckdb\`):<br><br>` +
+            `1. **\`reconciled_transactions\`** (5 avstemte grupper, ACID-lagring):<br>` +
+            `- Inneholder \`reconciliation_id\`, \`match_group_id\`, \`match_type\`, \`gross_amount_nok\`, \`fee_deduction_nok\`, \`audit_hash\` og tidsstempel.<br><br>` +
+            `2. **\`unreconciled_transactions\`** (4 åpne poster, 2 624 110,00 kr):<br>` +
+            `- Beregner aldersfordeling, RAG-status (Rød/Gul/Grønn), og tapsavsetning etter IFRS 9.<br>` +
+            `- Inkluderer \`project_id\` og \`wbs_code\` for direkte prosjektcontrolling mot EAC/ETC.<br><br>` +
+            `3. **Innebygde SQL Views**:<br>` +
+            `• \`v_reconciliation_summary\`: Match-statistikk per regeltype.<br>` +
+            `• \`v_unreconciled_aging\`: Aldersfordeling og risikoeksponering.<br>` +
+            `• \`v_wbs_open_exposure\`: Åpne uavstemte poster aggregert per WBS-kode.`,
+          actions: [
+            { label: 'Se Balansekontroll', action: "switchTab('balancer')", icon: 'scale' },
+            { label: 'Matcher Workbench', action: "switchTab('matcher')", icon: 'git-merge' }
+          ]
+        };
+      }
+
+      // Default fallback
+      return {
+        sender: 'bot',
+        text: `Jeg forstår at du spør om: *"${escapeHtml(query)}"*. <br><br>` +
+          `Som din AI Close assistent kan jeg bistå deg med:<br>` +
+          `• **For Bruker / Controller**: Balansebroen, tidsavvik (Bergen Marine), spinn-off bilag (valuta/gebyr), agio-beregninger og 4-øyne signering.<br>` +
+          `• **For Superbruker**: ERP-importmaler (Visma, BC, Xledger, Tripletex, SAP), bankformater (CAMT, MT940, BAI2), oppsett av nye konti med IB, og øresavrunding.`,
+        actions: [
+          { label: 'Balansekontroll', action: "switchTab('balancer')", icon: 'scale' },
+          { label: 'Matcher Workbench', action: "switchTab('matcher')", icon: 'git-merge' },
+          { label: 'Superbruker-veileder', action: "switchTab('guide-admin')", icon: 'shield' }
+        ]
+      };
+    }
+
+</script>
+
+  <!-- FLOATING POP-UP CHATBOT TRIGGER BUTTON -->
+  <button id="chatbot-toggle-btn" class="chatbot-trigger-btn" onclick="toggleChatbot()" title="Åpne AI Close Assistent (Copilot & Superbruker)" aria-label="Åpne AI Close Chatbot">
+    <div class="chatbot-trigger-icon">
+      <i data-lucide="bot" width="18" height="18"></i>
+    </div>
+    <span class="chatbot-trigger-label">AI Close Assistent</span>
+    <span class="chatbot-pulse-dot" id="chatbot-badge"></span>
+  </button>
+
+  <!-- POPUP CHATBOT DRAWER / MODAL -->
+  <div id="chatbot-drawer" class="chatbot-drawer is-hidden" role="dialog" aria-label="AI Close Assistent Chatbot">
+    <div class="chatbot-header">
+      <div class="chatbot-title-group">
+        <div class="chatbot-avatar">
+          <i data-lucide="bot" width="18" height="18"></i>
+        </div>
+        <div>
+          <div class="chatbot-title">AI Close Assistent</div>
+          <div class="chatbot-subtitle">Nordic Engineering · Finans &amp; Superbruker</div>
+        </div>
+      </div>
+      <div class="chatbot-controls">
+        <button type="button" class="chatbot-icon-btn" onclick="resetChatbotConversation()" title="Tilbakestill samtale">
+          <i data-lucide="rotate-ccw" width="15" height="15"></i>
+        </button>
+        <button type="button" class="chatbot-icon-btn" onclick="toggleChatbot()" title="Lukk assistent">
+          <i data-lucide="x" width="16" height="16"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- ROLE SWITCHER BAR -->
+    <div class="chatbot-role-bar">
+      <span class="chatbot-role-label">Modus:</span>
+      <div class="chatbot-seg-group">
+        <button type="button" id="chat-role-user" class="chatbot-seg-btn is-active" onclick="setChatbotRole('user')">
+          <i data-lucide="user-check" width="12" height="12"></i>
+          <span>Bruker / Controller</span>
+        </button>
+        <button type="button" id="chat-role-admin" class="chatbot-seg-btn" onclick="setChatbotRole('admin')">
+          <i data-lucide="shield-alert" width="12" height="12"></i>
+          <span>Superbruker / Admin</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- QUICK ACTION PROMPT CHIPS -->
+    <div class="chatbot-quick-chips" id="chatbot-quick-chips"></div>
+
+    <!-- CHAT MESSAGES STREAM -->
+    <div class="chatbot-messages" id="chatbot-messages" aria-live="polite"></div>
+
+    <!-- CHAT INPUT BAR -->
+    <form class="chatbot-input-bar" onsubmit="handleChatbotSubmit(event)">
+      <input type="text" id="chatbot-input" class="chatbot-input" placeholder="Still et spørsmål om avstemming, regler, ERP..." autocomplete="off">
+      <button type="submit" class="chatbot-send-btn">
+        <i data-lucide="send" width="14" height="14"></i>
+      </button>
+    </form>
+  </div>
+
 </body>
 </html>

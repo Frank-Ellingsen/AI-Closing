@@ -104,26 +104,32 @@ def read_root():
 
 @app.get("/ui/aurora")
 def serve_aurora_ui():
-    p = os.path.join(PROJECT_ROOT, "index.html")
+    p = os.path.join(PROJECT_ROOT, "app", "index.html")
+    if not os.path.exists(p):
+        p = os.path.join(PROJECT_ROOT, "index.html")
     if os.path.exists(p):
         return FileResponse(p, media_type="text/html")
-    raise HTTPException(status_code=404, detail="index.html not found")
+    raise HTTPException(status_code=404, detail="aurora index.html not found")
 
 
 @app.get("/ui/carbon")
 def serve_carbon_ui():
-    p = os.path.join(PROJECT_ROOT, "index_carbon.html")
+    p = os.path.join(PROJECT_ROOT, "index.html")
+    if not os.path.exists(p):
+        p = os.path.join(PROJECT_ROOT, "app", "index_carbon.html")
     if os.path.exists(p):
         return FileResponse(p, media_type="text/html")
-    raise HTTPException(status_code=404, detail="index_carbon.html not found")
+    raise HTTPException(status_code=404, detail="carbon index.html not found")
 
 
 @app.get("/ui/nordea")
 def serve_nordea_ui():
-    p = os.path.join(PROJECT_ROOT, "index_nordea_simulation.html")
+    p = os.path.join(PROJECT_ROOT, "app", "index_nordea_simulation.html")
+    if not os.path.exists(p):
+        p = os.path.join(PROJECT_ROOT, "index_nordea_simulation.html")
     if os.path.exists(p):
         return FileResponse(p, media_type="text/html")
-    raise HTTPException(status_code=404, detail="index_nordea_simulation.html not found")
+    raise HTTPException(status_code=404, detail="nordea simulation html not found")
 
 
 @app.get("/api/status")
